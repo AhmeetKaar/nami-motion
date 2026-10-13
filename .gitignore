@@ -1,5 +1,5 @@
 node_modules/
-lib/
+packages/motion/lib/
 dist/
 .expo/
 .next/
