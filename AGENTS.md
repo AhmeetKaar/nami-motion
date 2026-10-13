@@ -43,7 +43,7 @@ gradient isteyen hiçbir şey köke ya da bu dört girişe girmez.
 - Paket içinde göreli import kullanılır; paket kodu hiçbir uygulama katmanına (tema, i18n, provider) bağlanmaz — renk, metin, ikon, font, haptic prop olarak gelir.
 - Her component `useReducedMotion` ile statik son haline düşebilmeli.
 - İsimler marka içermez (ChatGPT/X/Claude yok); referanslar yalnızca ilham, kod kopyalanmaz.
-- `git commit` ve `git push` kullanıcının açık izni olmadan atılmaz; publish ve issue açmak da dışa dönük adımdır, izin ister.
+- Her görev bitince (kontroller temizse) `git commit` atılır, izin beklenmez. `git push`, publish ve issue açmak dışa dönük adımdır, kullanıcının açık izni olmadan yapılmaz.
 - Süreç/plan kararlarında (isim, düzen, sıra) önerilen seçenekle devam edilir, kullanıcıya sorulmaz.
 
 ## Yeni component eklerken
