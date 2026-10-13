@@ -5,7 +5,7 @@ skeletons, status rows, thinking traces, voice waves, progress rings, a
 shader orb and drawer reveals.
 
 ```bash
-bunx expo install nami-motion react-native-reanimated react-native-worklets react-native-gesture-handler
+npx expo install nami-motion react-native-reanimated react-native-worklets react-native-gesture-handler
 ```
 
 ## Repository
@@ -19,13 +19,13 @@ bunx expo install nami-motion react-native-reanimated react-native-worklets reac
 ## Development
 
 ```bash
-bun install
-bun run example
-bun run docs
-bun run build
+npm install
+npm run example
+npm run docs
+npm run build
 ```
 
-Changes that affect the package need a changeset: `bun run changeset`.
+Changes that affect the package need a changeset: `npm run changeset`.
 
 ## License
 

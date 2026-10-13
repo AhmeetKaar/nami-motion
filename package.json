@@ -6,14 +6,15 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "bun --filter nami-motion build",
-    "typecheck": "bun --filter '*' typecheck",
-    "example": "bun --cwd apps/example start",
-    "docs": "bun --cwd apps/docs dev",
+    "build": "npm run build -w nami-motion",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "example": "npm run start -w example",
+    "docs": "npm run dev -w docs",
     "changeset": "changeset",
-    "release": "bun run build && changeset publish"
+    "release": "npm run build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3"
-  }
+  },
+  "packageManager": "npm@11.6.2"
 }

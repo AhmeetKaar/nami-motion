@@ -15,8 +15,8 @@ geliştirme artık yalnızca bu repoda yürür, Nami'ye dokunulmaz.
 | `.changeset/` | Versiyonlama; `.github/workflows/` CI + release (changesets/action, npm provenance) |
 | `LICENSE`, `NOTICE.md` | MIT + üçüncü taraf bildirimleri (beautifului.dev MIT) |
 
-Komutlar: `bun install`, `bun run example`, `bun run docs`, `bun run build`,
-`bun run changeset`.
+Komutlar: `npm install`, `npm run example`, `npm run docs`, `npm run build`,
+`npm run changeset`.
 
 ## Paket yapısı (subpath export'lar)
 
@@ -34,8 +34,8 @@ gradient isteyen hiçbir şey köke ya da bu dört girişe girmez.
 
 ## Kurallar
 
-- Paket yöneticisi bun; Expo bağımlılıkları `bunx expo install` ile çözülür, sürüm elle yazılmaz.
-- `bunfig.toml` `linker = "hoisted"` kalır; isolated linker expo-doctor'da duplicate native modül hatası verir.
+- Paket yöneticisi npm (workspaces, `package-lock.json`; 2026-10-14'te bun'dan geçildi). Expo bağımlılıkları `npx expo install` ile çözülür, sürüm elle yazılmaz.
+- Workspace bağımlılığı `"nami-motion": "*"` ile yazılır (npm `workspace:*` desteklemez). npm'in varsayılan hoisting'i react/RN/reanimated'ı tek kopyada tutar; `install-strategy` değiştirilmez.
 - React tüm workspace'lerde 19.2.0; docs dahil yükseltilmez (aksi halde example'da duplicate react).
 - Expo SDK 55'te kalınır, sürüm yükseltilmez: toolchain Xcode 26.2, SDK 56+ Xcode 26.4 ister.
 - Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, RNGH ≥2.30, Skia ≥2.4).
@@ -52,8 +52,8 @@ gradient isteyen hiçbir şey köke ya da bu dört girişe girmez.
 2. `apps/example/src/app/index.tsx` içine canlı demo.
 3. `apps/docs/src/lib/catalog.ts` girdisi (`status: 'ready'`) ve `content/docs/components/<slug>.mdx` (kurulum, kullanım, props tablosu).
 4. Üçüncü taraftan uyarlandıysa lisansı kontrol et, MIT ise `NOTICE.md`'ye ekle.
-5. `bun run changeset`.
-6. Kontroller: `packages/motion` içinde `bunx tsc --noEmit` ve `bunx bob build`; `apps/example` içinde `bunx tsc --noEmit` ve `bunx expo-doctor` (20/20); `apps/docs` içinde `bun run build`.
+5. `npm run changeset`.
+6. Kontroller: `packages/motion` içinde `npx tsc --noEmit` ve `npx bob build`; `apps/example` içinde `npx tsc --noEmit` ve `npx expo-doctor` (20/20); `apps/docs` içinde `npm run build`.
 
 Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 
@@ -68,7 +68,7 @@ Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 
 ## Durum
 
-- Local git, branch `main`, henüz commit yok; GitHub remote yok (`gh` kurulu değil → `brew install gh && gh auth login`, sonra `AhmeetKaar/nami-motion` public repo).
+- GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main` (ilk commit `23ab268`, 2026-10-14). `gh` kurulu değil.
 - npm adı `nami-motion` boş (2026-10-14); `@nami` scope başkasına ait.
 - Tüm kontroller temiz (tsc, bob build, expo-doctor 20/20, docs build, iOS export).
 

@@ -29,7 +29,7 @@
     "expo-symbols": "~55.0.9",
     "expo-system-ui": "~55.0.22",
     "expo-web-browser": "~55.0.20",
-    "nami-motion": "workspace:*",
+    "nami-motion": "*",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.10",

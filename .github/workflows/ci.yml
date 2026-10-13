@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun --cwd packages/motion typecheck
-      - run: bun --cwd packages/motion build
-      - run: bun --cwd apps/example x tsc --noEmit
-      - run: bun --cwd apps/docs build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck -w nami-motion
+      - run: npm run build -w nami-motion
+      - run: npm run typecheck -w example
+      - run: npm run build -w docs

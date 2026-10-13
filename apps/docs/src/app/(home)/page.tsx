@@ -23,7 +23,7 @@ export default function HomePage() {
           >
             Get started
           </Link>
-          <code className="rounded-full border px-5 py-2 text-sm">bun add nami-motion</code>
+          <code className="rounded-full border px-5 py-2 text-sm">npm install nami-motion</code>
         </div>
       </section>
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
