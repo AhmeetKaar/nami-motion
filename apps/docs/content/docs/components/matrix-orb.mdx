@@ -1,0 +1,29 @@
+---
+title: Matrix Orb
+description: Dot-matrix shader orb with idle, listening and thinking states.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets @shopify/react-native-skia
+```
+
+## Usage
+
+```tsx
+import { MatrixOrb } from 'nami-motion/skia';
+
+<MatrixOrb state="thinking" size={120} color="#FFFFFF" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `state` | `"idle" | "listening" | "thinking"` | "idle" | Animation state |
+| `level` | `number` | — | Input level while listening |
+| `size` | `number` | — | Diameter |
+| `cover` | `boolean` | false | Fill the parent instead of size |
+| `color` | `string` | "#FFFFFF" | Dot color |
+| `dots` | `number` | — | Grid density |

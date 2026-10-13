@@ -1,0 +1,31 @@
+---
+title: Skeleton
+description: Pulsing placeholder bar for content that is still loading.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets
+```
+
+## Usage
+
+```tsx
+import { Skeleton } from 'nami-motion/feedback';
+
+<Skeleton color="#2A2A2A" width="60%" height={14} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `string` | — | Surface color |
+| `width` | `DimensionValue` | "100%" | Width |
+| `height` | `number` | 12 | Height |
+| `borderRadius` | `number` | 6 | Corner radius |
+| `duration` | `number` | — | Pulse duration in ms |
+| `style` | `StyleProp<ViewStyle>` | — | Extra style |
+
+Reduce Motion is respected: the animation settles into its static state.

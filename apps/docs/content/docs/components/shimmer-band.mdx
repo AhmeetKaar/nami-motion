@@ -1,0 +1,30 @@
+---
+title: Shimmer Band
+description: Gradient band sweeping over a surface, for image and card placeholders.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets expo-linear-gradient
+```
+
+## Usage
+
+```tsx
+import { ShimmerBand } from 'nami-motion/gradient';
+
+<ShimmerBand backgroundColor="#1C1C1C" highlightColor="#FFFFFF" style={{ height: 240, borderRadius: 20 }} />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `backgroundColor` | `string` | — | Surface color |
+| `highlightColor` | `string` | — | Band color |
+| `highlightOpacity` | `number` | — | Band opacity |
+| `bandRatio` | `number` | — | Band width relative to the surface |
+| `duration` | `number` | 1400 | Sweep duration in ms |
+| `style` | `StyleProp<ViewStyle>` | — | Surface style |
+| `children` | `ReactNode` | — | Content rendered above the band |

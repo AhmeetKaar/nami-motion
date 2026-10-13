@@ -1,0 +1,40 @@
+---
+title: Thinking Block
+description: Reasoning trace that shimmers while streaming and settles into an elapsed-time summary.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets
+```
+
+## Usage
+
+```tsx
+import { ThinkingBlock } from 'nami-motion/chat';
+
+<ThinkingBlock
+  reasoning={reasoning}
+  isStreaming={streaming}
+  thinkingLabel="Thinking"
+  formatDoneLabel={(s) => (s ? `Thought for ${s}s` : "Thought")}
+  colors={{ text: "#FFF", textSecondary: "#A1A1A1", textTertiary: "#6B6B6B", pressed: "#222" }}
+  onPress={openReasoning}
+/>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `reasoning` | `string` | — | Reasoning text so far |
+| `isStreaming` | `boolean` | — | Shimmers while true |
+| `thinkingLabel` | `string` | — | Label while streaming |
+| `formatDoneLabel` | `(seconds: number | null) => string` | — | Label once finished |
+| `colors` | `ThinkingBlockColors` | — | text, textSecondary, textTertiary, pressed |
+| `textStyle` | `StyleProp<TextStyle>` | — | Typography |
+| `renderIcon` | `(active: boolean) => ReactNode` | — | Leading icon |
+| `trailingIcon` | `ReactNode` | — | Trailing chevron |
+| `onPress` | `() => void` | — | Open the full trace |
+| `onPressIn` | `(event) => void` | — | Haptics hook |

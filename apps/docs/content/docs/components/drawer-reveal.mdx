@@ -1,0 +1,29 @@
+---
+title: Drawer Reveal
+description: Fades and slides drawer content in sync with the drawer's open progress.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets
+```
+
+## Usage
+
+```tsx
+import { DrawerReveal } from 'nami-motion/gestures';
+
+const progress = useDrawerProgress();
+
+<DrawerReveal progress={progress}>{content}</DrawerReveal>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `progress` | `SharedValue<number>` | — | Drawer open progress 0-1 |
+| `offset` | `number` | — | Slide distance |
+| `onDetachedChange` | `(detached: boolean) => void` | — | Called when the drawer fully opens or closes |
+| `style` | `StyleProp<ViewStyle>` | — | Container style |

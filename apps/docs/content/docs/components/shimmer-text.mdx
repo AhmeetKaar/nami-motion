@@ -1,0 +1,28 @@
+---
+title: Shimmer Text
+description: A light band sweeping across text while a response is being generated.
+---
+
+## Installation
+
+```bash
+bunx expo install nami-motion react-native-reanimated react-native-worklets
+```
+
+## Usage
+
+```tsx
+import { ShimmerText } from 'nami-motion/text';
+
+<ShimmerText text="Thinking" activeColor="#FFFFFF" mutedColor="#6B6B6B" />
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `text` | `string` | — | Text to render |
+| `activeColor` | `string` | — | Color of the moving highlight |
+| `mutedColor` | `string` | — | Base text color |
+| `textStyle` | `StyleProp<TextStyle>` | 15 / 20 | Typography |
+| `duration` | `number` | 1400 | Sweep duration in ms |

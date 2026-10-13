@@ -1,0 +1,19 @@
+{
+  "name": "nami-motion-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "bun --filter nami-motion build",
+    "typecheck": "bun --filter '*' typecheck",
+    "example": "bun --cwd apps/example start",
+    "docs": "bun --cwd apps/docs dev",
+    "changeset": "changeset",
+    "release": "bun run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3"
+  }
+}
