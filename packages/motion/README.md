@@ -2,7 +2,7 @@
 
 Production animations for React Native and Expo chat apps: shimmer text,
 skeletons, status rows, thinking traces, voice waves, progress rings, a
-shader orb and drawer reveals.
+shader orb, drawer reveals and swipe actions.
 
 ```bash
 npx expo install nami-motion react-native-reanimated react-native-worklets react-native-gesture-handler

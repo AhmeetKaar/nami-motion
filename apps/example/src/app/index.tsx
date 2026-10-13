@@ -1,7 +1,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
-import {
+import * as Haptics from "expo-haptics";
+import Animated, {
   Easing,
+  FadeOut,
+  LinearTransition,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -9,12 +12,13 @@ import {
 } from "react-native-reanimated";
 import { StatusRow, ThinkingBlock } from "nami-motion/chat";
 import { Skeleton } from "nami-motion/feedback";
-import { DrawerReveal } from "nami-motion/gestures";
+import { DrawerReveal, SwipeActions, SwipeActionsGroup, type SwipeAction } from "nami-motion/gestures";
 import { ShimmerBand } from "nami-motion/gradient";
 import { MatrixOrb, RemainingRing, VoiceWave, type MatrixOrbState } from "nami-motion/skia";
 import { ShimmerText } from "nami-motion/text";
 
 const ORB_STATES: MatrixOrbState[] = ["idle", "listening", "thinking"];
+const CHATS = ["Trip planning", "Paper summary", "Weekly groceries", "Bug triage"];
 
 function usePalette() {
   const dark = useColorScheme() === "dark";
@@ -41,6 +45,71 @@ function Demo({ title, children, onPress, hint }: { title: string; children: Rea
       </View>
       {children}
     </Pressable>
+  );
+}
+
+function ActionLabel({ label }: { label: string }) {
+  return <Text style={{ color: "#FFFFFF", fontSize: 13, fontWeight: "600" }}>{label}</Text>;
+}
+
+function SwipeActionsDemo() {
+  const palette = usePalette();
+  const [chats, setChats] = useState(CHATS);
+  const [pinned, setPinned] = useState<string[]>([]);
+
+  const remove = (title: string) => setChats((items) => items.filter((item) => item !== title));
+  const togglePin = (title: string) =>
+    setPinned((items) => (items.includes(title) ? items.filter((item) => item !== title) : [...items, title]));
+
+  return (
+    <Demo title="Swipe Actions" hint="Tap to reset" onPress={() => setChats(CHATS)}>
+      <SwipeActionsGroup>
+        <View style={{ borderRadius: 14, borderCurve: "continuous", overflow: "hidden" }}>
+          {chats.map((title) => {
+            const leftActions: SwipeAction[] = [
+              {
+                key: "pin",
+                accessibilityLabel: pinned.includes(title) ? "Unpin" : "Pin",
+                backgroundColor: "#FF9F0A",
+                onPress: () => togglePin(title),
+                children: <ActionLabel label={pinned.includes(title) ? "Unpin" : "Pin"} />,
+              },
+            ];
+            const rightActions: SwipeAction[] = [
+              {
+                key: "delete",
+                accessibilityLabel: "Delete",
+                backgroundColor: "#FF3B30",
+                onPress: () => remove(title),
+                children: <ActionLabel label="Delete" />,
+              },
+              {
+                key: "archive",
+                accessibilityLabel: "Archive",
+                backgroundColor: "#8E8E93",
+                onPress: () => remove(title),
+                children: <ActionLabel label="Archive" />,
+              },
+            ];
+            return (
+              <Animated.View key={title} exiting={FadeOut.duration(160)} layout={LinearTransition}>
+                <SwipeActions
+                  leftActions={leftActions}
+                  rightActions={rightActions}
+                  onThreshold={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+                  contentStyle={{ backgroundColor: palette.surface }}
+                >
+                  <View style={{ paddingHorizontal: 14, paddingVertical: 14, flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ fontSize: 15, color: palette.text }}>{title}</Text>
+                    {pinned.includes(title) ? <Text style={{ fontSize: 13, color: palette.secondary }}>Pinned</Text> : null}
+                  </View>
+                </SwipeActions>
+              </Animated.View>
+            );
+          })}
+        </View>
+      </SwipeActionsGroup>
+    </Demo>
   );
 }
 
@@ -124,6 +193,7 @@ export default function GalleryScreen() {
           <Skeleton color={palette.surface} width="60%" />
         </DrawerReveal>
       </Demo>
+      <SwipeActionsDemo />
     </ScrollView>
   );
 }

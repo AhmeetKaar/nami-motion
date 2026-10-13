@@ -3,4 +3,68 @@ title: Swipe Actions
 description: List rows that reveal actions with a rubber-banded swipe.
 ---
 
-<Callout>In development. It will ship in an upcoming release.</Callout>
+## Installation
+
+```bash
+npx expo install nami-motion react-native-reanimated react-native-worklets react-native-gesture-handler
+```
+
+Your app root must be wrapped in `GestureHandlerRootView`.
+
+## Usage
+
+```tsx
+import { SwipeActions, SwipeActionsGroup } from 'nami-motion/gestures';
+import * as Haptics from 'expo-haptics';
+
+<SwipeActionsGroup>
+  {chats.map((chat) => (
+    <SwipeActions
+      key={chat.id}
+      leftActions={[
+        { key: 'pin', accessibilityLabel: 'Pin', backgroundColor: '#FF9F0A', onPress: () => pin(chat.id), children: <PinIcon /> },
+      ]}
+      rightActions={[
+        { key: 'delete', accessibilityLabel: 'Delete', backgroundColor: '#FF3B30', onPress: () => remove(chat.id), children: <TrashIcon /> },
+        { key: 'archive', accessibilityLabel: 'Archive', backgroundColor: '#8E8E93', onPress: () => archive(chat.id), children: <ArchiveIcon /> },
+      ]}
+      onThreshold={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+      contentStyle={{ backgroundColor: colors.surface }}
+    >
+      <ChatRow chat={chat} />
+    </SwipeActions>
+  ))}
+</SwipeActionsGroup>
+```
+
+The first action of each side is the primary one: it sits at the outer edge and, when `fullSwipe` is on, expands to fill the row once the swipe passes `fullSwipeThreshold`. Releasing past the threshold runs it. Swiping beyond the open width without a full swipe rubber-bands.
+
+Rows inside a `SwipeActionsGroup` keep only one row open at a time. Tapping an open row closes it. Every action is also exposed as an accessibility action, so screen reader users get the same options without swiping. With reduce motion on, rows snap open and closed without springs.
+
+Give the content a background color with `contentStyle`, otherwise the actions show through it.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `leftActions` | `SwipeAction[]` | `[]` | Actions revealed by swiping right; the first one is primary |
+| `rightActions` | `SwipeAction[]` | `[]` | Actions revealed by swiping left; the first one is primary |
+| `actionWidth` | `number` | `80` | Width of each action when the row rests open |
+| `fullSwipe` | `boolean` | `true` | Allow a full swipe to run the primary action |
+| `fullSwipeThreshold` | `number` | `0.6` | Fraction of the row width a full swipe must pass |
+| `closeOnActionPress` | `boolean` | `true` | Close the row after an action is tapped |
+| `onThreshold` | `(side, crossed) => void` | — | Called when a swipe crosses the full-swipe threshold in either direction; use it for haptics |
+| `onOpenChange` | `(side \| null) => void` | — | Called when the row settles open on a side or closes |
+| `style` | `StyleProp<ViewStyle>` | — | Row container style |
+| `contentStyle` | `StyleProp<ViewStyle>` | — | Style of the sliding content |
+| `ref` | `Ref<SwipeActionsHandle>` | — | Exposes `open(side)` and `close()` |
+
+### SwipeAction
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `key` | `string` | Unique key, also the accessibility action name |
+| `accessibilityLabel` | `string` | Label for the button and the accessibility action |
+| `backgroundColor` | `string` | Action background |
+| `onPress` | `() => void` | Runs on tap, full swipe or accessibility action |
+| `children` | `ReactNode` | Icon or label rendered in the action |

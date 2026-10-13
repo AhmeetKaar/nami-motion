@@ -25,12 +25,12 @@ Komutlar: `npm install`, `npm run example`, `npm run docs`, `npm run build`,
 | `nami-motion/text` | ShimmerText | — |
 | `nami-motion/feedback` | Skeleton | — |
 | `nami-motion/chat` | StatusRow, ThinkingBlock | — |
-| `nami-motion/gestures` | DrawerReveal | — |
+| `nami-motion/gestures` | DrawerReveal, SwipeActions, SwipeActionsGroup | react-native-gesture-handler (SwipeActions) |
 | `nami-motion/gradient` | ShimmerBand | expo-linear-gradient (opsiyonel peer) |
 | `nami-motion/skia` | VoiceWave, RemainingRing, MatrixOrb | @shopify/react-native-skia (opsiyonel peer) |
 
-Kök `src/index.ts` yalnızca text, feedback, chat ve gestures'ı export eder; Skia veya
-gradient isteyen hiçbir şey köke ya da bu dört girişe girmez.
+Kök `src/index.ts` text, feedback, chat ve yalnızca DrawerReveal'ı export eder; Skia,
+gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 
 ## Kurallar
 
@@ -74,9 +74,8 @@ Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 
 ## Sıradaki işler
 
-1. **Swipe actions** (`nami-motion/gestures`, RNGH + Reanimated): satır sola/sağa kayar, aksiyonlar rubber-band ile açılır, eşik geçilince tam swipe ile birincil aksiyon tetiklenir, haptic `onThreshold` callback'i ile dışarı verilir, aynı anda tek satır açık kalır.
-2. **Streaming markdown** (`nami-motion/chat`): Nami'deki yapı referans — blok bazlı split, son blok "frozen + live" diye bölünür (yalnızca canlı satır her tick'te yeniden render edilir). Animasyon yalnızca live kısma uygulanır: kelime/token bazlı fade + hafif blur, code block satır reveal'ı, tablo satır girişi, kaynak rozetleri ve follow-up chip'lerinde stagger. Paragraf/heading/liste tek `<Text selectable>` ağacında nested render edilir (paragraflar arası seçim için), animasyon seçilebilirliği bozmamalı. Markdown parser bağımlılığı opsiyonel peer olmalı.
-3. Site: her component için cihazdan kaydedilmiş kısa video (`apps/docs/public/videos/<slug>.mp4`) ve galeri kartında hover'da oynatma; "kaynağı kopyala" butonu.
-4. İlk yayın `0.1.0`: GitHub repo + `NPM_TOKEN` secret, changeset ile release; Vercel'e docs deploy.
-5. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
-6. Nami entegrasyonu en sonda: Nami eski componentlerini bırakıp npm paketine geçer (Nami'nin kendi faz/PR kurallarıyla, ayrı branch'te).
+1. **Streaming markdown** (`nami-motion/chat`): Nami'deki yapı referans — blok bazlı split, son blok "frozen + live" diye bölünür (yalnızca canlı satır her tick'te yeniden render edilir). Animasyon yalnızca live kısma uygulanır: kelime/token bazlı fade + hafif blur, code block satır reveal'ı, tablo satır girişi, kaynak rozetleri ve follow-up chip'lerinde stagger. Paragraf/heading/liste tek `<Text selectable>` ağacında nested render edilir (paragraflar arası seçim için), animasyon seçilebilirliği bozmamalı. Markdown parser bağımlılığı opsiyonel peer olmalı.
+2. Site: her component için cihazdan kaydedilmiş kısa video (`apps/docs/public/videos/<slug>.mp4`) ve galeri kartında hover'da oynatma; "kaynağı kopyala" butonu.
+3. İlk yayın `0.1.0`: GitHub repo + `NPM_TOKEN` secret, changeset ile release; Vercel'e docs deploy.
+4. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
+5. Nami entegrasyonu en sonda: Nami eski componentlerini bırakıp npm paketine geçer (Nami'nin kendi faz/PR kurallarıyla, ayrı branch'te).
