@@ -1,0 +1,54 @@
+appId: dev.namimotion.example
+name: 10 Swipe Actions chat list
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/swipe-actions?driver=maestro
+- extendedWaitUntil:
+    visible: ".*Trip planning.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1000
+    optional: true
+- takeScreenshot: ${OUT}/10-swipe-actions-1-list
+- swipe:
+    start: "70%,43%"
+    end: "35%,43%"
+    duration: 700
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/10-swipe-actions-2-archive-delete
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 800
+    optional: true
+- swipe:
+    start: "30%,52%"
+    end: "62%,52%"
+    duration: 700
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/10-swipe-actions-3-pin
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 800
+    optional: true
+- tapOn:
+    point: "70%,52%"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/10-swipe-actions-4-closed
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 600
+    optional: true
+- swipe:
+    start: "85%,61%"
+    end: "8%,61%"
+    duration: 900
+- waitForAnimationToEnd
+- assertNotVisible: ".*Weekly groceries.*"
+- takeScreenshot: ${OUT}/10-swipe-actions-5-deleted
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
+    optional: true

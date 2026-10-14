@@ -1,0 +1,43 @@
+appId: dev.namimotion.example
+name: 09 Drawer Reveal sidebar pan
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/drawer-reveal?driver=maestro
+- extendedWaitUntil:
+    visible: "Summarize this paper in two sentences."
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1200
+    optional: true
+- takeScreenshot: ${OUT}/09-drawer-reveal-1-closed
+- swipe:
+    start: "10%,52%"
+    end: "80%,52%"
+    duration: 1200
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 500
+    optional: true
+- takeScreenshot: ${OUT}/09-drawer-reveal-2-open
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1800
+    optional: true
+- swipe:
+    start: "85%,52%"
+    end: "15%,52%"
+    duration: 900
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 500
+    optional: true
+- takeScreenshot: ${OUT}/09-drawer-reveal-3-closed
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
+    optional: true

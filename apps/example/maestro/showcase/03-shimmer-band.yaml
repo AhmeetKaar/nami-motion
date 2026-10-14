@@ -1,0 +1,27 @@
+appId: dev.namimotion.example
+name: 03 Shimmer Band image generation
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/shimmer-band?driver=maestro
+- extendedWaitUntil:
+    visible: "Creating image"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
+    optional: true
+- takeScreenshot: ${OUT}/03-shimmer-band-1-generating
+- extendedWaitUntil:
+    visible: "Image created"
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/03-shimmer-band-2-created
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 2500
+    optional: true

@@ -1,0 +1,27 @@
+appId: dev.namimotion.example
+name: 02 Skeleton usage card loading
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/skeleton?driver=maestro
+- extendedWaitUntil:
+    visible: "Skeleton"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 900
+    optional: true
+- takeScreenshot: ${OUT}/02-skeleton-1-loading
+- extendedWaitUntil:
+    visible: "Alex Morgan"
+    timeout: 6000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 600
+    optional: true
+- takeScreenshot: ${OUT}/02-skeleton-2-loaded
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 2500
+    optional: true

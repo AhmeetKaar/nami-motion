@@ -1,0 +1,44 @@
+appId: dev.namimotion.example
+name: 05 Thinking Block reasoning and expand
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/thinking-block?driver=maestro
+- extendedWaitUntil:
+    visible: ".*Thinking.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 400
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-1-thinking
+- extendedWaitUntil:
+    visible: ".*Running the test.*"
+    timeout: 6000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 500
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-2-reasoning
+- extendedWaitUntil:
+    visible: "Thought for .*"
+    timeout: 8000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 900
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-3-done
+- tapOn: "Thought for .*"
+- extendedWaitUntil:
+    visible: ".*ninth one found.*"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 600
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-4-expanded
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 2000
+    optional: true

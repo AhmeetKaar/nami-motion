@@ -1,0 +1,43 @@
+appId: dev.namimotion.example
+name: 04 Status Row tool use steps
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/status-row?driver=maestro
+- extendedWaitUntil:
+    visible: ".*Searching the web.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/04-status-row-1-searching
+- extendedWaitUntil:
+    visible: ".*Reading 4 sources.*"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/04-status-row-2-reading
+- extendedWaitUntil:
+    visible: ".*Writing the answer.*"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 600
+    optional: true
+- takeScreenshot: ${OUT}/04-status-row-3-writing
+- extendedWaitUntil:
+    visible: ".*Sunny on Saturday.*"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/04-status-row-4-answer
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 2000
+    optional: true
