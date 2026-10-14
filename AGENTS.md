@@ -24,14 +24,15 @@ Komutlar: `npm install`, `npm run example`, `npm run site` (http://localhost:517
 
 | Giriş | Componentler | Ek native bağımlılık |
 | --- | --- | --- |
+| `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
 | `nami-motion/text` | ShimmerText | — |
 | `nami-motion/feedback` | Skeleton | — |
-| `nami-motion/chat` | StatusRow, ThinkingBlock | — |
+| `nami-motion/chat` | StatusRow, ThinkingBlock, SourceChips, SourceBadge, MessageActions, FollowUpChips, ThinkingTrace, TraceSteps | — |
 | `nami-motion/gestures` | DrawerReveal, SwipeActions, SwipeActionsGroup | react-native-gesture-handler (SwipeActions) |
-| `nami-motion/gradient` | ShimmerBand | expo-linear-gradient (opsiyonel peer) |
-| `nami-motion/skia` | VoiceWave, RemainingRing, MatrixOrb | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/gradient` | ShimmerBand, GeneratingImage | expo-linear-gradient (opsiyonel peer) |
+| `nami-motion/skia` | VoiceWave, RemainingRing, MatrixOrb, DictationBar, AttachmentTile, AttachmentTray | @shopify/react-native-skia (opsiyonel peer) |
 
-Kök `src/index.ts` text, feedback, chat ve yalnızca DrawerReveal'ı export eder; Skia,
+Kök `src/index.ts` theme, text, feedback, chat ve yalnızca DrawerReveal'ı export eder; Skia,
 gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 
 ## Kurallar
@@ -44,6 +45,8 @@ gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 - Kaynak dosyalar İngilizce ve ASCII, dosya adları kebab-case, koda yorum satırı yazılmaz.
 - Paket içinde göreli import kullanılır; paket kodu hiçbir uygulama katmanına (tema, i18n, provider) bağlanmaz — renk, metin, ikon, font, haptic prop olarak gelir.
 - Her component `useReducedMotion` ile statik son haline düşebilmeli.
+- Yeni componentler renkleri `useMotionPalette(colors)` ile okur: varsayılan Moodstone paleti, `MotionThemeProvider` ile uygulama paleti, `colors` ile tek component override. İkonlar her zaman prop.
+- Showcase/demo tasarlamadan önce Nami `client-animations.md` okunur; referans sitelerden kod alınmaz, yalnızca fikir.
 - İsimler marka içermez (ChatGPT/X/Claude yok); referanslar yalnızca ilham, kod kopyalanmaz.
 - Her görev bitince (kontroller temizse) `git commit` atılır, izin beklenmez. `git push`, publish ve issue açmak dışa dönük adımdır, kullanıcının açık izni olmadan yapılmaz.
 - Süreç/plan kararlarında (isim, düzen, sıra) önerilen seçenekle devam edilir, kullanıcıya sorulmaz.
@@ -79,4 +82,4 @@ Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 1. **Streaming markdown** (`nami-motion/chat`): Nami'deki yapı referans — blok bazlı split, son blok "frozen + live" diye bölünür (yalnızca canlı satır her tick'te yeniden render edilir). Animasyon yalnızca live kısma uygulanır: kelime/token bazlı fade + hafif blur, code block satır reveal'ı, tablo satır girişi, kaynak rozetleri ve follow-up chip'lerinde stagger. Paragraf/heading/liste tek `<Text selectable>` ağacında nested render edilir (paragraflar arası seçim için), animasyon seçilebilirliği bozmamalı. Markdown parser bağımlılığı opsiyonel peer olmalı.
 2. İlk yayın `0.1.0` (kullanıcı onayıyla; şimdilik her şey test tarafında, yayın yok): `NPM_TOKEN` secret, changeset ile release; site deploy'u.
 3. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
-4. Nami entegrasyonu: `feature/nami-motion` branch'inde paket `vendor/nami-motion-0.0.0.tgz` ile kurulu, 9 component paketten geliyor, chats listesinde SwipeActions var. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla; npm yayınından sonra tarball yerine npm sürümüne geçilir.
+4. Nami entegrasyonu: `feature/nami-motion` branch'inde paket `vendor/nami-motion-<sha>.tgz` (bun) ile kurulu. Paketten gelenler: StatusRow + canlı SourceChips (favicon ikonlu), ThinkingBlock, gerekçe sheet'inde ThinkingTrace (Adımlar/Kaynaklar), MessageActions, DictationBar, AttachmentTile/Tray, GeneratingImage, ShimmerText, Skeleton, MatrixOrb, DrawerReveal, SwipeActions. `src/providers/motion-theme-provider.tsx` Nami renklerini pakete bağlar. Nami'de veri olmadığı için FollowUpChips ve SourceBadge kullanılmıyor. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla.
