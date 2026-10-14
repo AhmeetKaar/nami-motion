@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
+import { SymbolView, type SFSymbol } from "expo-symbols";
 import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
+  FadeIn,
   FadeOut,
   LinearTransition,
   useSharedValue,
@@ -124,6 +125,46 @@ function SwipeActionsDemo() {
   );
 }
 
+const MENU: { label: string; icon: SFSymbol }[] = [
+  { label: "New chat", icon: "square.and.pencil" },
+  { label: "Search", icon: "magnifyingglass" },
+  { label: "Projects", icon: "folder" },
+];
+
+function ProfileSkeleton() {
+  const palette = usePalette();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => setLoading((value) => !value), 2200);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <Animated.View key={loading ? "loading" : "loaded"} entering={FadeIn.duration(250)} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      {loading ? (
+        <>
+          <Skeleton color={palette.surface} width={44} height={44} borderRadius={22} />
+          <View style={{ flex: 1, gap: 8 }}>
+            <Skeleton color={palette.surface} width="50%" height={14} />
+            <Skeleton color={palette.surface} width="75%" height={12} />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "#5E5CE6" }}>
+            <Text style={{ fontSize: 15, fontWeight: "600", color: "#FFFFFF" }}>AM</Text>
+          </View>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ fontSize: 16, fontWeight: "600", color: palette.text }}>Alex Morgan</Text>
+            <Text style={{ fontSize: 14, color: palette.secondary }}>Plus plan - 640 of 1,000 messages</Text>
+          </View>
+        </>
+      )}
+    </Animated.View>
+  );
+}
+
 export default function GalleryScreen() {
   const palette = usePalette();
   const level = useSharedValue(0);
@@ -150,10 +191,7 @@ export default function GalleryScreen() {
         <ShimmerText text="Generating a response" activeColor={palette.text} mutedColor={palette.tertiary} />
       </Demo>
       <Demo title="Skeleton" slug="skeleton">
-        <View style={{ gap: 8 }}>
-          <Skeleton color={palette.surface} width="80%" />
-          <Skeleton color={palette.surface} width="55%" />
-        </View>
+        <ProfileSkeleton />
       </Demo>
       <Demo title="Shimmer Band" slug="shimmer-band">
         <ShimmerBand
@@ -189,11 +227,14 @@ export default function GalleryScreen() {
           <MatrixOrb state="thinking" size={140} color={palette.text} />
         </View>
       </Demo>
-<Demo title="Drawer Reveal" slug="drawer-reveal">
-        <DrawerReveal progress={drawer} style={{ gap: 8 }}>
-          <Skeleton color={palette.surface} width="70%" />
-          <Skeleton color={palette.surface} width="45%" />
-          <Skeleton color={palette.surface} width="60%" />
+      <Demo title="Drawer Reveal" slug="drawer-reveal">
+        <DrawerReveal progress={drawer} style={{ gap: 14 }}>
+          {MENU.map((item) => (
+            <View key={item.label} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <SymbolView name={item.icon} size={18} tintColor={palette.text} style={{ width: 18, height: 18 }} />
+              <Text style={{ fontSize: 16, color: palette.text }}>{item.label}</Text>
+            </View>
+          ))}
         </DrawerReveal>
       </Demo>
       <SwipeActionsDemo />
