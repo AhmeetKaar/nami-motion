@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
+import { useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
 import * as Haptics from "expo-haptics";
 import Animated, {
   Easing,
@@ -14,10 +16,9 @@ import { StatusRow, ThinkingBlock } from "nami-motion/chat";
 import { Skeleton } from "nami-motion/feedback";
 import { DrawerReveal, SwipeActions, SwipeActionsGroup, type SwipeAction } from "nami-motion/gestures";
 import { ShimmerBand } from "nami-motion/gradient";
-import { MatrixOrb, RemainingRing, VoiceWave, type MatrixOrbState } from "nami-motion/skia";
+import { MatrixOrb, RemainingRing, VoiceWave } from "nami-motion/skia";
 import { ShimmerText } from "nami-motion/text";
 
-const ORB_STATES: MatrixOrbState[] = ["idle", "listening", "thinking"];
 const CHATS = ["Trip planning", "Paper summary", "Weekly groceries", "Bug triage"];
 
 function usePalette() {
@@ -32,18 +33,28 @@ function usePalette() {
   };
 }
 
-function Demo({ title, children, onPress, hint }: { title: string; children: ReactNode; onPress?: () => void; hint?: string }) {
+function Demo({ title, slug, children }: { title: string; slug: string; children: ReactNode }) {
   const palette = usePalette();
+  const router = useRouter();
   return (
     <Pressable
-      onPress={onPress}
-      style={{ padding: 16, gap: 14, borderRadius: 20, borderCurve: "continuous", backgroundColor: palette.card }}
+      accessibilityRole="button"
+      accessibilityHint="Opens the full showcase"
+      onPress={() => router.push(`/showcase/${slug}`)}
+      style={({ pressed }) => ({
+        padding: 16,
+        gap: 14,
+        borderRadius: 20,
+        borderCurve: "continuous",
+        backgroundColor: palette.card,
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <Text style={{ fontSize: 15, fontWeight: "600", color: palette.text }}>{title}</Text>
-        {hint ? <Text style={{ fontSize: 13, color: palette.secondary }}>{hint}</Text> : null}
+        <SymbolView name="chevron.right" size={13} tintColor={palette.tertiary} style={{ width: 13, height: 13 }} />
       </View>
-      {children}
+      <View pointerEvents="none">{children}</View>
     </Pressable>
   );
 }
@@ -62,7 +73,7 @@ function SwipeActionsDemo() {
     setPinned((items) => (items.includes(title) ? items.filter((item) => item !== title) : [...items, title]));
 
   return (
-    <Demo title="Swipe Actions" hint="Tap to reset" onPress={() => setChats(CHATS)}>
+    <Demo title="Swipe Actions" slug="swipe-actions">
       <SwipeActionsGroup>
         <View style={{ borderRadius: 14, borderCurve: "continuous", overflow: "hidden" }}>
           {chats.map((title) => {
@@ -115,9 +126,6 @@ function SwipeActionsDemo() {
 
 export default function GalleryScreen() {
   const palette = usePalette();
-  const [streaming, setStreaming] = useState(true);
-  const [orbIndex, setOrbIndex] = useState(0);
-  const [progress, setProgress] = useState(0.35);
   const level = useSharedValue(0);
   const drawer = useSharedValue(0);
 
@@ -129,7 +137,8 @@ export default function GalleryScreen() {
       ),
       -1,
     );
-  }, [level]);
+    drawer.value = withRepeat(withSequence(withTiming(1, { duration: 700 }), withTiming(1, { duration: 900 }), withTiming(0, { duration: 600 })), -1);
+  }, [level, drawer]);
 
   return (
     <ScrollView
@@ -137,56 +146,50 @@ export default function GalleryScreen() {
       style={{ backgroundColor: palette.background }}
       contentContainerStyle={{ padding: 16, gap: 12 }}
     >
-      <Demo title="Shimmer Text">
+      <Demo title="Shimmer Text" slug="shimmer-text">
         <ShimmerText text="Generating a response" activeColor={palette.text} mutedColor={palette.tertiary} />
       </Demo>
-      <Demo title="Skeleton">
+      <Demo title="Skeleton" slug="skeleton">
         <View style={{ gap: 8 }}>
           <Skeleton color={palette.surface} width="80%" />
           <Skeleton color={palette.surface} width="55%" />
         </View>
       </Demo>
-      <Demo title="Shimmer Band">
+      <Demo title="Shimmer Band" slug="shimmer-band">
         <ShimmerBand
           backgroundColor={palette.surface}
           highlightColor={palette.text}
           style={{ height: 160, borderRadius: 16 }}
         />
       </Demo>
-      <Demo title="Status Row">
+      <Demo title="Status Row" slug="status-row">
         <StatusRow
           label="Searching the web"
           color={palette.secondary}
           icon={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: palette.text }} />}
         />
       </Demo>
-      <Demo title="Thinking Block" hint="Tap to toggle" onPress={() => setStreaming((value) => !value)}>
+      <Demo title="Thinking Block" slug="thinking-block">
         <ThinkingBlock
           reasoning="The user wants a summary of the paper, so I should start with the abstract."
-          isStreaming={streaming}
+          isStreaming
           thinkingLabel="Thinking"
           formatDoneLabel={(seconds) => (seconds ? `Thought for ${seconds}s` : "Thought")}
           colors={{ text: palette.text, textSecondary: palette.secondary, textTertiary: palette.tertiary, pressed: palette.surface }}
         />
       </Demo>
-      <Demo title="Voice Wave">
+      <Demo title="Voice Wave" slug="voice-wave">
         <VoiceWave level={level} colors={["#7C5CFF", "#4CC9F0", "#F72585"]} />
       </Demo>
-      <Demo title="Remaining Ring" hint="Tap to change" onPress={() => setProgress((value) => (value > 0.8 ? 0.1 : value + 0.25))}>
-        <RemainingRing size={44} progress={progress} trackColor={palette.surface} color={palette.text} />
+      <Demo title="Remaining Ring" slug="remaining-ring">
+        <RemainingRing size={44} progress={0.6} trackColor={palette.surface} color={palette.text} />
       </Demo>
-      <Demo title="Matrix Orb" hint={ORB_STATES[orbIndex]} onPress={() => setOrbIndex((value) => (value + 1) % ORB_STATES.length)}>
+      <Demo title="Matrix Orb" slug="matrix-orb">
         <View style={{ alignItems: "center" }}>
-          <MatrixOrb state={ORB_STATES[orbIndex]} size={140} color={palette.text} />
+          <MatrixOrb state="thinking" size={140} color={palette.text} />
         </View>
       </Demo>
-      <Demo
-        title="Drawer Reveal"
-        hint="Tap to toggle"
-        onPress={() => {
-          drawer.value = withTiming(drawer.value > 0.5 ? 0 : 1, { duration: 360 });
-        }}
-      >
+<Demo title="Drawer Reveal" slug="drawer-reveal">
         <DrawerReveal progress={drawer} style={{ gap: 8 }}>
           <Skeleton color={palette.surface} width="70%" />
           <Skeleton color={palette.surface} width="45%" />

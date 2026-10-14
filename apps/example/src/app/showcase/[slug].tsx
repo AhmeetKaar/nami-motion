@@ -730,7 +730,9 @@ export default function ShowcaseScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.background, padding: 24 }}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen
+        options={{ title: "", headerTransparent: true, headerLargeTitle: false, headerShadowVisible: false, headerBackButtonDisplayMode: "minimal" }}
+      />
       <Text style={{ marginTop: 72, fontSize: 28, fontWeight: "700", color: palette.text }}>
         {showcase?.title ?? "Unknown component"}
       </Text>

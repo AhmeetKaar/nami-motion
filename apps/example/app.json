@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "dev.namimotion.example"
+      "bundleIdentifier": "dev.namimotion.example",
+      "appleTeamId": "7SZG9WY248"
     },
     "android": {
       "adaptiveIcon": {
