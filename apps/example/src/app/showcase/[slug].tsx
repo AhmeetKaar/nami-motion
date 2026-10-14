@@ -61,17 +61,80 @@ function Card({ children }: { children: ReactNode }) {
   );
 }
 
+const STREAM_ANSWER =
+  "The paper shows that small models trained on carefully filtered data can match much larger ones on reasoning tasks. Most of the gain comes from the filtering step, not from extra compute.";
+const STREAM_WORDS = STREAM_ANSWER.split(" ");
+const STREAM_READING_MS = 2400;
+const STREAM_WORD_MS = 130;
+const STREAM_HOLD_MS = 3000;
+
+function useStreamingCycle() {
+  const [words, setWords] = useState(-1);
+  const [cycle, setCycle] = useState(0);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    setWords(-1);
+    timers.push(setTimeout(() => setWords(0), STREAM_READING_MS));
+    STREAM_WORDS.forEach((_, index) => {
+      timers.push(setTimeout(() => setWords(index + 1), STREAM_READING_MS + (index + 1) * STREAM_WORD_MS));
+    });
+    const total = STREAM_READING_MS + STREAM_WORDS.length * STREAM_WORD_MS + STREAM_HOLD_MS;
+    timers.push(setTimeout(() => setCycle((value) => value + 1), total));
+    return () => timers.forEach(clearTimeout);
+  }, [cycle]);
+
+  if (words < 0) return { phase: "reading" as const, text: "" };
+  if (words < STREAM_WORDS.length) return { phase: "streaming" as const, text: STREAM_WORDS.slice(0, words).join(" ") };
+  return { phase: "done" as const, text: STREAM_ANSWER };
+}
+
 function ShimmerTextShowcase() {
   const palette = usePalette();
+  const { phase, text } = useStreamingCycle();
+  const doneSeconds = Math.round((STREAM_READING_MS + STREAM_WORDS.length * STREAM_WORD_MS) / 1000);
+
   return (
-    <Card>
-      <ShimmerText
-        text="Generating a response"
-        activeColor={palette.text}
-        mutedColor={palette.tertiary}
-        textStyle={{ fontSize: 22, lineHeight: 28, fontWeight: "600" }}
-      />
-    </Card>
+    <View
+      style={{
+        width: "100%",
+        height: 330,
+        padding: 20,
+        gap: 18,
+        borderRadius: 24,
+        borderCurve: "continuous",
+        backgroundColor: palette.card,
+      }}
+    >
+      <View
+        style={{
+          alignSelf: "flex-end",
+          maxWidth: "80%",
+          paddingHorizontal: 14,
+          paddingVertical: 10,
+          borderRadius: 20,
+          borderCurve: "continuous",
+          backgroundColor: palette.surface,
+        }}
+      >
+        <Text style={{ fontSize: 16, lineHeight: 21, color: palette.text }}>Summarize this paper in two sentences.</Text>
+      </View>
+      <View style={{ gap: 8 }}>
+        {phase === "done" ? (
+          <Text style={{ fontSize: 17, lineHeight: 22, fontWeight: "600", color: palette.tertiary }}>
+            {`Finished in ${doneSeconds}s`}
+          </Text>
+        ) : (
+          <ShimmerText
+            text={phase === "reading" ? "Reading the paper" : "Generating a response"}
+            activeColor={palette.text}
+            mutedColor={palette.tertiary}
+            textStyle={{ fontSize: 17, lineHeight: 22, fontWeight: "600" }}
+          />
+        )}
+        {text ? <Text style={{ fontSize: 17, lineHeight: 24, color: palette.text }}>{text}</Text> : null}
+      </View>
+    </View>
   );
 }
 
