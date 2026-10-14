@@ -9,6 +9,7 @@ export type MessageAction = {
   icon: ReactNode;
   accessibilityLabel: string;
   onPress?: () => void;
+  onPressIn?: () => void;
   disabled?: boolean;
 };
 
@@ -44,6 +45,7 @@ export function MessageActions({
             accessibilityLabel={action.accessibilityLabel}
             disabled={action.disabled}
             onPress={action.onPress}
+            onPressIn={action.onPressIn}
             style={({ pressed }) => ({
               width: hitSize,
               height: hitSize,
