@@ -20,7 +20,7 @@ SwipeActions → DrawerReveal → VoiceWave → RemainingRing → Skeleton → S
 
 | # | Component | Referans | Paket | iOS showcase | Onay |
 | --- | --- | --- | --- | --- | --- |
-| 1 | StatusRow | — | — | — | — |
+| 1 | StatusRow | REFERENCES.md §1 (Raycast, Linktree, Gemini) | shimmer etiket, yumuşak geçiş, `history`, `variant="card"` | adım geçmişli ekran, galeride kart | bekliyor |
 | 2 | ThinkingBlock | — | — | — | — |
 | 3 | ShimmerText | — | — | — | — |
 | 4 | SwipeActions | — | — | — | — |

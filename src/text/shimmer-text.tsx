@@ -15,6 +15,7 @@ import Animated, {
 
 const DEFAULT_DURATION = 1400;
 const HIGHLIGHT_WIDTH = 0.22;
+const GLYPH_BLEED: TextStyle = { paddingHorizontal: 2, marginHorizontal: -2 };
 
 const DEFAULT_TEXT_STYLE: TextStyle = {
   fontSize: 14,
@@ -101,5 +102,5 @@ function ShimmerChar({
     return { color: interpolateColor(t, [0, 1], [activeColor, mutedColor]) };
   });
 
-  return <Animated.Text style={[textStyle, style]}>{char}</Animated.Text>;
+  return <Animated.Text style={[textStyle, GLYPH_BLEED, style]}>{char}</Animated.Text>;
 }
