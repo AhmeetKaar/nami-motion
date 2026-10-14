@@ -17,7 +17,7 @@ import {
   type ViewProps,
   type ViewStyle,
 } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, type PanGesture } from "react-native-gesture-handler";
 import Animated, {
   type SharedValue,
   useAnimatedReaction,
@@ -68,6 +68,7 @@ export type SwipeActionsProps = Omit<ViewProps, "style" | "children"> & {
   closeOnActionPress?: boolean;
   onThreshold?: (side: SwipeActionsSide, crossed: boolean) => void;
   onOpenChange?: (side: SwipeActionsSide | null) => void;
+  configureGesture?: (gesture: PanGesture) => PanGesture;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   children?: ReactNode;
@@ -95,6 +96,7 @@ export function SwipeActions({
   closeOnActionPress = true,
   onThreshold,
   onOpenChange,
+  configureGesture,
   style,
   contentStyle,
   children,
@@ -221,7 +223,7 @@ export function SwipeActions({
       return Math.abs(x) >= threshold ? sign : CLOSED;
     };
 
-    return Gesture.Pan()
+    const pan = Gesture.Pan()
       .activeOffsetX([-ACTIVE_OFFSET, ACTIVE_OFFSET])
       .failOffsetY([-ACTIVE_OFFSET, ACTIVE_OFFSET])
       .onStart(() => {
@@ -267,7 +269,10 @@ export function SwipeActions({
         );
         openSide.set(sign);
       });
+
+    return configureGesture ? configureGesture(pan) : pan;
   }, [
+    configureGesture,
     actionWidth,
     activate,
     crossed,
