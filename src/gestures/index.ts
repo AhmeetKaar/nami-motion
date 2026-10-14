@@ -2,6 +2,7 @@ export { DrawerReveal, type DrawerRevealProps } from "./drawer-reveal";
 export {
   SwipeActions,
   type SwipeAction,
+  type SwipeActionShape,
   type SwipeActionsHandle,
   type SwipeActionsProps,
   type SwipeActionsSide,

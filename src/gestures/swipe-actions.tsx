@@ -10,6 +10,7 @@ import {
 import {
   Pressable,
   StyleSheet,
+  Text,
   View,
   type AccessibilityActionEvent,
   type LayoutChangeEvent,
@@ -19,6 +20,8 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector, type PanGesture } from "react-native-gesture-handler";
 import Animated, {
+  Extrapolation,
+  interpolate,
   type SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
@@ -28,6 +31,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
+import { useMotionPalette } from "../theme/provider";
 import { useSwipeActionsGroup } from "./swipe-actions-group";
 
 const DEFAULT_ACTION_WIDTH = 80;
@@ -51,8 +55,11 @@ export type SwipeAction = {
   accessibilityLabel: string;
   backgroundColor: string;
   onPress: () => void;
+  label?: string;
   children?: ReactNode;
 };
+
+export type SwipeActionShape = "fill" | "circle";
 
 export type SwipeActionsHandle = {
   open: (side: SwipeActionsSide) => void;
@@ -63,6 +70,8 @@ export type SwipeActionsProps = Omit<ViewProps, "style" | "children"> & {
   leftActions?: SwipeAction[];
   rightActions?: SwipeAction[];
   actionWidth?: number;
+  actionShape?: SwipeActionShape;
+  circleSize?: number;
   fullSwipe?: boolean;
   fullSwipeThreshold?: number;
   closeOnActionPress?: boolean;
@@ -91,6 +100,8 @@ export function SwipeActions({
   leftActions = EMPTY,
   rightActions = EMPTY,
   actionWidth = DEFAULT_ACTION_WIDTH,
+  actionShape = "fill",
+  circleSize,
   fullSwipe = true,
   fullSwipeThreshold = DEFAULT_FULL_SWIPE_THRESHOLD,
   closeOnActionPress = true,
@@ -335,6 +346,9 @@ export function SwipeActions({
       {leftCount > 0 ? (
         <ActionPanel
           side={LEFT}
+          shape={actionShape}
+          actionWidth={actionWidth}
+          circleSize={circleSize ?? Math.min(actionWidth - 24, 52)}
           actions={leftActions}
           translateX={translateX}
           expanded={expanded}
@@ -344,6 +358,9 @@ export function SwipeActions({
       {rightCount > 0 ? (
         <ActionPanel
           side={RIGHT}
+          shape={actionShape}
+          actionWidth={actionWidth}
+          circleSize={circleSize ?? Math.min(actionWidth - 24, 52)}
           actions={rightActions}
           translateX={translateX}
           expanded={expanded}
@@ -369,13 +386,16 @@ export function SwipeActions({
 
 type ActionPanelProps = {
   side: number;
+  shape: SwipeActionShape;
+  actionWidth: number;
+  circleSize: number;
   actions: SwipeAction[];
   translateX: SharedValue<number>;
   expanded: SharedValue<number>;
   onPress: (action: SwipeAction) => void;
 };
 
-function ActionPanel({ side, actions, translateX, expanded, onPress }: ActionPanelProps) {
+function ActionPanel({ side, shape, actionWidth, circleSize, actions, translateX, expanded, onPress }: ActionPanelProps) {
   const panelStyle = useAnimatedStyle(() => ({
     width: Math.max(side * translateX.get(), 0),
   }));
@@ -395,6 +415,9 @@ function ActionPanel({ side, actions, translateX, expanded, onPress }: ActionPan
           index={index}
           count={actions.length}
           side={side}
+          shape={shape}
+          actionWidth={actionWidth}
+          circleSize={circleSize}
           translateX={translateX}
           expanded={expanded}
           onPress={onPress}
@@ -406,6 +429,9 @@ function ActionPanel({ side, actions, translateX, expanded, onPress }: ActionPan
 
 type ActionItemProps = {
   action: SwipeAction;
+  shape: SwipeActionShape;
+  actionWidth: number;
+  circleSize: number;
   index: number;
   count: number;
   side: number;
@@ -414,7 +440,19 @@ type ActionItemProps = {
   onPress: (action: SwipeAction) => void;
 };
 
-function ActionItem({ action, index, count, side, translateX, expanded, onPress }: ActionItemProps) {
+function ActionItem({
+  action,
+  index,
+  count,
+  side,
+  shape,
+  actionWidth,
+  circleSize,
+  translateX,
+  expanded,
+  onPress,
+}: ActionItemProps) {
+  const palette = useMotionPalette();
   const itemStyle = useAnimatedStyle(() => {
     const reveal = Math.max(side * translateX.get(), 0);
     const share = reveal / count;
@@ -423,6 +461,47 @@ function ActionItem({ action, index, count, side, translateX, expanded, onPress 
       width: index === 0 ? share + (reveal - share) * progress : share * (1 - progress),
     };
   });
+  const circleStyle = useAnimatedStyle(() => {
+    const share = Math.max(side * translateX.get(), 0) / count;
+    const appear = interpolate(share, [actionWidth * 0.25, actionWidth * 0.9], [0, 1], Extrapolation.CLAMP);
+    return {
+      opacity: appear,
+      transform: [{ scale: 0.55 + appear * 0.45 }],
+    };
+  });
+
+  if (shape === "circle") {
+    return (
+      <Animated.View style={[styles.item, itemStyle]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={action.accessibilityLabel}
+          onPress={() => onPress(action)}
+          style={styles.pressable}
+        >
+          <Animated.View style={[{ alignItems: "center", gap: 4 }, circleStyle]}>
+            <View
+              style={{
+                width: circleSize,
+                height: circleSize,
+                borderRadius: circleSize / 2,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: action.backgroundColor,
+              }}
+            >
+              {action.children}
+            </View>
+            {action.label ? (
+              <Text numberOfLines={1} style={{ fontSize: 11, fontWeight: "600", color: palette.textSecondary }}>
+                {action.label}
+              </Text>
+            ) : null}
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    );
+  }
 
   return (
     <Animated.View style={[styles.item, { backgroundColor: action.backgroundColor }, itemStyle]}>
@@ -433,6 +512,11 @@ function ActionItem({ action, index, count, side, translateX, expanded, onPress 
         style={styles.pressable}
       >
         {action.children}
+        {action.label ? (
+          <Text numberOfLines={1} style={{ marginTop: 4, fontSize: 12, fontWeight: "600", color: "#FFFFFF" }}>
+            {action.label}
+          </Text>
+        ) : null}
       </Pressable>
     </Animated.View>
   );
