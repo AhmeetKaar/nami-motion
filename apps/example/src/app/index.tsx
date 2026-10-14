@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import * as Haptics from "expo-haptics";
@@ -19,19 +19,20 @@ import { DrawerReveal, SwipeActions, SwipeActionsGroup, type SwipeAction } from 
 import { ShimmerBand } from "nami-motion/gradient";
 import { MatrixOrb, RemainingRing, VoiceWave } from "nami-motion/skia";
 import { ShimmerText } from "nami-motion/text";
+import { useMotionPalette } from "nami-motion/theme";
 
 const CHATS = ["Trip planning", "Paper summary", "Weekly groceries", "Bug triage"];
 
 function usePalette() {
-  const dark = useColorScheme() === "dark";
+  const palette = useMotionPalette();
   return {
-    background: dark ? "#000000" : "#F2F2F7",
-    card: dark ? "#1C1C1E" : "#FFFFFF",
-    surface: dark ? "#2C2C2E" : "#E5E5EA",
-    text: dark ? "#FFFFFF" : "#000000",
-    secondary: dark ? "#A1A1A6" : "#6C6C70",
-    tertiary: dark ? "#636366" : "#AEAEB2",
-    skeleton: dark ? "#3A3A3C" : "#E1E1E6",
+    background: palette.background,
+    card: palette.card,
+    surface: palette.surface,
+    text: palette.text,
+    secondary: palette.textSecondary,
+    tertiary: palette.textTertiary,
+    skeleton: palette.raised,
   };
 }
 
@@ -225,7 +226,7 @@ export default function GalleryScreen() {
         />
       </Demo>
       <Demo title="Voice Wave" slug="voice-wave">
-        <VoiceWave level={level} colors={["#7C5CFF", "#4CC9F0", "#F72585"]} />
+        <VoiceWave level={level} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />
       </Demo>
       <Demo title="Remaining Ring" slug="remaining-ring">
         <RemainingRing size={44} progress={0.6} trackColor={palette.surface} color={palette.text} />

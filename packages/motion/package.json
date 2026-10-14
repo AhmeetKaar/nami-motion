@@ -29,6 +29,11 @@
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
+    "./theme": {
+      "source": "./src/theme/index.ts",
+      "types": "./lib/typescript/src/theme/index.d.ts",
+      "default": "./lib/module/theme/index.js"
+    },
     "./text": {
       "source": "./src/text/index.ts",
       "types": "./lib/typescript/src/text/index.d.ts",

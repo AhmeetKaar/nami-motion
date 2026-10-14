@@ -1,3 +1,4 @@
+export * from "./theme";
 export * from "./text";
 export * from "./feedback";
 export * from "./chat";

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Pressable, Text, View, useColorScheme, type DimensionValue } from "react-native";
+import { Pressable, Text, View, type DimensionValue } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { SymbolView, type SFSymbol } from "expo-symbols";
@@ -20,7 +20,16 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { StatusRow, ThinkingBlock } from "nami-motion/chat";
+import {
+  FollowUpChips,
+  MessageActions,
+  SourceBadge,
+  SourceChips,
+  StatusRow,
+  ThinkingBlock,
+  ThinkingTrace,
+  TraceSteps,
+} from "nami-motion/chat";
 import { Skeleton } from "nami-motion/feedback";
 import {
   DrawerReveal,
@@ -28,23 +37,24 @@ import {
   SwipeActionsGroup,
   type SwipeActionsHandle,
 } from "nami-motion/gestures";
-import { ShimmerBand } from "nami-motion/gradient";
-import { MatrixOrb, RemainingRing, VoiceWave, type MatrixOrbState } from "nami-motion/skia";
+import { GeneratingImage } from "nami-motion/gradient";
+import { AttachmentTile, AttachmentTray, DictationBar, MatrixOrb, type MatrixOrbState } from "nami-motion/skia";
+import { useMotionPalette } from "nami-motion/theme";
 import { ShimmerText } from "nami-motion/text";
 
 type ShowcaseProps = { manual: boolean };
 
 function usePalette() {
-  const dark = useColorScheme() === "dark";
+  const palette = useMotionPalette();
   return {
-    background: dark ? "#000000" : "#F2F2F7",
-    card: dark ? "#1C1C1E" : "#FFFFFF",
-    surface: dark ? "#2C2C2E" : "#E5E5EA",
-    text: dark ? "#FFFFFF" : "#000000",
-    secondary: dark ? "#A1A1A6" : "#6C6C70",
-    tertiary: dark ? "#636366" : "#AEAEB2",
-    skeleton: dark ? "#3A3A3C" : "#E1E1E6",
-    accent: "#0A84FF",
+    background: palette.background,
+    card: palette.card,
+    surface: palette.surface,
+    text: palette.text,
+    secondary: palette.textSecondary,
+    tertiary: palette.textTertiary,
+    skeleton: palette.raised,
+    accent: palette.accent,
   };
 }
 
@@ -151,23 +161,6 @@ function useStreamingCycle() {
   return { phase: "done" as const, visible: STREAM_TOKENS };
 }
 
-function SourceBadge({ label }: { label: string }) {
-  const palette = usePalette();
-  return (
-    <View
-      style={{
-        transform: [{ translateY: 3 }],
-        paddingHorizontal: 7,
-        paddingVertical: 2,
-        borderRadius: 8,
-        backgroundColor: palette.surface,
-      }}
-    >
-      <Text style={{ fontSize: 12, lineHeight: 15, fontWeight: "600", color: palette.secondary }}>{label}</Text>
-    </View>
-  );
-}
-
 function ShimmerTextShowcase() {
   const palette = usePalette();
   const { phase, visible } = useStreamingCycle();
@@ -203,23 +196,15 @@ function ShimmerTextShowcase() {
           </Text>
         ) : null}
         {phase === "done" ? (
-          <View style={{ gap: 14, marginTop: 4 }}>
-            <Animated.View entering={FadeIn.duration(300)} style={{ flexDirection: "row", gap: 18 }}>
-              {ANSWER_ACTIONS.map((name) => (
-                <Glyph key={name} name={name} size={16} color={palette.secondary} />
-              ))}
-            </Animated.View>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {FOLLOW_UPS.map((label, index) => (
-                <Animated.View
-                  key={label}
-                  entering={FadeInDown.delay(350 + index * 140).duration(320)}
-                  style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, borderWidth: 1, borderColor: palette.surface }}
-                >
-                  <Text style={{ fontSize: 14, color: palette.text }}>{label}</Text>
-                </Animated.View>
-              ))}
-            </View>
+          <View style={{ gap: 12, marginTop: 4 }}>
+            <MessageActions
+              actions={ANSWER_ACTIONS.map((name) => ({
+                key: name,
+                accessibilityLabel: name,
+                icon: <Glyph name={name} size={16} color={palette.secondary} />,
+              }))}
+            />
+            <FollowUpChips delay={350} items={FOLLOW_UPS.map((label) => ({ key: label, label }))} />
           </View>
         ) : null}
       </View>
@@ -321,44 +306,24 @@ function ShimmerBandShowcase() {
   return (
     <Card height={340}>
       <UserBubble text="Draw a lighthouse at dusk." />
-      <View style={{ gap: 10 }}>
-        {generating ? (
-          <ShimmerText
-            text="Creating image"
-            activeColor={palette.text}
-            mutedColor={palette.tertiary}
-            textStyle={{ fontSize: 16, lineHeight: 21, fontWeight: "600" }}
-          />
-        ) : (
-          <Text style={{ fontSize: 16, lineHeight: 21, fontWeight: "600", color: palette.tertiary }}>Image created</Text>
-        )}
-        {generating ? (
-          <ShimmerBand
-            backgroundColor={palette.surface}
-            highlightColor={palette.card}
-            highlightOpacity={0.9}
-            duration={1400}
-            style={{ width: 210, height: 210, borderRadius: 20, alignItems: "center", justifyContent: "center" }}
-          >
-            <Glyph name="photo" size={34} color={palette.tertiary} />
-          </ShimmerBand>
-        ) : (
-          <Animated.View entering={FadeIn.duration(450)} style={{ width: 210, height: 210, borderRadius: 20, overflow: "hidden" }}>
-            <LinearGradient colors={["#2B2F77", "#B24F8A", "#F59E6B"]} style={{ flex: 1 }}>
-              <View style={{ position: "absolute", left: 120, top: 104, width: 44, height: 44, borderRadius: 22, backgroundColor: "#FFD9A0" }} />
-              <View style={{ position: "absolute", left: 38, top: 62, width: 18, height: 88, backgroundColor: "#F4F1EA" }} />
-              <View style={{ position: "absolute", left: 38, top: 86, width: 18, height: 12, backgroundColor: "#D9443F" }} />
-              <View style={{ position: "absolute", left: 38, top: 116, width: 18, height: 12, backgroundColor: "#D9443F" }} />
-              <View style={{ position: "absolute", left: 34, top: 48, width: 26, height: 14, borderRadius: 4, backgroundColor: "#FFE08A" }} />
-              <LinearGradient
-                colors={["#3A3F8F", "#1C1F4A"]}
-                style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 62 }}
-              />
-              <View style={{ position: "absolute", left: 18, bottom: 54, width: 70, height: 12, borderRadius: 6, backgroundColor: "#262A5C" }} />
-            </LinearGradient>
-          </Animated.View>
-        )}
-      </View>
+      <GeneratingImage
+        generating={generating}
+        label="Creating image"
+        doneLabel="Image created"
+        width={210}
+        height={210}
+        placeholderIcon={<Glyph name="photo" size={34} color={palette.tertiary} />}
+      >
+        <LinearGradient colors={["#1F8A70", "#5FC7B0", "#F5D48A"]} style={{ flex: 1 }}>
+          <View style={{ position: "absolute", left: 120, top: 96, width: 44, height: 44, borderRadius: 22, backgroundColor: "#FFD447" }} />
+          <View style={{ position: "absolute", left: 38, top: 62, width: 18, height: 88, backgroundColor: "#F3F4F5" }} />
+          <View style={{ position: "absolute", left: 38, top: 86, width: 18, height: 12, backgroundColor: "#F2705B" }} />
+          <View style={{ position: "absolute", left: 38, top: 116, width: 18, height: 12, backgroundColor: "#F2705B" }} />
+          <View style={{ position: "absolute", left: 34, top: 48, width: 26, height: 14, borderRadius: 4, backgroundColor: "#FFD447" }} />
+          <LinearGradient colors={["#1B2327", "#0B0E10"]} style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 62 }} />
+          <View style={{ position: "absolute", left: 18, bottom: 54, width: 70, height: 12, borderRadius: 6, backgroundColor: "#141A1D" }} />
+        </LinearGradient>
+      </GeneratingImage>
     </Card>
   );
 }
@@ -374,7 +339,7 @@ function BrandMark({ size = 18 }: { size?: number }) {
   return (
     <Animated.View style={[{ width: size, height: size }, style]}>
       <LinearGradient
-        colors={["#7C5CFF", "#4CC9F0"]}
+        colors={["#1F8A70", "#5FC7B0"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1, borderRadius: size * 0.3, alignItems: "center", justifyContent: "center" }}
@@ -387,22 +352,11 @@ function BrandMark({ size = 18 }: { size?: number }) {
 
 const TOOL_LABELS = ["Searching the web", "Reading 3 sources", "Writing the answer"];
 const TOOL_DURATIONS = [2000, 2400, 1600, 4000];
-const TOOL_SOURCES = ["ipma.pt", "meteo.pt", "lisboa.pt"];
-
-function SourceChip({ label, index }: { label: string; index: number }) {
-  const palette = usePalette();
-  return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 260).duration(300)}
-      style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 4, paddingRight: 10, height: 28, borderRadius: 14, backgroundColor: palette.background }}
-    >
-      <View style={{ width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: palette.card }}>
-        <Text style={{ fontSize: 11, fontWeight: "700", color: palette.secondary }}>{label[0].toUpperCase()}</Text>
-      </View>
-      <Text style={{ fontSize: 13, color: palette.secondary }}>{label}</Text>
-    </Animated.View>
-  );
-}
+const TOOL_SOURCES = [
+  { key: "ipma", label: "ipma.pt" },
+  { key: "meteo", label: "meteo.pt" },
+  { key: "lisboa", label: "lisboa.pt" },
+];
 
 function StatusRowShowcase() {
   const palette = usePalette();
@@ -416,30 +370,20 @@ function StatusRowShowcase() {
         <View style={{ gap: 12 }}>
           <StatusRow
             label={label}
-            color={palette.text}
             iconSize={20}
             labelStyle={{ fontSize: 16, lineHeight: 22, fontWeight: "500" }}
             icon={<BrandMark size={20} />}
           />
-          {step >= 1 ? (
-            <View style={{ flexDirection: "row", gap: 6 }}>
-              {TOOL_SOURCES.map((source, index) => (
-                <SourceChip key={source} label={source} index={step === 1 ? index : 0} />
-              ))}
-            </View>
-          ) : null}
+          {step >= 1 ? <SourceChips sources={TOOL_SOURCES} stagger={step === 1 ? 260 : 0} /> : null}
         </View>
       ) : (
         <View style={{ gap: 10 }}>
           <Answer text={"Sunny on Saturday, around 24°C. Light rain is likely on Sunday afternoon, so pack a jacket."} />
-          <Animated.View entering={FadeIn.delay(250).duration(300)} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            {TOOL_SOURCES.map((source) => (
-              <View key={source} style={{ width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: palette.background }}>
-                <Text style={{ fontSize: 10, fontWeight: "700", color: palette.secondary }}>{source[0].toUpperCase()}</Text>
-              </View>
-            ))}
-            <Text style={{ fontSize: 13, color: palette.secondary }}>3 sources</Text>
-          </Animated.View>
+          <SourceChips
+            sources={TOOL_SOURCES}
+            stagger={0}
+            renderIcon={() => <Glyph name="globe" size={14} color={palette.secondary} />}
+          />
         </View>
       )}
     </Card>
@@ -466,16 +410,13 @@ function TracePanel({ tab }: { tab: TraceTab }) {
   const palette = usePalette();
   if (tab === "Steps") {
     return (
-      <View style={{ gap: 9 }}>
-        {TRACE_STEPS.map((line, index) => (
-          <View key={line} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View style={{ alignItems: "center", width: 14 }}>
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: index === TRACE_STEPS.length - 1 ? "#30D158" : palette.tertiary }} />
-            </View>
-            <Text style={{ fontSize: 14, lineHeight: 18, color: palette.secondary }}>{line}</Text>
-          </View>
-        ))}
-      </View>
+      <TraceSteps
+        steps={TRACE_STEPS.map((label, index) => ({
+          key: label,
+          label,
+          status: index === TRACE_STEPS.length - 1 ? "active" : "done",
+        }))}
+      />
     );
   }
   if (tab === "Reasoning") {
@@ -535,22 +476,13 @@ function ThinkingBlockShowcase({ manual }: ShowcaseProps) {
           onPress={() => setManualTab((value) => (value ? null : "Steps"))}
         />
         {tab && !streaming ? (
-          <Animated.View entering={FadeIn.duration(220)} style={{ gap: 12, marginBottom: 12 }}>
-            <View style={{ flexDirection: "row", gap: 4, padding: 3, borderRadius: 10, backgroundColor: palette.background }}>
-              {TRACE_TABS.map((item) => (
-                <Pressable
-                  key={item}
-                  onPress={() => setManualTab(item)}
-                  style={{ flex: 1, alignItems: "center", paddingVertical: 5, borderRadius: 8, backgroundColor: item === tab ? palette.card : "transparent" }}
-                >
-                  <Text style={{ fontSize: 13, fontWeight: item === tab ? "600" : "500", color: item === tab ? palette.text : palette.secondary }}>{item}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Animated.View key={tab} entering={FadeIn.duration(220)} style={{ height: 96 }}>
-              <TracePanel tab={tab} />
-            </Animated.View>
-          </Animated.View>
+          <ThinkingTrace
+            style={{ marginBottom: 12 }}
+            contentHeight={96}
+            selectedKey={tab}
+            onSelect={(key) => setManualTab(key as TraceTab)}
+            tabs={TRACE_TABS.map((key) => ({ key, label: key, content: <TracePanel tab={key} /> }))}
+          />
         ) : null}
         {streaming ? null : (
           <Animated.Text entering={FadeIn.duration(350)} style={{ fontSize: 16, lineHeight: 22, color: palette.text }}>
@@ -637,16 +569,16 @@ function VoiceWaveShowcase() {
         ) : null}
       </View>
       {recording ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 8, height: 56, borderRadius: 28, backgroundColor: palette.background }}>
-          <RoundButton icon="xmark" />
-          <VoiceWave level={level} colors={["#7C5CFF", "#4CC9F0", "#F72585"]} />
-          <Text style={{ fontSize: 15, fontVariant: ["tabular-nums"], color: palette.secondary }}>{`0:${String(seconds).padStart(2, "0")}`}</Text>
-          <RoundButton icon="checkmark" filled />
-        </View>
+        <DictationBar
+          level={level}
+          elapsedSeconds={seconds}
+          cancelIcon={<Glyph name="xmark" size={14} color={palette.text} />}
+          confirmIcon={<Glyph name="checkmark" size={14} color={palette.card} />}
+        />
       ) : (
         <Animated.View
           entering={FadeInDown.duration(320)}
-          style={{ flexDirection: "row", alignItems: "flex-end", gap: 10, padding: 8, paddingLeft: 16, borderRadius: 28, backgroundColor: palette.background }}
+          style={{ flexDirection: "row", alignItems: "flex-end", gap: 10, padding: 8, paddingLeft: 16, borderRadius: 28, backgroundColor: palette.surface }}
         >
           <Text style={{ flex: 1, paddingVertical: 8, fontSize: 16, lineHeight: 22, color: palette.text }}>{DICTATION}</Text>
           <RoundButton icon="arrow.up" filled />
@@ -669,66 +601,6 @@ const ATTACH_TIMELINE: { items: Attachment[]; duration: number }[] = [
 ];
 const ATTACH_DURATIONS = ATTACH_TIMELINE.map((frame) => frame.duration);
 
-function RemoveBadge() {
-  return (
-    <View
-      style={{
-        position: "absolute",
-        top: -6,
-        right: -6,
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#1C1C1E",
-        borderWidth: 2,
-        borderColor: "#FFFFFF",
-      }}
-    >
-      <Glyph name="xmark" size={8} color="#FFFFFF" />
-    </View>
-  );
-}
-
-function AttachmentTile({ item }: { item: Attachment }) {
-  const palette = usePalette();
-  const done = item.progress >= 1;
-  if (item.kind === "image") {
-    return (
-      <View accessible accessibilityLabel="lighthouse.jpg" style={{ width: 64, height: 64 }}>
-        <LinearGradient colors={["#2B2F77", "#B24F8A", "#F59E6B"]} style={{ flex: 1, borderRadius: 14, alignItems: "center", justifyContent: "center" }}>
-          {done ? null : (
-            <View style={{ position: "absolute", inset: 0, borderRadius: 14, backgroundColor: "rgba(0,0,0,0.35)" }} />
-          )}
-          {done ? null : <RemainingRing size={28} strokeWidth={3} progress={item.progress} trackColor="rgba(255,255,255,0.3)" color="#FFFFFF" />}
-        </LinearGradient>
-        <RemoveBadge />
-      </View>
-    );
-  }
-  return (
-    <View style={{ height: 64, width: 172 }}>
-      <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 10, borderRadius: 14, backgroundColor: palette.background }}>
-        <View style={{ width: 36, height: 36, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: "#FF453A" }}>
-          {done ? (
-            <Text style={{ fontSize: 10, fontWeight: "800", color: "#FFFFFF" }}>PDF</Text>
-          ) : (
-            <RemainingRing size={24} strokeWidth={3} progress={item.progress} trackColor="rgba(255,255,255,0.35)" color="#FFFFFF" />
-          )}
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 14, lineHeight: 18, fontWeight: "600", color: palette.text }}>paper.pdf</Text>
-          <Text style={{ fontSize: 12, lineHeight: 16, color: palette.secondary }}>
-            {done ? "PDF - 2.4 MB" : `Uploading ${Math.round(item.progress * 100)}%`}
-          </Text>
-        </View>
-      </View>
-      <RemoveBadge />
-    </View>
-  );
-}
-
 function RemainingRingShowcase() {
   const palette = usePalette();
   const step = useSequence(ATTACH_DURATIONS);
@@ -737,18 +609,32 @@ function RemainingRingShowcase() {
 
   return (
     <Card height={200}>
-      <View style={{ height: 76, flexDirection: "row", alignItems: "flex-end", gap: 12 }}>
-        {items.map((item) => (
-          <Animated.View
-            key={item.id}
-            entering={ZoomIn.springify().damping(14)}
-            exiting={ZoomOut.duration(180)}
-            layout={LinearTransition.springify().damping(18)}
-          >
-            <AttachmentTile item={item} />
-          </Animated.View>
-        ))}
-      </View>
+      <AttachmentTray
+        scroll={false}
+        style={{ height: 76 }}
+        items={items}
+        keyExtractor={(item) => item.id}
+        renderItem={(item) =>
+          item.kind === "image" ? (
+            <AttachmentTile
+              kind="image"
+              name="lighthouse.jpg"
+              progress={item.progress}
+              onRemove={() => {}}
+              preview={<LinearGradient colors={["#1F8A70", "#5FC7B0", "#F5D48A"]} style={{ flex: 1 }} />}
+            />
+          ) : (
+            <AttachmentTile
+              kind="file"
+              name="paper.pdf"
+              progress={item.progress}
+              detail={item.progress >= 1 ? "PDF - 2.4 MB" : `Uploading ${Math.round(item.progress * 100)}%`}
+              fileIcon={<Text style={{ fontSize: 10, fontWeight: "800", color: "#FFFFFF" }}>PDF</Text>}
+              onRemove={() => {}}
+            />
+          )
+        }
+      />
       <View style={{ flex: 1 }} />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 8, paddingRight: 8, height: 52, borderRadius: 26, borderWidth: 1, borderColor: palette.surface }}>
         <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: palette.background }}>

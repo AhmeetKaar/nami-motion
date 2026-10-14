@@ -7,6 +7,18 @@ import { components, type ComponentDoc } from "../data/components";
 
 const INSTALL = "npx expo install nami-motion react-native-reanimated react-native-worklets react-native-gesture-handler";
 const OPTIONAL = "npx expo install @shopify/react-native-skia expo-linear-gradient";
+const THEMING = `import { MotionThemeProvider } from 'nami-motion/theme';
+
+<MotionThemeProvider
+  palette={{
+    light: { accent: colors.light.accent, text: colors.light.text },
+    dark: { accent: colors.dark.accent, text: colors.dark.text },
+  }}
+>
+  <App />
+</MotionThemeProvider>`;
+
+const SWATCHES = ["#0B0E10", "#1B2327", "#1F8A70", "#5FC7B0", "#88C9F7", "#F5D48A", "#F2705B", "#EEF2F3"];
 
 const FILTERS: Array<{ id: "all" | ComponentDoc["category"]; label: string }> = [
   { id: "all", label: "all" },
@@ -30,7 +42,7 @@ function ComponentCard({ doc, index }: { doc: ComponentDoc; index: number }) {
           <span>{doc.entry.replace("nami-motion/", "")}</span>
         </div>
         <div className="aspect-[9/8] overflow-hidden bg-stage">
-          <DemoVideo slug={doc.slug} title={doc.name} mode="hover" />
+          <DemoVideo slug={doc.media ?? doc.slug} title={doc.name} mode="hover" />
         </div>
         <div className="flex flex-col gap-1 p-4">
           <h3 className="flex items-center justify-between font-semibold">
@@ -122,6 +134,23 @@ export function HomePage() {
             <span className="text-accent">→</span> Expo SDK 55, React Native 0.83+, Reanimated 4.2+, Worklets 0.7+.
           </li>
         </ul>
+      </section>
+      <section id="theming" className="container-page mt-24 scroll-mt-20">
+        <p className="label mb-2">// theming</p>
+        <h2 className="mb-3 text-2xl font-semibold tracking-tight md:text-3xl">Moodstone by default, yours when you want</h2>
+        <p className="mb-6 max-w-2xl text-dim">
+          Newer components read colors from a palette that defaults to Moodstone and follows the system color scheme. Override any
+          token once with MotionThemeProvider, or per component with the colors prop. Icons are always yours.
+        </p>
+        <div className="mb-6 flex flex-wrap gap-2" aria-label="Moodstone palette">
+          {SWATCHES.map((hex) => (
+            <span key={hex} className="flex items-center gap-2 rounded border border-line bg-panel px-2 py-1 font-mono text-[12px] text-dim">
+              <span className="size-3.5 rounded-sm border border-line" style={{ backgroundColor: hex }} />
+              {hex}
+            </span>
+          ))}
+        </div>
+        <CodeBlock title="theme.tsx" code={THEMING} />
       </section>
     </>
   );

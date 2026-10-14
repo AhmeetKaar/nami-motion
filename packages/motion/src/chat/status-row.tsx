@@ -8,6 +8,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { useMotionPalette } from "../theme/provider";
 
 const PULSE_MIN = 0.4;
 const DEFAULT_DURATION = 700;
@@ -21,7 +22,7 @@ const DEFAULT_LABEL_STYLE: TextStyle = {
 
 export type StatusRowProps = {
   label: string;
-  color: string;
+  color?: string;
   icon?: ReactNode;
   iconSize?: number;
   labelStyle?: StyleProp<TextStyle>;
@@ -36,6 +37,8 @@ export function StatusRow({
   labelStyle = DEFAULT_LABEL_STYLE,
   duration = DEFAULT_DURATION,
 }: StatusRowProps) {
+  const palette = useMotionPalette();
+  const labelColor = color ?? palette.text;
   const reduceMotion = useReducedMotion();
   const opacity = useSharedValue(PULSE_MIN);
 
@@ -68,7 +71,7 @@ export function StatusRow({
       {icon ? (
         <View style={{ width: iconSize, height: iconSize }}>{icon}</View>
       ) : null}
-      <Text style={[labelStyle, { color, opacity: LABEL_OPACITY }]}>
+      <Text style={[labelStyle, { color: labelColor, opacity: LABEL_OPACITY }]}>
         {label}
       </Text>
     </Animated.View>
