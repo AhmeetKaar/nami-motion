@@ -1,35 +1,43 @@
 appId: dev.namimotion.example
-name: 07 Remaining Ring file upload
+name: 07 Remaining Ring attachments
 env:
   OUT: .
 ---
 - stopApp
 - openLink: namimotion:///showcase/remaining-ring?driver=maestro
 - extendedWaitUntil:
-    visible: "Uploading .*"
+    visible: "Ask anything"
     timeout: 30000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 700
+    timeout: 500
     optional: true
-- takeScreenshot: ${OUT}/07-remaining-ring-1-start
+- takeScreenshot: ${OUT}/07-remaining-ring-1-empty
 - extendedWaitUntil:
-    visible: "Uploading 58%"
-    timeout: 6000
+    visible: "Uploading .*"
+    timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
     timeout: 300
     optional: true
-- takeScreenshot: ${OUT}/07-remaining-ring-2-halfway
+- takeScreenshot: ${OUT}/07-remaining-ring-2-uploading
 - extendedWaitUntil:
-    visible: ".*Ready.*"
-    timeout: 6000
+    visible: "PDF - 2.4 MB"
+    timeout: 8000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 600
+    timeout: 300
     optional: true
 - takeScreenshot: ${OUT}/07-remaining-ring-3-ready
 - extendedWaitUntil:
+    notVisible: "lighthouse.jpg"
+    timeout: 5000
+- extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 2500
+    timeout: 500
+    optional: true
+- takeScreenshot: ${OUT}/07-remaining-ring-4-removed
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
     optional: true

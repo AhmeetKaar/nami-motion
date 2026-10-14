@@ -1,5 +1,5 @@
 appId: dev.namimotion.example
-name: 01 Shimmer Text streaming showcase
+name: 01 Shimmer Text streaming answer
 env:
   OUT: .
 ---
@@ -10,7 +10,7 @@ env:
     timeout: 30000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 800
+    timeout: 700
     optional: true
 - takeScreenshot: ${OUT}/01-shimmer-text-1-reading
 - extendedWaitUntil:
@@ -18,14 +18,26 @@ env:
     timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 1800
+    timeout: 1400
     optional: true
 - takeScreenshot: ${OUT}/01-shimmer-text-2-streaming
 - extendedWaitUntil:
-    visible: "Finished in 7s"
+    visible: "Finished in 5s"
     timeout: 8000
-- takeScreenshot: ${OUT}/01-shimmer-text-3-done
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 1500
+    timeout: 300
+    optional: true
+- takeScreenshot: ${OUT}/01-shimmer-text-3-done
+- extendedWaitUntil:
+    visible: "Which tasks\\?"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 500
+    optional: true
+- takeScreenshot: ${OUT}/01-shimmer-text-4-follow-ups
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 2000
     optional: true

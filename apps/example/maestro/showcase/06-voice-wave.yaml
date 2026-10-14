@@ -26,10 +26,15 @@ env:
     timeout: 8000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 600
+    timeout: 300
     optional: true
 - takeScreenshot: ${OUT}/06-voice-wave-3-transcribed
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 2000
+    timeout: 1800
+    optional: true
+- takeScreenshot: ${OUT}/06-voice-wave-4-in-composer
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
     optional: true

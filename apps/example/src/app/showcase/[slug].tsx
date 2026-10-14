@@ -5,11 +5,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  Easing,
   Extrapolation,
   FadeIn,
+  FadeInDown,
+  LinearTransition,
+  ZoomIn,
+  ZoomOut,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
   withSequence,
   withSpring,
   withTiming,
@@ -105,46 +111,74 @@ function Answer({ text }: { text: string }) {
   );
 }
 
-const STREAM_ANSWER =
-  "The paper shows that small models trained on carefully filtered data can match much larger ones on reasoning tasks. Most of the gain comes from the filtering step, not from extra compute.";
-const STREAM_WORDS = STREAM_ANSWER.split(" ");
-const STREAM_READING_MS = 2400;
-const STREAM_WORD_MS = 130;
-const STREAM_HOLD_MS = 3000;
+type StreamToken = { kind: "word"; text: string } | { kind: "source"; text: string };
+
+const STREAM_TOKENS: StreamToken[] = [
+  ..."Small models trained on filtered data match much larger ones on reasoning."
+    .split(" ")
+    .map((text) => ({ kind: "word" as const, text })),
+  { kind: "source", text: "arxiv.org" },
+  ..."Most of the gain comes from filtering, not extra compute."
+    .split(" ")
+    .map((text) => ({ kind: "word" as const, text })),
+  { kind: "source", text: "nature.com" },
+];
+const STREAM_READING_MS = 1800;
+const STREAM_TOKEN_MS = 120;
+const STREAM_HOLD_MS = 4200;
+const STREAM_DONE_SECONDS = Math.round((STREAM_READING_MS + STREAM_TOKENS.length * STREAM_TOKEN_MS) / 1000);
+const FOLLOW_UPS = ["How was data filtered?", "Which tasks?"];
+const ANSWER_ACTIONS: SFSymbol[] = ["doc.on.doc", "hand.thumbsup", "hand.thumbsdown", "arrow.clockwise", "speaker.wave.2"];
 
 function useStreamingCycle() {
-  const [words, setWords] = useState(-1);
+  const [tokens, setTokens] = useState(-1);
   const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
-    setWords(-1);
-    timers.push(setTimeout(() => setWords(0), STREAM_READING_MS));
-    STREAM_WORDS.forEach((_, index) => {
-      timers.push(setTimeout(() => setWords(index + 1), STREAM_READING_MS + (index + 1) * STREAM_WORD_MS));
+    setTokens(-1);
+    timers.push(setTimeout(() => setTokens(0), STREAM_READING_MS));
+    STREAM_TOKENS.forEach((_, index) => {
+      timers.push(setTimeout(() => setTokens(index + 1), STREAM_READING_MS + (index + 1) * STREAM_TOKEN_MS));
     });
-    const total = STREAM_READING_MS + STREAM_WORDS.length * STREAM_WORD_MS + STREAM_HOLD_MS;
+    const total = STREAM_READING_MS + STREAM_TOKENS.length * STREAM_TOKEN_MS + STREAM_HOLD_MS;
     timers.push(setTimeout(() => setCycle((value) => value + 1), total));
     return () => timers.forEach(clearTimeout);
   }, [cycle]);
 
-  if (words < 0) return { phase: "reading" as const, text: "" };
-  if (words < STREAM_WORDS.length) return { phase: "streaming" as const, text: STREAM_WORDS.slice(0, words).join(" ") };
-  return { phase: "done" as const, text: STREAM_ANSWER };
+  if (tokens < 0) return { phase: "reading" as const, visible: [] as StreamToken[] };
+  if (tokens < STREAM_TOKENS.length) return { phase: "streaming" as const, visible: STREAM_TOKENS.slice(0, tokens) };
+  return { phase: "done" as const, visible: STREAM_TOKENS };
+}
+
+function SourceBadge({ label }: { label: string }) {
+  const palette = usePalette();
+  return (
+    <View
+      style={{
+        transform: [{ translateY: 3 }],
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderRadius: 8,
+        backgroundColor: palette.surface,
+      }}
+    >
+      <Text style={{ fontSize: 12, lineHeight: 15, fontWeight: "600", color: palette.secondary }}>{label}</Text>
+    </View>
+  );
 }
 
 function ShimmerTextShowcase() {
   const palette = usePalette();
-  const { phase, text } = useStreamingCycle();
-  const doneSeconds = Math.round((STREAM_READING_MS + STREAM_WORDS.length * STREAM_WORD_MS) / 1000);
+  const { phase, visible } = useStreamingCycle();
 
   return (
-    <Card height={330}>
+    <Card height={340}>
       <UserBubble text="Summarize this paper in two sentences." />
       <View style={{ gap: 8 }}>
         {phase === "done" ? (
           <Text style={{ fontSize: 17, lineHeight: 22, fontWeight: "600", color: palette.tertiary }}>
-            {`Finished in ${doneSeconds}s`}
+            {`Finished in ${STREAM_DONE_SECONDS}s`}
           </Text>
         ) : (
           <ShimmerText
@@ -154,7 +188,40 @@ function ShimmerTextShowcase() {
             textStyle={{ fontSize: 17, lineHeight: 22, fontWeight: "600" }}
           />
         )}
-        {text ? <Text style={{ fontSize: 17, lineHeight: 24, color: palette.text }}>{text}</Text> : null}
+        {visible.length ? (
+          <Text style={{ fontSize: 17, lineHeight: 25, color: palette.text }}>
+            {visible.map((token, index) =>
+              token.kind === "word" ? (
+                <Text key={index}>{index ? ` ${token.text}` : token.text}</Text>
+              ) : (
+                <Text key={index}>
+                  {" "}
+                  <SourceBadge label={token.text} />
+                </Text>
+              ),
+            )}
+          </Text>
+        ) : null}
+        {phase === "done" ? (
+          <View style={{ gap: 14, marginTop: 4 }}>
+            <Animated.View entering={FadeIn.duration(300)} style={{ flexDirection: "row", gap: 18 }}>
+              {ANSWER_ACTIONS.map((name) => (
+                <Glyph key={name} name={name} size={16} color={palette.secondary} />
+              ))}
+            </Animated.View>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {FOLLOW_UPS.map((label, index) => (
+                <Animated.View
+                  key={label}
+                  entering={FadeInDown.delay(350 + index * 140).duration(320)}
+                  style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, borderWidth: 1, borderColor: palette.surface }}
+                >
+                  <Text style={{ fontSize: 14, color: palette.text }}>{label}</Text>
+                </Animated.View>
+              ))}
+            </View>
+          </View>
+        ) : null}
       </View>
     </Card>
   );
@@ -255,14 +322,22 @@ function ShimmerBandShowcase() {
     <Card height={340}>
       <UserBubble text="Draw a lighthouse at dusk." />
       <View style={{ gap: 10 }}>
-        <Text style={{ fontSize: 15, lineHeight: 20, fontWeight: "500", color: palette.secondary }}>
-          {generating ? "Creating image" : "Image created"}
-        </Text>
+        {generating ? (
+          <ShimmerText
+            text="Creating image"
+            activeColor={palette.text}
+            mutedColor={palette.tertiary}
+            textStyle={{ fontSize: 16, lineHeight: 21, fontWeight: "600" }}
+          />
+        ) : (
+          <Text style={{ fontSize: 16, lineHeight: 21, fontWeight: "600", color: palette.tertiary }}>Image created</Text>
+        )}
         {generating ? (
           <ShimmerBand
             backgroundColor={palette.surface}
             highlightColor={palette.card}
             highlightOpacity={0.9}
+            duration={1400}
             style={{ width: 210, height: 210, borderRadius: 20, alignItems: "center", justifyContent: "center" }}
           >
             <Glyph name="photo" size={34} color={palette.tertiary} />
@@ -288,35 +363,83 @@ function ShimmerBandShowcase() {
   );
 }
 
-const TOOL_STEPS: { label: string; icon: SFSymbol; duration: number }[] = [
-  { label: "Searching the web", icon: "globe", duration: 2000 },
-  { label: "Reading 4 sources", icon: "doc.text", duration: 2000 },
-  { label: "Writing the answer", icon: "pencil", duration: 1600 },
-];
-const TOOL_DURATIONS = [...TOOL_STEPS.map((step) => step.duration), 4000];
+function BrandMark({ size = 18 }: { size?: number }) {
+  const breath = useSharedValue(0);
+  useEffect(() => {
+    breath.value = withRepeat(withTiming(1, { duration: 900, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [breath]);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(breath.value, [0, 1], [0.86, 1]) }, { rotate: `${interpolate(breath.value, [0, 1], [0, 90])}deg` }],
+  }));
+  return (
+    <Animated.View style={[{ width: size, height: size }, style]}>
+      <LinearGradient
+        colors={["#7C5CFF", "#4CC9F0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1, borderRadius: size * 0.3, alignItems: "center", justifyContent: "center" }}
+      >
+        <View style={{ width: size * 0.32, height: size * 0.32, borderRadius: size, backgroundColor: "#FFFFFF" }} />
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
+const TOOL_LABELS = ["Searching the web", "Reading 3 sources", "Writing the answer"];
+const TOOL_DURATIONS = [2000, 2400, 1600, 4000];
+const TOOL_SOURCES = ["ipma.pt", "meteo.pt", "lisboa.pt"];
+
+function SourceChip({ label, index }: { label: string; index: number }) {
+  const palette = usePalette();
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 260).duration(300)}
+      style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 4, paddingRight: 10, height: 28, borderRadius: 14, backgroundColor: palette.background }}
+    >
+      <View style={{ width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: palette.card }}>
+        <Text style={{ fontSize: 11, fontWeight: "700", color: palette.secondary }}>{label[0].toUpperCase()}</Text>
+      </View>
+      <Text style={{ fontSize: 13, color: palette.secondary }}>{label}</Text>
+    </Animated.View>
+  );
+}
 
 function StatusRowShowcase() {
   const palette = usePalette();
   const step = useSequence(TOOL_DURATIONS);
-  const tool = TOOL_STEPS[step];
+  const label = TOOL_LABELS[step];
 
   return (
-    <Card height={250}>
+    <Card height={260}>
       <UserBubble text="What's the weather in Lisbon this weekend?" />
-      {tool ? (
-        <StatusRow
-          label={tool.label}
-          color={palette.text}
-          iconSize={18}
-          labelStyle={{ fontSize: 16, lineHeight: 21, fontWeight: "500" }}
-          icon={<Glyph name={tool.icon} color={palette.text} />}
-        />
+      {label ? (
+        <View style={{ gap: 12 }}>
+          <StatusRow
+            label={label}
+            color={palette.text}
+            iconSize={20}
+            labelStyle={{ fontSize: 16, lineHeight: 22, fontWeight: "500" }}
+            icon={<BrandMark size={20} />}
+          />
+          {step >= 1 ? (
+            <View style={{ flexDirection: "row", gap: 6 }}>
+              {TOOL_SOURCES.map((source, index) => (
+                <SourceChip key={source} label={source} index={step === 1 ? index : 0} />
+              ))}
+            </View>
+          ) : null}
+        </View>
       ) : (
         <View style={{ gap: 10 }}>
-          <Animated.Text entering={FadeIn.duration(300)} style={{ fontSize: 13, lineHeight: 16, color: palette.tertiary }}>
-            4 sources
-          </Animated.Text>
-          <Answer text={"Sunny on Saturday, around 24\u00B0C. Light rain is likely on Sunday afternoon, so pack a jacket."} />
+          <Answer text={"Sunny on Saturday, around 24°C. Light rain is likely on Sunday afternoon, so pack a jacket."} />
+          <Animated.View entering={FadeIn.delay(250).duration(300)} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {TOOL_SOURCES.map((source) => (
+              <View key={source} style={{ width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: palette.background }}>
+                <Text style={{ fontSize: 10, fontWeight: "700", color: palette.secondary }}>{source[0].toUpperCase()}</Text>
+              </View>
+            ))}
+            <Text style={{ fontSize: 13, color: palette.secondary }}>3 sources</Text>
+          </Animated.View>
         </View>
       )}
     </Card>
@@ -328,24 +451,78 @@ const REASONING = [
   "Running the test for p = 61 leaves a final residue of zero.",
   "That makes it a Mersenne prime, the ninth one found.",
 ];
-const THINKING_STEPS = [1400, 1400, 1400, 1400, 2000, 3600];
+const TRACE_TABS = ["Steps", "Reasoning", "Search", "Coding"] as const;
+type TraceTab = (typeof TRACE_TABS)[number];
+const TRACE_STEPS = ["Spot the Mersenne form", "Pick the Lucas-Lehmer test", "Run it for p = 61", "Residue is zero"];
+const TRACE_SEARCH = [
+  { title: "List of known Mersenne primes", domain: "mersenne.org" },
+  { title: "Lucas-Lehmer primality test", domain: "wikipedia.org" },
+];
+const TRACE_CODE = "def is_mersenne_prime(p):\n    s, m = 4, 2**p - 1\n    for _ in range(p - 2):\n        s = (s * s - 2) % m\n    return s == 0";
+const THINKING_STEPS = [1400, 1400, 1400, 1400, 1200, 1500, 1500, 1500, 1600];
+const THINKING_AUTO_TABS: (TraceTab | null)[] = [null, null, null, null, null, "Steps", "Search", "Coding", null];
+
+function TracePanel({ tab }: { tab: TraceTab }) {
+  const palette = usePalette();
+  if (tab === "Steps") {
+    return (
+      <View style={{ gap: 9 }}>
+        {TRACE_STEPS.map((line, index) => (
+          <View key={line} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View style={{ alignItems: "center", width: 14 }}>
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: index === TRACE_STEPS.length - 1 ? "#30D158" : palette.tertiary }} />
+            </View>
+            <Text style={{ fontSize: 14, lineHeight: 18, color: palette.secondary }}>{line}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  }
+  if (tab === "Reasoning") {
+    return (
+      <View style={{ gap: 6 }}>
+        {REASONING.map((line) => (
+          <Text key={line} style={{ fontSize: 14, lineHeight: 19, color: palette.secondary }}>
+            {line}
+          </Text>
+        ))}
+      </View>
+    );
+  }
+  if (tab === "Search") {
+    return (
+      <View style={{ gap: 10 }}>
+        {TRACE_SEARCH.map((result) => (
+          <View key={result.domain} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Glyph name="globe" size={14} color={palette.secondary} />
+            <View>
+              <Text style={{ fontSize: 14, lineHeight: 18, color: palette.text }}>{result.title}</Text>
+              <Text style={{ fontSize: 12, lineHeight: 16, color: palette.tertiary }}>{result.domain}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  }
+  return (
+    <View style={{ padding: 10, borderRadius: 10, backgroundColor: palette.background }}>
+      <Text style={{ fontFamily: "Menlo", fontSize: 11.5, lineHeight: 16, color: palette.text }}>{TRACE_CODE}</Text>
+    </View>
+  );
+}
 
 function ThinkingBlockShowcase({ manual }: ShowcaseProps) {
   const palette = usePalette();
   const step = useSequence(THINKING_STEPS, !manual);
-  const [expanded, setExpanded] = useState(false);
+  const [manualTab, setManualTab] = useState<TraceTab | null>(null);
   const streaming = step < 4;
   const reasoning = REASONING.slice(0, Math.min(step, REASONING.length)).join("\n\n");
-
-  useEffect(() => {
-    if (manual) return;
-    setExpanded(step === 5);
-  }, [manual, step]);
+  const tab = manual ? manualTab : THINKING_AUTO_TABS[step];
 
   return (
-    <Card height={340}>
+    <Card height={350}>
       <UserBubble text="Is 2^61 - 1 prime?" />
-      <View>
+      <Animated.View layout={LinearTransition.duration(260)}>
         <ThinkingBlock
           key={step === 0 ? "start" : "run"}
           reasoning={reasoning}
@@ -354,30 +531,58 @@ function ThinkingBlockShowcase({ manual }: ShowcaseProps) {
           formatDoneLabel={(seconds) => (seconds ? `Thought for ${seconds}s` : "Thought")}
           textStyle={{ fontSize: 16, lineHeight: 21, fontWeight: "500" }}
           colors={{ text: palette.text, textSecondary: palette.secondary, textTertiary: palette.tertiary, pressed: palette.surface }}
-          trailingIcon={streaming ? null : <Glyph name={expanded ? "chevron.up" : "chevron.down"} size={12} color={palette.secondary} />}
-          onPress={() => setExpanded((value) => !value)}
+          trailingIcon={streaming ? null : <Glyph name={tab ? "chevron.up" : "chevron.down"} size={12} color={palette.secondary} />}
+          onPress={() => setManualTab((value) => (value ? null : "Steps"))}
         />
-        {expanded && !streaming ? (
-          <Animated.View
-            entering={FadeIn.duration(250)}
-            style={{ gap: 6, marginBottom: 12, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: palette.surface }}
-          >
-            {REASONING.map((line) => (
-              <Text key={line} style={{ fontSize: 14, lineHeight: 19, color: palette.secondary }}>
-                {line}
-              </Text>
-            ))}
+        {tab && !streaming ? (
+          <Animated.View entering={FadeIn.duration(220)} style={{ gap: 12, marginBottom: 12 }}>
+            <View style={{ flexDirection: "row", gap: 4, padding: 3, borderRadius: 10, backgroundColor: palette.background }}>
+              {TRACE_TABS.map((item) => (
+                <Pressable
+                  key={item}
+                  onPress={() => setManualTab(item)}
+                  style={{ flex: 1, alignItems: "center", paddingVertical: 5, borderRadius: 8, backgroundColor: item === tab ? palette.card : "transparent" }}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: item === tab ? "600" : "500", color: item === tab ? palette.text : palette.secondary }}>{item}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Animated.View key={tab} entering={FadeIn.duration(220)} style={{ height: 96 }}>
+              <TracePanel tab={tab} />
+            </Animated.View>
           </Animated.View>
         ) : null}
-        {streaming ? null : <Answer text="Yes. 2^61 - 1 is prime: the ninth Mersenne prime, found by Pervushin in 1883." />}
-      </View>
+        {streaming ? null : (
+          <Animated.Text entering={FadeIn.duration(350)} style={{ fontSize: 16, lineHeight: 22, color: palette.text }}>
+            Yes. It is the ninth Mersenne prime, found by Pervushin in 1883.
+          </Animated.Text>
+        )}
+      </Animated.View>
     </Card>
   );
 }
 
 const DICTATION = "Book a table for two at eight tonight, somewhere quiet near the river.";
 const DICTATION_WORDS = DICTATION.split(" ");
-const VOICE_STEPS = [1400, 4800, 3200];
+const VOICE_STEPS = [1400, 4800, 3400];
+
+function RoundButton({ icon, filled }: { icon: SFSymbol; filled?: boolean }) {
+  const palette = usePalette();
+  return (
+    <View
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: filled ? palette.text : palette.card,
+      }}
+    >
+      <Glyph name={icon} size={14} color={filled ? palette.card : palette.text} />
+    </View>
+  );
+}
 
 function VoiceWaveShowcase() {
   const palette = usePalette();
@@ -395,13 +600,12 @@ function VoiceWaveShowcase() {
     }
     if (step === 2) {
       setWords(DICTATION_WORDS.length);
-      level.value = withTiming(0, { duration: 400 });
+      level.value = withTiming(0, { duration: 300 });
       return;
     }
     const start = Date.now();
     const id = setInterval(() => {
-      const elapsed = Date.now() - start;
-      setWords(Math.min(DICTATION_WORDS.length, Math.floor(elapsed / 330) + 1));
+      setWords(Math.min(DICTATION_WORDS.length, Math.floor((Date.now() - start) / 330) + 1));
       level.value = withTiming(0.35 + Math.random() * 0.65, { duration: 110 });
     }, 120);
     return () => clearInterval(id);
@@ -414,103 +618,145 @@ function VoiceWaveShowcase() {
   }, [step]);
 
   const transcript = DICTATION_WORDS.slice(0, words).join(" ");
+  const recording = step < 2;
 
   return (
     <Card height={230}>
-      <View style={{ flex: 1 }}>
-        {transcript ? (
-          <Text style={{ fontSize: 20, lineHeight: 27, fontWeight: "500", color: palette.text }}>{transcript}</Text>
-        ) : (
-          <Text style={{ fontSize: 20, lineHeight: 27, fontWeight: "500", color: palette.tertiary }}>Listening</Text>
-        )}
+      <View style={{ flex: 1, justifyContent: "flex-end" }}>
+        {recording ? (
+          transcript ? (
+            <Text style={{ fontSize: 20, lineHeight: 27, fontWeight: "500", color: palette.text }}>{transcript}</Text>
+          ) : (
+            <ShimmerText
+              text="Listening"
+              activeColor={palette.text}
+              mutedColor={palette.tertiary}
+              textStyle={{ fontSize: 20, lineHeight: 27, fontWeight: "500" }}
+            />
+          )
+        ) : null}
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          paddingHorizontal: 8,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: palette.background,
-        }}
-      >
-        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: palette.card }}>
-          <Glyph name="xmark" size={14} color={palette.text} />
+      {recording ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 8, height: 56, borderRadius: 28, backgroundColor: palette.background }}>
+          <RoundButton icon="xmark" />
+          <VoiceWave level={level} colors={["#7C5CFF", "#4CC9F0", "#F72585"]} />
+          <Text style={{ fontSize: 15, fontVariant: ["tabular-nums"], color: palette.secondary }}>{`0:${String(seconds).padStart(2, "0")}`}</Text>
+          <RoundButton icon="checkmark" filled />
         </View>
-        <VoiceWave level={level} colors={["#7C5CFF", "#4CC9F0", "#F72585"]} />
-        <Text style={{ fontSize: 15, fontVariant: ["tabular-nums"], color: palette.secondary }}>
-          {`0:${String(seconds).padStart(2, "0")}`}
-        </Text>
-        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: palette.text }}>
-          <Glyph name={step === 2 ? "arrow.up" : "stop.fill"} size={14} color={palette.card} />
-        </View>
-      </View>
+      ) : (
+        <Animated.View
+          entering={FadeInDown.duration(320)}
+          style={{ flexDirection: "row", alignItems: "flex-end", gap: 10, padding: 8, paddingLeft: 16, borderRadius: 28, backgroundColor: palette.background }}
+        >
+          <Text style={{ flex: 1, paddingVertical: 8, fontSize: 16, lineHeight: 22, color: palette.text }}>{DICTATION}</Text>
+          <RoundButton icon="arrow.up" filled />
+        </Animated.View>
+      )}
     </Card>
   );
 }
 
-const UPLOAD_PROGRESS = [0, 0.08, 0.22, 0.41, 0.58, 0.77, 0.93, 1];
-const UPLOAD_STEPS = [900, 700, 700, 700, 700, 700, 700, 3600];
+type Attachment = { id: string; kind: "image" | "pdf"; progress: number };
+const ATTACH_TIMELINE: { items: Attachment[]; duration: number }[] = [
+  { items: [], duration: 1000 },
+  { items: [{ id: "photo", kind: "image", progress: 0.15 }], duration: 700 },
+  { items: [{ id: "photo", kind: "image", progress: 0.45 }, { id: "paper", kind: "pdf", progress: 0.1 }], duration: 700 },
+  { items: [{ id: "photo", kind: "image", progress: 0.8 }, { id: "paper", kind: "pdf", progress: 0.35 }], duration: 700 },
+  { items: [{ id: "photo", kind: "image", progress: 1 }, { id: "paper", kind: "pdf", progress: 0.6 }], duration: 700 },
+  { items: [{ id: "photo", kind: "image", progress: 1 }, { id: "paper", kind: "pdf", progress: 0.85 }], duration: 700 },
+  { items: [{ id: "photo", kind: "image", progress: 1 }, { id: "paper", kind: "pdf", progress: 1 }], duration: 1600 },
+  { items: [{ id: "paper", kind: "pdf", progress: 1 }], duration: 2600 },
+];
+const ATTACH_DURATIONS = ATTACH_TIMELINE.map((frame) => frame.duration);
+
+function RemoveBadge() {
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: -6,
+        right: -6,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#1C1C1E",
+        borderWidth: 2,
+        borderColor: "#FFFFFF",
+      }}
+    >
+      <Glyph name="xmark" size={8} color="#FFFFFF" />
+    </View>
+  );
+}
+
+function AttachmentTile({ item }: { item: Attachment }) {
+  const palette = usePalette();
+  const done = item.progress >= 1;
+  if (item.kind === "image") {
+    return (
+      <View accessible accessibilityLabel="lighthouse.jpg" style={{ width: 64, height: 64 }}>
+        <LinearGradient colors={["#2B2F77", "#B24F8A", "#F59E6B"]} style={{ flex: 1, borderRadius: 14, alignItems: "center", justifyContent: "center" }}>
+          {done ? null : (
+            <View style={{ position: "absolute", inset: 0, borderRadius: 14, backgroundColor: "rgba(0,0,0,0.35)" }} />
+          )}
+          {done ? null : <RemainingRing size={28} strokeWidth={3} progress={item.progress} trackColor="rgba(255,255,255,0.3)" color="#FFFFFF" />}
+        </LinearGradient>
+        <RemoveBadge />
+      </View>
+    );
+  }
+  return (
+    <View style={{ height: 64, width: 172 }}>
+      <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 10, borderRadius: 14, backgroundColor: palette.background }}>
+        <View style={{ width: 36, height: 36, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: "#FF453A" }}>
+          {done ? (
+            <Text style={{ fontSize: 10, fontWeight: "800", color: "#FFFFFF" }}>PDF</Text>
+          ) : (
+            <RemainingRing size={24} strokeWidth={3} progress={item.progress} trackColor="rgba(255,255,255,0.35)" color="#FFFFFF" />
+          )}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 14, lineHeight: 18, fontWeight: "600", color: palette.text }}>paper.pdf</Text>
+          <Text style={{ fontSize: 12, lineHeight: 16, color: palette.secondary }}>
+            {done ? "PDF - 2.4 MB" : `Uploading ${Math.round(item.progress * 100)}%`}
+          </Text>
+        </View>
+      </View>
+      <RemoveBadge />
+    </View>
+  );
+}
 
 function RemainingRingShowcase() {
   const palette = usePalette();
-  const step = useSequence(UPLOAD_STEPS);
-  const progress = UPLOAD_PROGRESS[step];
-  const done = progress >= 1;
+  const step = useSequence(ATTACH_DURATIONS);
+  const items = ATTACH_TIMELINE[step].items;
+  const ready = items.length > 0 && items.every((item) => item.progress >= 1);
 
   return (
-    <Card height={220}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 14,
-          padding: 14,
-          borderRadius: 18,
-          borderCurve: "continuous",
-          backgroundColor: palette.background,
-        }}
-      >
-        <View style={{ width: 52, height: 52, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#FF453A" }}>
-          <Text style={{ fontSize: 13, fontWeight: "700", color: "#FFFFFF" }}>PDF</Text>
-        </View>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontSize: 17, lineHeight: 22, fontWeight: "600", color: palette.text }}>paper.pdf</Text>
-          <Text style={{ fontSize: 14, lineHeight: 18, color: palette.secondary }}>
-            {done ? "2.4 MB - Ready" : `Uploading ${Math.round(progress * 100)}%`}
-          </Text>
-        </View>
-        <RemainingRing size={56} strokeWidth={5} progress={progress} trackColor={palette.surface} color={done ? "#30D158" : palette.text}>
-          <Glyph name={done ? "checkmark" : "xmark"} size={18} color={done ? "#30D158" : palette.secondary} />
-        </RemainingRing>
+    <Card height={200}>
+      <View style={{ height: 76, flexDirection: "row", alignItems: "flex-end", gap: 12 }}>
+        {items.map((item) => (
+          <Animated.View
+            key={item.id}
+            entering={ZoomIn.springify().damping(14)}
+            exiting={ZoomOut.duration(180)}
+            layout={LinearTransition.springify().damping(18)}
+          >
+            <AttachmentTile item={item} />
+          </Animated.View>
+        ))}
       </View>
       <View style={{ flex: 1 }} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          paddingLeft: 18,
-          paddingRight: 8,
-          height: 52,
-          borderRadius: 26,
-          borderWidth: 1,
-          borderColor: palette.surface,
-        }}
-      >
-        <Text style={{ flex: 1, fontSize: 17, color: palette.tertiary }}>Ask about this file</Text>
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: done ? palette.text : palette.surface,
-          }}
-        >
-          <Glyph name="arrow.up" size={14} color={done ? palette.card : palette.tertiary} />
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 8, paddingRight: 8, height: 52, borderRadius: 26, borderWidth: 1, borderColor: palette.surface }}>
+        <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: palette.background }}>
+          <Glyph name="plus" size={14} color={palette.text} />
+        </View>
+        <Text style={{ flex: 1, fontSize: 17, color: palette.tertiary }}>Ask anything</Text>
+        <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: ready ? palette.text : palette.surface }}>
+          <Glyph name="arrow.up" size={14} color={ready ? palette.card : palette.tertiary} />
         </View>
       </View>
     </Card>

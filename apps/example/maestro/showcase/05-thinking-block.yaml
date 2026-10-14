@@ -1,5 +1,5 @@
 appId: dev.namimotion.example
-name: 05 Thinking Block reasoning and expand
+name: 05 Thinking Block trace tabs
 env:
   OUT: .
 ---
@@ -26,19 +26,37 @@ env:
     timeout: 8000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 900
+    timeout: 800
     optional: true
 - takeScreenshot: ${OUT}/05-thinking-block-3-done
 - tapOn: "Thought for .*"
 - extendedWaitUntil:
-    visible: ".*ninth one found.*"
+    visible: "Spot the Mersenne form"
     timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 600
+    timeout: 700
     optional: true
-- takeScreenshot: ${OUT}/05-thinking-block-4-expanded
+- takeScreenshot: ${OUT}/05-thinking-block-4-steps
+- tapOn: "Search"
+- extendedWaitUntil:
+    visible: "Lucas-Lehmer primality test"
+    timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 2000
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-5-search
+- tapOn: "Coding"
+- extendedWaitUntil:
+    visible: ".*is_mersenne_prime.*"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 700
+    optional: true
+- takeScreenshot: ${OUT}/05-thinking-block-6-coding
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1200
     optional: true

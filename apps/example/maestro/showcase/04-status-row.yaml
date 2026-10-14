@@ -14,11 +14,11 @@ env:
     optional: true
 - takeScreenshot: ${OUT}/04-status-row-1-searching
 - extendedWaitUntil:
-    visible: ".*Reading 4 sources.*"
+    visible: ".*Reading 3 sources.*"
     timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 700
+    timeout: 1200
     optional: true
 - takeScreenshot: ${OUT}/04-status-row-2-reading
 - extendedWaitUntil:
@@ -34,7 +34,7 @@ env:
     timeout: 5000
 - extendedWaitUntil:
     visible: "maestro-hold"
-    timeout: 700
+    timeout: 800
     optional: true
 - takeScreenshot: ${OUT}/04-status-row-4-answer
 - extendedWaitUntil:
