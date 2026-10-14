@@ -65,10 +65,10 @@ export function ComponentPage() {
         cd ..
       </Link>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-14">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:gap-14">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <TerminalWindow title={`${doc.slug}.mp4`} meta={<span>10s</span>} bodyClassName="">
-            <div className="aspect-[9/19.5] bg-panel-2">
+            <div className="aspect-[9/8] bg-stage">
               <DemoVideo slug={doc.slug} title={doc.name} mode="autoplay" />
             </div>
           </TerminalWindow>

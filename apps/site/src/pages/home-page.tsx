@@ -29,7 +29,7 @@ function ComponentCard({ doc, index }: { doc: ComponentDoc; index: number }) {
           </span>
           <span>{doc.entry.replace("nami-motion/", "")}</span>
         </div>
-        <div className="aspect-[4/5] overflow-hidden bg-panel-2">
+        <div className="aspect-[9/8] overflow-hidden bg-stage">
           <DemoVideo slug={doc.slug} title={doc.name} mode="hover" />
         </div>
         <div className="flex flex-col gap-1 p-4">

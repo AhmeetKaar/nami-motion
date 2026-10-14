@@ -13,6 +13,7 @@
   --accent-contrast: #ffffff;
   --ok: #1f9d55;
   --warn: #c77d0b;
+  --stage: #efeff3;
   color-scheme: light;
 }
 
@@ -41,6 +42,7 @@
   --color-accent-contrast: var(--accent-contrast);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
+  --color-stage: var(--stage);
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
