@@ -55,7 +55,7 @@ export function ShimmerText({
   }
 
   return (
-    <View style={{ flexDirection: "row" }}>
+    <View accessible accessibilityRole="text" accessibilityLabel={text} style={{ flexDirection: "row" }}>
       {characters.map((char, index) => (
         <ShimmerChar
           key={index}
