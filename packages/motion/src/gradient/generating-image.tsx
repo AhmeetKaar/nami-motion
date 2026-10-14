@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { Text, View, type DimensionValue, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 import { ShimmerText } from "../text/shimmer-text";
 import { useMotionPalette } from "../theme/provider";
@@ -10,8 +10,10 @@ export type GeneratingImageProps = {
   generating: boolean;
   label: string;
   doneLabel?: string;
-  width?: number;
-  height?: number;
+  width?: DimensionValue;
+  height?: DimensionValue;
+  aspectRatio?: number;
+  maxHeight?: number;
   borderRadius?: number;
   placeholderIcon?: ReactNode;
   labelAccessory?: ReactNode;
@@ -29,7 +31,9 @@ export function GeneratingImage({
   label,
   doneLabel,
   width = 220,
-  height = 220,
+  height,
+  aspectRatio,
+  maxHeight,
   borderRadius = 20,
   placeholderIcon,
   labelAccessory,
@@ -41,6 +45,7 @@ export function GeneratingImage({
 }: GeneratingImageProps) {
   const palette = useMotionPalette(colors);
   const reduceMotion = useReducedMotion();
+  const frame = { width, height: height ?? (aspectRatio ? undefined : 220), aspectRatio, maxHeight, borderRadius };
 
   return (
     <View style={[{ gap: 10 }, style]}>
@@ -64,14 +69,14 @@ export function GeneratingImage({
           highlightColor={palette.card}
           highlightOpacity={0.9}
           duration={duration}
-          style={{ width, height, borderRadius, alignItems: "center", justifyContent: "center" }}
+          style={{ ...frame, alignItems: "center", justifyContent: "center" }}
         >
           {placeholderIcon}
         </ShimmerBand>
       ) : (
         <Animated.View
           entering={reduceMotion ? undefined : FadeIn.duration(450)}
-          style={{ width, height, borderRadius, overflow: "hidden", backgroundColor: palette.surface }}
+          style={{ ...frame, overflow: "hidden", backgroundColor: palette.surface }}
         >
           {children}
         </Animated.View>

@@ -938,9 +938,15 @@ export const components: ComponentDoc[] = [
       ],
       [
         "width / height",
-        "`number`",
+        "`DimensionValue`",
         "`220`",
         "Placeholder size"
+      ],
+      [
+        "aspectRatio / maxHeight",
+        "`number`",
+        "—",
+        "Size from width, capped in height"
       ],
       [
         "placeholderIcon",
