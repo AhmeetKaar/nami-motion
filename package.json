@@ -9,9 +9,10 @@
     "build": "npm run build -w nami-motion",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "example": "npm run start -w example",
-    "docs": "npm run dev -w docs",
     "changeset": "changeset",
-    "release": "npm run build && changeset publish"
+    "release": "npm run build && changeset publish",
+    "site": "npm run dev -w site",
+    "site:build": "npm run build -w site"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3"

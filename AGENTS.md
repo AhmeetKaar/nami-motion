@@ -11,11 +11,13 @@ geliştirme artık yalnızca bu repoda yürür, Nami'ye dokunulmaz.
 | --- | --- |
 | `packages/motion` | Yayınlanan npm paketi `nami-motion` (MIT, builder-bob, ESM + tipler) |
 | `apps/example` | Expo SDK 55 canlı demo galerisi (`src/app/index.tsx`) |
-| `apps/docs` | Next.js 16 + Fumadocs sitesi; katalog `src/lib/catalog.ts`, sayfalar `content/docs/components/*.mdx` |
+| `apps/site` | Vitrin sitesi (Vite + React + Tailwind 4, portföy tasarım dili); içerik `src/data/components.ts`, videolar `public/videos/<slug>.mp4`, poster `public/posters/<slug>.jpg` |
+| `apps/example/src/app/showcase/[slug].tsx` | Video kaydı için kendi kendine oynayan tam ekran vitrin; `namimotion:///showcase/<slug>` |
+| `media/` | README GIF'leri; `scripts/encode-videos.sh` ham kayıtlardan (`~/development/nami-motion-videos/*.mov`) mp4, poster ve GIF üretir |
 | `.changeset/` | Versiyonlama; `.github/workflows/` CI + release (changesets/action, npm provenance) |
 | `LICENSE`, `NOTICE.md` | MIT + üçüncü taraf bildirimleri (beautifului.dev MIT) |
 
-Komutlar: `npm install`, `npm run example`, `npm run docs`, `npm run build`,
+Komutlar: `npm install`, `npm run example`, `npm run site` (http://localhost:5173), `npm run build`,
 `npm run changeset`.
 
 ## Paket yapısı (subpath export'lar)
@@ -50,10 +52,10 @@ gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 
 1. `packages/motion/src/<giriş>/<ad>.tsx` + ilgili `index.ts` export'u (props tipiyle).
 2. `apps/example/src/app/index.tsx` içine canlı demo.
-3. `apps/docs/src/lib/catalog.ts` girdisi (`status: 'ready'`) ve `content/docs/components/<slug>.mdx` (kurulum, kullanım, props tablosu).
+3. `apps/site/src/data/components.ts` girdisi (kurulum, kullanım, props, prompt) ve `apps/example/src/app/showcase/[slug].tsx` vitrini; 10 sn kayıt `xcrun simctl io <udid> recordVideo`, sonra `scripts/encode-videos.sh`.
 4. Üçüncü taraftan uyarlandıysa lisansı kontrol et, MIT ise `NOTICE.md`'ye ekle.
 5. `npm run changeset`.
-6. Kontroller: `packages/motion` içinde `npx tsc --noEmit` ve `npx bob build`; `apps/example` içinde `npx tsc --noEmit` ve `npx expo-doctor` (20/20); `apps/docs` içinde `npm run build`.
+6. Kontroller: `packages/motion` içinde `npx tsc --noEmit` ve `npx bob build`; `apps/example` içinde `npx tsc --noEmit` ve `npx expo-doctor` (20/20); `apps/site` içinde `npm run build`.
 
 Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 
@@ -75,7 +77,6 @@ Simülatör build'i ajan tarafından denenmez; görsel testi kullanıcı yapar.
 ## Sıradaki işler
 
 1. **Streaming markdown** (`nami-motion/chat`): Nami'deki yapı referans — blok bazlı split, son blok "frozen + live" diye bölünür (yalnızca canlı satır her tick'te yeniden render edilir). Animasyon yalnızca live kısma uygulanır: kelime/token bazlı fade + hafif blur, code block satır reveal'ı, tablo satır girişi, kaynak rozetleri ve follow-up chip'lerinde stagger. Paragraf/heading/liste tek `<Text selectable>` ağacında nested render edilir (paragraflar arası seçim için), animasyon seçilebilirliği bozmamalı. Markdown parser bağımlılığı opsiyonel peer olmalı.
-2. Site: her component için cihazdan kaydedilmiş kısa video (`apps/docs/public/videos/<slug>.mp4`) ve galeri kartında hover'da oynatma; "kaynağı kopyala" butonu.
-3. İlk yayın `0.1.0`: GitHub repo + `NPM_TOKEN` secret, changeset ile release; Vercel'e docs deploy.
-4. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
-5. Nami entegrasyonu en sonda: Nami eski componentlerini bırakıp npm paketine geçer (Nami'nin kendi faz/PR kurallarıyla, ayrı branch'te).
+2. İlk yayın `0.1.0` (kullanıcı onayıyla; şimdilik her şey test tarafında, yayın yok): `NPM_TOKEN` secret, changeset ile release; site deploy'u.
+3. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
+4. Nami entegrasyonu: `feature/nami-motion` branch'inde paket `vendor/nami-motion-0.0.0.tgz` ile kurulu, 9 component paketten geliyor, chats listesinde SwipeActions var. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla; npm yayınından sonra tarball yerine npm sürümüne geçilir.
