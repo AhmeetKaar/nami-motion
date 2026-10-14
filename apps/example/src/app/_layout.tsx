@@ -1,5 +1,8 @@
 import { Stack } from "expo-router";
+import { LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+LogBox.ignoreLogs(["Sending `onAnimatedValueUpdate` with no listeners registered."]);
 
 export default function RootLayout() {
   return (
