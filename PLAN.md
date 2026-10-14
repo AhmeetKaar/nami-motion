@@ -52,3 +52,11 @@ commit ve push yine izin ister (Nami `AGENTS.md`), değişiklik
 ## 7. Kapanış
 
 - `AGENTS.md` repo düzeni/komutlar/sıradaki işler güncellenir, ozaOS'a not düşülür.
+
+## Durum (2026-10-14, tamamlandı)
+
+- 1-2: Nami `feature/nami-motion` branch'inde 9 component paketten geliyor, eski dosyalar silindi; chats listesinde SwipeActions. tsc, eslint, prettier, expo-doctor 20/20 temiz. Nami'de commit yok (Nami kuralı: onay ister).
+- 3: Maestro akışları `nami/maestro/flows/motion/` (drawer, chats swipe, usage, ses girişi, chat thinking) geçti. Bulunan ve düzeltilen: drawer'ın tam genişlik kaydırması satır jestini engelliyordu (`configureGesture` + `blocksExternalGesture`), ekran okuyucu satır aksiyonlarını göremiyordu (satır kökü erişilebilir yapıldı), npm geçişi sonrası bayat watchman haritası.
+- 4: 10 video `~/development/nami-motion-videos/` (mov + mp4), Maestro ekran görüntüleri `nami-maestro/` altında.
+- 5-6: README GIF tablosu, `apps/site` (npm run site). `apps/docs` kaldırıldı.
+- Görsel olarak Nami'de doğrulanmayanlar: ShimmerBand (görsel üretimi), MatrixOrb (video üretimi, Premium); bunlar örnek uygulama kayıtlarında doğrulandı.
