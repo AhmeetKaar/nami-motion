@@ -1,0 +1,30 @@
+appId: dev.namimotion.example
+name: 01 Shimmer Text showcase
+env:
+  OUT: .
+---
+- stopApp
+- openLink: namimotion:///showcase/shimmer-text?driver=maestro
+- extendedWaitUntil:
+    visible: "Shimmer Text"
+    timeout: 30000
+- assertVisible: "Generating a response"
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 1500
+    optional: true
+- takeScreenshot: ${OUT}/01-shimmer-text-1-start
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 450
+    optional: true
+- takeScreenshot: ${OUT}/01-shimmer-text-2-mid
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 450
+    optional: true
+- takeScreenshot: ${OUT}/01-shimmer-text-3-end
+- extendedWaitUntil:
+    visible: "maestro-hold"
+    timeout: 4000
+    optional: true
