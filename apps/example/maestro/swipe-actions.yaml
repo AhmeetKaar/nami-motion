@@ -1,15 +1,18 @@
 appId: dev.namimotion.example
 name: Swipe actions gesture in gallery
 ---
+- launchApp
 - extendedWaitUntil:
-    visible: "Shimmer Text"
+    visible: ".*Shimmer Text.*"
     timeout: 30000
 - scrollUntilVisible:
-    element: "Bug triage"
+    element: ".*Bug triage.*"
     direction: DOWN
+- scroll
+- scroll
 - swipe:
-    from: "Bug triage"
-    direction: LEFT
+    start: "60%,74%"
+    end: "15%,74%"
+    duration: 1500
 - waitForAnimationToEnd
-- takeScreenshot: example-swipe
-- assertVisible: "Delete"
+- takeScreenshot: example-swipe-open
