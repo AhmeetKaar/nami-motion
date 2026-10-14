@@ -9,12 +9,14 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 
 const DEFAULT_DURATION = 1400;
-const HIGHLIGHT_WIDTH = 0.22;
+const DEFAULT_HIGHLIGHT_WIDTH = 0.22;
 const GLYPH_BLEED: TextStyle = { paddingHorizontal: 2, marginHorizontal: -2 };
 
 const DEFAULT_TEXT_STYLE: TextStyle = {
@@ -29,7 +31,12 @@ export type ShimmerTextProps = {
   mutedColor: string;
   textStyle?: StyleProp<TextStyle>;
   duration?: number;
+  highlightWidth?: number;
+  pause?: number;
+  direction?: "ltr" | "rtl";
 };
+
+type Glyph = { char: string; index: number };
 
 export function ShimmerText({
   text,
@@ -37,37 +44,65 @@ export function ShimmerText({
   mutedColor,
   textStyle = DEFAULT_TEXT_STYLE,
   duration = DEFAULT_DURATION,
+  highlightWidth = DEFAULT_HIGHLIGHT_WIDTH,
+  pause = 0,
+  direction = "ltr",
 }: ShimmerTextProps) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
-  const characters = useMemo(() => Array.from(text), [text]);
+  const { words, total } = useMemo(() => {
+    const characters = Array.from(text);
+    const groups: Glyph[][] = [];
+    let current: Glyph[] = [];
+    characters.forEach((char, index) => {
+      current.push({ char, index });
+      if (char === " ") {
+        groups.push(current);
+        current = [];
+      }
+    });
+    if (current.length) groups.push(current);
+    return { words: groups, total: characters.length };
+  }, [text]);
 
   useEffect(() => {
     if (reduceMotion) return;
+    progress.value = 0;
+    const sweep = withTiming(1, { duration, easing: Easing.linear });
     progress.value = withRepeat(
-      withTiming(1, { duration, easing: Easing.linear }),
+      pause > 0 ? withSequence(sweep, withDelay(pause, withTiming(0, { duration: 0 }))) : sweep,
       -1,
       false,
     );
-  }, [duration, progress, reduceMotion]);
+  }, [duration, pause, progress, reduceMotion]);
 
   if (reduceMotion) {
     return <Text style={[textStyle, { color: activeColor }]}>{text}</Text>;
   }
 
   return (
-    <View accessible accessibilityRole="text" accessibilityLabel={text} style={{ flexDirection: "row" }}>
-      {characters.map((char, index) => (
-        <ShimmerChar
-          key={index}
-          char={char}
-          index={index}
-          total={characters.length}
-          progress={progress}
-          activeColor={activeColor}
-          mutedColor={mutedColor}
-          textStyle={textStyle}
-        />
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={text}
+      style={{ flexDirection: "row", flexWrap: "wrap" }}
+    >
+      {words.map((word, wordIndex) => (
+        <View key={wordIndex} style={{ flexDirection: "row" }}>
+          {word.map((glyph) => (
+            <ShimmerChar
+              key={glyph.index}
+              char={glyph.char}
+              index={direction === "rtl" ? total - 1 - glyph.index : glyph.index}
+              total={total}
+              progress={progress}
+              activeColor={activeColor}
+              mutedColor={mutedColor}
+              textStyle={textStyle}
+              highlightWidth={highlightWidth}
+            />
+          ))}
+        </View>
       ))}
     </View>
   );
@@ -81,6 +116,7 @@ function ShimmerChar({
   activeColor,
   mutedColor,
   textStyle,
+  highlightWidth,
 }: {
   char: string;
   index: number;
@@ -89,16 +125,14 @@ function ShimmerChar({
   activeColor: string;
   mutedColor: string;
   textStyle: StyleProp<TextStyle>;
+  highlightWidth: number;
 }) {
   const style = useAnimatedStyle(() => {
-    const phase = index / total;
-    const distance = Math.abs(((progress.value - phase + 1.5) % 1) - 0.5);
-    const t = interpolate(
-      distance,
-      [0, HIGHLIGHT_WIDTH],
-      [0, 1],
-      Extrapolation.CLAMP,
-    );
+    const phase = total > 1 ? index / (total - 1) : 0;
+    const position = -highlightWidth + progress.value * (1 + highlightWidth * 2);
+    const distance = Math.abs(position - phase);
+    const linear = interpolate(distance, [0, highlightWidth], [0, 1], Extrapolation.CLAMP);
+    const t = linear * linear * (3 - 2 * linear);
     return { color: interpolateColor(t, [0, 1], [activeColor, mutedColor]) };
   });
 
