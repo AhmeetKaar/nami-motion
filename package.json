@@ -1,6 +1,6 @@
 {
   "name": "nami-motion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Production animations for React Native and Expo chat apps: shimmer, skeletons, thinking traces, voice waves, progress rings and drawer reveals.",
   "license": "MIT",
   "author": "Ahmet Kar",

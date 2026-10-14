@@ -1,5 +1,17 @@
 # nami-motion
 
+## 0.2.0
+
+### Minor Changes
+
+- 07b9796: Add `SourceStack` to `nami-motion/chat`: overlapping source avatars (favicons via `icon` or `renderIcon`, letters otherwise) with a count label, the compact citation trigger used under answers. `StatusRow` now shows the Nami logo when no `icon` is given; pass your own `icon` to replace it or `icon={null}` to hide it.
+- e42da13: StatusRow animates label changes (the old label drifts up and out, the new one rises in) and shimmers its label by default instead of pulsing the whole row (`effect="pulse"` keeps the old look). New props: `history` shows finished steps with check marks and a connector line, `variant="card"` turns the row into a bordered tool card with a trailing activity indicator, plus `trailing`, `historyIcon`, `colors` and `style`.
+- 4254247: Add StreamingMarkdown to `nami-motion/chat`: a dependency-free markdown renderer for streaming replies. Only the line being typed re-renders; its words fade in, code blocks reveal line by line and table rows slide in as they complete.
+
+### Patch Changes
+
+- e42da13: ShimmerText no longer clips the edges of glyphs such as a trailing "s" or "b": each character keeps a little room to draw outside its advance width.
+
 ## 0.1.0
 
 ### Minor Changes
