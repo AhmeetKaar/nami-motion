@@ -13,8 +13,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const PULSE_MIN = 0.45;
-const DEFAULT_DURATION = 800;
+const PULSE_MIN = 0.6;
+const DEFAULT_DURATION = 1000;
 
 export type SkeletonProps = {
   color: string;
@@ -39,7 +39,7 @@ export function Skeleton({
   useEffect(() => {
     if (reduceMotion) return;
     pulse.value = withRepeat(
-      withTiming(1, { duration, easing: Easing.inOut(Easing.ease) }),
+      withTiming(1, { duration, easing: Easing.inOut(Easing.sin) }),
       -1,
       true,
     );

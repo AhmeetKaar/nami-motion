@@ -31,6 +31,7 @@ function usePalette() {
     text: dark ? "#FFFFFF" : "#000000",
     secondary: dark ? "#A1A1A6" : "#6C6C70",
     tertiary: dark ? "#636366" : "#AEAEB2",
+    skeleton: dark ? "#3A3A3C" : "#E1E1E6",
   };
 }
 
@@ -144,10 +145,14 @@ function ProfileSkeleton() {
     <Animated.View key={loading ? "loading" : "loaded"} entering={FadeIn.duration(250)} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
       {loading ? (
         <>
-          <Skeleton color={palette.surface} width={44} height={44} borderRadius={22} />
-          <View style={{ flex: 1, gap: 8 }}>
-            <Skeleton color={palette.surface} width="50%" height={14} />
-            <Skeleton color={palette.surface} width="75%" height={12} />
+          <Skeleton color={palette.skeleton} width={44} height={44} borderRadius={22} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ height: 21, justifyContent: "center" }}>
+              <Skeleton color={palette.skeleton} width="42%" height={12} borderRadius={4} />
+            </View>
+            <View style={{ height: 18, justifyContent: "center" }}>
+              <Skeleton color={palette.skeleton} width="78%" height={10} borderRadius={4} />
+            </View>
           </View>
         </>
       ) : (
@@ -156,8 +161,8 @@ function ProfileSkeleton() {
             <Text style={{ fontSize: 15, fontWeight: "600", color: "#FFFFFF" }}>AM</Text>
           </View>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontSize: 16, fontWeight: "600", color: palette.text }}>Alex Morgan</Text>
-            <Text style={{ fontSize: 14, color: palette.secondary }}>Plus plan - 640 of 1,000 messages</Text>
+            <Text style={{ fontSize: 16, lineHeight: 21, fontWeight: "600", color: palette.text }}>Alex Morgan</Text>
+            <Text style={{ fontSize: 14, lineHeight: 18, color: palette.secondary }}>Plus plan - 640 of 1,000 messages</Text>
           </View>
         </>
       )}
@@ -196,15 +201,18 @@ export default function GalleryScreen() {
       <Demo title="Shimmer Band" slug="shimmer-band">
         <ShimmerBand
           backgroundColor={palette.surface}
-          highlightColor={palette.text}
-          style={{ height: 160, borderRadius: 16 }}
-        />
+          highlightColor={palette.card}
+          highlightOpacity={0.9}
+          style={{ height: 160, borderRadius: 16, alignItems: "center", justifyContent: "center" }}
+        >
+          <SymbolView name="photo" size={30} tintColor={palette.tertiary} style={{ width: 30, height: 30 }} />
+        </ShimmerBand>
       </Demo>
       <Demo title="Status Row" slug="status-row">
         <StatusRow
           label="Searching the web"
-          color={palette.secondary}
-          icon={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: palette.text }} />}
+          color={palette.text}
+          icon={<SymbolView name="globe" size={16} tintColor={palette.text} style={{ width: 16, height: 16 }} />}
         />
       </Demo>
       <Demo title="Thinking Block" slug="thinking-block">

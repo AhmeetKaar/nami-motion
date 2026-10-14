@@ -37,6 +37,7 @@ function usePalette() {
     text: dark ? "#FFFFFF" : "#000000",
     secondary: dark ? "#A1A1A6" : "#6C6C70",
     tertiary: dark ? "#636366" : "#AEAEB2",
+    skeleton: dark ? "#3A3A3C" : "#E1E1E6",
     accent: "#0A84FF",
   };
 }
@@ -166,16 +167,25 @@ const USAGE_ROWS: { label: string; value: string; ratio: number }[] = [
 ];
 const SKELETON_STEPS = [3200, 4200];
 
+function SkeletonLine({ width, lineHeight, height }: { width: DimensionValue; lineHeight: number; height?: number }) {
+  const palette = usePalette();
+  return (
+    <View style={{ height: lineHeight, justifyContent: "center" }}>
+      <Skeleton color={palette.skeleton} width={width} height={height ?? Math.round(lineHeight * 0.62)} borderRadius={4} />
+    </View>
+  );
+}
+
 function UsageRow({ label, value, ratio, loading }: { label: string; value: string; ratio: number; loading: boolean }) {
   const palette = usePalette();
   if (loading) {
     return (
-      <View style={{ gap: 10 }}>
+      <View style={{ gap: 8 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Skeleton color={palette.surface} width={90} height={14} />
-          <Skeleton color={palette.surface} width={70} height={14} />
+          <SkeletonLine width={84} lineHeight={18} />
+          <SkeletonLine width={72} lineHeight={18} />
         </View>
-        <Skeleton color={palette.surface} height={8} borderRadius={4} />
+        <Skeleton color={palette.skeleton} height={8} borderRadius={4} />
       </View>
     );
   }
@@ -202,10 +212,10 @@ function SkeletonShowcase() {
         <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
           {loading ? (
             <>
-              <Skeleton color={palette.surface} width={48} height={48} borderRadius={24} />
-              <View style={{ flex: 1, gap: 8 }}>
-                <Skeleton color={palette.surface} width="55%" height={16} />
-                <Skeleton color={palette.surface} width="30%" height={13} />
+              <Skeleton color={palette.skeleton} width={48} height={48} borderRadius={24} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <SkeletonLine width="48%" lineHeight={22} />
+                <SkeletonLine width="28%" lineHeight={18} />
               </View>
             </>
           ) : (
@@ -223,7 +233,7 @@ function SkeletonShowcase() {
           )}
         </View>
         {loading ? (
-          <Skeleton color={palette.surface} width={110} height={13} />
+          <SkeletonLine width={86} lineHeight={16} height={10} />
         ) : (
           <Text style={{ fontSize: 13, lineHeight: 16, fontWeight: "600", color: palette.secondary }}>THIS MONTH</Text>
         )}
@@ -733,7 +743,7 @@ export default function ShowcaseScreen() {
       <Stack.Screen
         options={{ title: "", headerTransparent: true, headerLargeTitle: false, headerShadowVisible: false, headerBackButtonDisplayMode: "minimal" }}
       />
-      <Text style={{ marginTop: 72, fontSize: 28, fontWeight: "700", color: palette.text }}>
+      <Text style={{ marginTop: 84, fontSize: 28, fontWeight: "700", color: palette.text }}>
         {showcase?.title ?? "Unknown component"}
       </Text>
       <Text style={{ marginTop: 4, fontSize: 15, color: palette.secondary }}>nami-motion</Text>

@@ -103,7 +103,7 @@ export const components: ComponentDoc[] = [
       [
         "duration",
         "`number`",
-        "800",
+        "1000",
         "Pulse duration in ms"
       ],
       [
