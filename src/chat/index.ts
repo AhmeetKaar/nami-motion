@@ -5,6 +5,7 @@ export {
   type ThinkingBlockProps,
 } from "./thinking-block";
 export { SourceBadge, type SourceBadgeProps } from "./source-badge";
+export { SourceStack, type SourceStackItem, type SourceStackProps } from "./source-stack";
 export { SourceChips, type SourceChipItem, type SourceChipsProps } from "./source-chips";
 export { MessageActions, type MessageAction, type MessageActionsProps } from "./message-actions";
 export { FollowUpChips, type FollowUpItem, type FollowUpChipsProps } from "./follow-up-chips";

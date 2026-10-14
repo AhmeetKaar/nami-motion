@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  Image,
   StyleSheet,
   Text,
   View,
@@ -29,6 +30,7 @@ const PULSE_MIN = 0.4;
 const DEFAULT_DURATION = 700;
 const SHIMMER_DURATION = 1600;
 const DEFAULT_ICON_SIZE = 16;
+const DEFAULT_LOGO = require("../assets/nami-logo.png");
 const LABEL_OPACITY = 0.7;
 
 const DEFAULT_LABEL_STYLE: TextStyle = {
@@ -39,7 +41,7 @@ const DEFAULT_LABEL_STYLE: TextStyle = {
 export type StatusRowProps = {
   label: string;
   color?: string;
-  icon?: ReactNode;
+  icon?: ReactNode | null;
   iconSize?: number;
   labelStyle?: StyleProp<TextStyle>;
   duration?: number;
@@ -78,6 +80,16 @@ export function StatusRow({
   const opacity = useSharedValue(effect === "pulse" ? PULSE_MIN : 1);
   const lineHeight = lineHeightOf(labelStyle);
   const card = variant === "card";
+  const resolvedIcon =
+    icon === undefined ? (
+      <Image
+        source={DEFAULT_LOGO}
+        accessibilityIgnoresInvertColors
+        style={{ width: iconSize, height: iconSize, borderRadius: iconSize * 0.25 }}
+      />
+    ) : (
+      icon
+    );
 
   useEffect(() => {
     if (effect !== "pulse" || reduceMotion) {
@@ -123,7 +135,7 @@ export function StatusRow({
         effect === "pulse" ? pulseStyle : null,
       ]}
     >
-      {icon ? <View style={{ width: iconSize, height: iconSize }}>{icon}</View> : null}
+      {resolvedIcon ? <View style={{ width: iconSize, height: iconSize }}>{resolvedIcon}</View> : null}
       <View style={{ flexGrow: card ? 1 : 0, flexShrink: card ? 1 : 0, minHeight: lineHeight, justifyContent: "center" }}>
         <Animated.View
           key={label}
