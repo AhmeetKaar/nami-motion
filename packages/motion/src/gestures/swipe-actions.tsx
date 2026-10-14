@@ -326,6 +326,7 @@ export function SwipeActions({
   return (
     <View
       {...props}
+      accessible={props.accessible ?? (hasActions || undefined)}
       accessibilityActions={hasActions ? accessibilityActions : props.accessibilityActions}
       onAccessibilityAction={hasActions ? handleAccessibilityAction : props.onAccessibilityAction}
       onLayout={handleLayout}
