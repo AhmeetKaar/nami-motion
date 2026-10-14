@@ -15,7 +15,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run typecheck -w nami-motion
-      - run: npm run build -w nami-motion
-      - run: npm run typecheck -w example
-      - run: npm run build -w site
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm pack --dry-run

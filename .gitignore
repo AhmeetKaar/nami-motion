@@ -1,9 +1,7 @@
 node_modules/
-packages/motion/lib/
+lib/
 dist/
 .expo/
-.next/
-.source/
 ios/
 android/
 *.tsbuildinfo

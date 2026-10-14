@@ -5,10 +5,17 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "target": "esnext",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "types": []
+  },
+  "include": [
+    "src"
+  ]
 }
