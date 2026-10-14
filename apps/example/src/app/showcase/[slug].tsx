@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Pressable, Text, View, useColorScheme, type DimensionValue } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -979,6 +979,30 @@ const SHOWCASES: Record<string, { title: string; render: (props: ShowcaseProps) 
   "swipe-actions": { title: "Swipe Actions", render: (props) => <SwipeActionsShowcase {...props} /> },
 };
 
+function BackButton() {
+  const palette = usePalette();
+  const router = useRouter();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Back"
+      hitSlop={12}
+      onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+      style={({ pressed }) => ({
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: palette.card,
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <Glyph name="chevron.left" size={16} color={palette.text} />
+    </Pressable>
+  );
+}
+
 export default function ShowcaseScreen() {
   const palette = usePalette();
   const { slug, driver } = useLocalSearchParams<{ slug: string; driver?: string }>();
@@ -986,10 +1010,11 @@ export default function ShowcaseScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.background, padding: 24 }}>
-      <Stack.Screen
-        options={{ title: "", headerTransparent: true, headerLargeTitle: false, headerShadowVisible: false, headerBackButtonDisplayMode: "minimal" }}
-      />
-      <Text style={{ marginTop: 84, fontSize: 28, fontWeight: "700", color: palette.text }}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={{ marginTop: 36 }}>
+        <BackButton />
+      </View>
+      <Text style={{ marginTop: 8, fontSize: 28, fontWeight: "700", color: palette.text }}>
         {showcase?.title ?? "Unknown component"}
       </Text>
       <Text style={{ marginTop: 4, fontSize: 15, color: palette.secondary }}>nami-motion</Text>
