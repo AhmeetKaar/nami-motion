@@ -16,6 +16,7 @@ export type GeneratingImageProps = {
   maxHeight?: number;
   borderRadius?: number;
   placeholderIcon?: ReactNode;
+  tint?: string[];
   labelAccessory?: ReactNode;
   duration?: number;
   labelStyle?: StyleProp<TextStyle>;
@@ -36,6 +37,7 @@ export function GeneratingImage({
   maxHeight,
   borderRadius = 20,
   placeholderIcon,
+  tint,
   labelAccessory,
   duration = 1400,
   labelStyle = DEFAULT_LABEL_STYLE,
@@ -69,6 +71,7 @@ export function GeneratingImage({
           highlightColor={palette.card}
           highlightOpacity={0.9}
           duration={duration}
+          backgroundColors={tint}
           style={{ ...frame, alignItems: "center", justifyContent: "center" }}
         >
           {placeholderIcon}
