@@ -12,3 +12,11 @@ export { FollowUpChips, type FollowUpItem, type FollowUpChipsProps } from "./fol
 export { ThinkingTrace, type ThinkingTraceTab, type ThinkingTraceProps } from "./thinking-trace";
 export { TraceSteps, type TraceStep, type TraceStepsProps } from "./trace-steps";
 export { StreamingMarkdown, type StreamingMarkdownProps } from "./streaming-markdown";
+export {
+  AttachmentPicker,
+  PlusToggle,
+  type AttachmentPickerPhoto,
+  type AttachmentPickerProps,
+  type AttachmentPickerSource,
+  type PlusToggleProps,
+} from "./attachment-picker";
