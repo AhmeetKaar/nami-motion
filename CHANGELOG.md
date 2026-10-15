@@ -1,9 +1,12 @@
 # nami-motion
 
-## 0.3.0
+## 0.2.0
 
 ### Minor Changes
 
+- 07b9796: Add `SourceStack` to `nami-motion/chat`: overlapping source avatars (favicons via `icon` or `renderIcon`, letters otherwise) with a count label, the compact citation trigger used under answers. `StatusRow` now shows the Nami logo when no `icon` is given; pass your own `icon` to replace it or `icon={null}` to hide it.
+- e42da13: StatusRow animates label changes (the old label drifts up and out, the new one rises in) and shimmers its label by default instead of pulsing the whole row (`effect="pulse"` keeps the old look). New props: `history` shows finished steps with check marks and a connector line, `variant="card"` turns the row into a bordered tool card with a trailing activity indicator, plus `trailing`, `historyIcon`, `colors` and `style`.
+- 4254247: Add StreamingMarkdown to `nami-motion/chat`: a dependency-free markdown renderer for streaming replies. Only the line being typed re-renders; its words fade in, code blocks reveal line by line and table rows slide in as they complete.
 - c4ad26c: AttachmentTile adds `progressPlacement="corner"` (a small ring in the corner instead of dimming the whole image) and `variant="chip"` for files (a single-line pill with icon, name and an inline remove button). AttachmentTray items now grow in with a short timed zoom instead of an overshooting spring.
 - 44522ee: DrawerReveal can reveal its children one after another: `stagger` gives each child its own slice of the drawer progress, and `scaleFrom` lets items grow slightly as they arrive.
 - 089ea82: MatrixOrb takes `stateColors` to give idle, listening and thinking their own color; the tint blends between them with the same easing as the state change.
@@ -12,14 +15,6 @@
 - 8214008: Skeleton gets `effect="wave"` (a soft highlight band sweeping across each bar, no gradient dependency) and `SkeletonGroup`, which drives every Skeleton inside it from one clock so pulses and waves stay in sync. `color` is now optional and falls back to the palette; `highlightColor` sets the wave tint.
 - 41868bc: SwipeActions can draw actions as circles: `actionShape="circle"` puts each action in a colored circle (`circleSize`) that scales and fades in as the row opens, and actions take an optional `label` shown under the circle (or under the icon on filled actions).
 - 2350401: ThinkingBlock can expand in place: `expandable` makes the header toggle a body with a left rail and the full reasoning (paragraphs fade in as they stream), with a rotating chevron when no `trailingIcon` is given. Control it with `expanded` / `defaultExpanded` / `onExpandedChange`, or replace the body with `renderBody`. `colors` is now optional and falls back to the palette; `onPress` keeps working for apps that open their own sheet.
-
-## 0.2.0
-
-### Minor Changes
-
-- 07b9796: Add `SourceStack` to `nami-motion/chat`: overlapping source avatars (favicons via `icon` or `renderIcon`, letters otherwise) with a count label, the compact citation trigger used under answers. `StatusRow` now shows the Nami logo when no `icon` is given; pass your own `icon` to replace it or `icon={null}` to hide it.
-- e42da13: StatusRow animates label changes (the old label drifts up and out, the new one rises in) and shimmers its label by default instead of pulsing the whole row (`effect="pulse"` keeps the old look). New props: `history` shows finished steps with check marks and a connector line, `variant="card"` turns the row into a bordered tool card with a trailing activity indicator, plus `trailing`, `historyIcon`, `colors` and `style`.
-- 4254247: Add StreamingMarkdown to `nami-motion/chat`: a dependency-free markdown renderer for streaming replies. Only the line being typed re-renders; its words fade in, code blocks reveal line by line and table rows slide in as they complete.
 
 ### Patch Changes
 
