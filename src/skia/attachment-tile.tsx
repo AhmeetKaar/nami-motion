@@ -18,6 +18,8 @@ export type AttachmentTileProps = {
   removeIcon?: ReactNode;
   removeLabel?: string;
   size?: number;
+  variant?: "card" | "chip";
+  progressPlacement?: "center" | "corner";
   colors?: Partial<MotionPalette>;
   style?: StyleProp<ViewStyle>;
 };
@@ -35,6 +37,8 @@ export function AttachmentTile({
   removeIcon,
   removeLabel,
   size = 64,
+  variant = "card",
+  progressPlacement = "center",
   colors,
   style,
 }: AttachmentTileProps) {
@@ -75,9 +79,26 @@ export function AttachmentTile({
       <View accessible accessibilityLabel={name} style={[{ width: size, height: size }, style]}>
         <View style={{ flex: 1, borderRadius: 14, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: palette.surface }}>
           <View style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}>{preview}</View>
-          {uploading ? <View style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(0,0,0,0.35)" }} /> : null}
-          {uploading ? (
-            indicator(size * 0.44, "rgba(255,255,255,0.3)")
+          {uploading && progressPlacement === "center" ? (
+            <View style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(0,0,0,0.35)" }} />
+          ) : null}
+          {uploading && progressPlacement === "center" ? indicator(size * 0.44, "rgba(255,255,255,0.3)") : null}
+          {uploading && progressPlacement === "corner" ? (
+            <View
+              style={{
+                position: "absolute",
+                right: 5,
+                bottom: 5,
+                width: size * 0.36,
+                height: size * 0.36,
+                borderRadius: size,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(0,0,0,0.55)",
+              }}
+            >
+              {indicator(size * 0.28, "rgba(255,255,255,0.3)")}
+            </View>
           ) : null}
         </View>
         {remove}
@@ -86,6 +107,45 @@ export function AttachmentTile({
   }
 
   const tint = fileColor ?? palette.danger;
+  if (variant === "chip") {
+    return (
+      <View
+        style={[
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            height: 36,
+            paddingLeft: 6,
+            paddingRight: onRemove ? 6 : 12,
+            borderRadius: 18,
+            backgroundColor: palette.surface,
+          },
+          style,
+        ]}
+      >
+        <View style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: tint }}>
+          {uploading ? indicator(20, "rgba(255,255,255,0.35)") : fileIcon}
+        </View>
+        <Text numberOfLines={1} style={{ maxWidth: 160, fontSize: 14, fontWeight: "500", color: palette.text }}>
+          {name}
+        </Text>
+        {detail ? <Text style={{ fontSize: 12, color: palette.textSecondary }}>{detail}</Text> : null}
+        {onRemove ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={removeLabel ?? `Remove ${name}`}
+            hitSlop={8}
+            onPress={onRemove}
+            style={{ width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" }}
+          >
+            {removeIcon ?? <CrossGlyph size={9} color={palette.textSecondary} />}
+          </Pressable>
+        ) : null}
+      </View>
+    );
+  }
+
   return (
     <View style={[{ height: size, width: size * 2.7 }, style]}>
       <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 10, borderRadius: 14, backgroundColor: palette.surface }}>

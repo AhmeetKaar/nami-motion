@@ -26,7 +26,7 @@ export function AttachmentTray<T>({
   const tiles = items.map((item) => (
         <Animated.View
           key={keyExtractor(item)}
-          entering={reduceMotion ? undefined : ZoomIn.springify().damping(14)}
+          entering={reduceMotion ? undefined : ZoomIn.duration(240)}
           exiting={reduceMotion ? undefined : ZoomOut.duration(180)}
           layout={reduceMotion ? undefined : LinearTransition.springify().damping(18)}
         >
