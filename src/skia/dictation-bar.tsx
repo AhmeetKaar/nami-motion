@@ -22,6 +22,7 @@ export type DictationBarProps = {
   limitWarningAt?: number;
   disabled?: boolean;
   waveColors?: [string, string, string];
+  waveVariant?: "wave" | "bars";
   colors?: Partial<MotionPalette>;
   style?: StyleProp<ViewStyle>;
 };
@@ -45,6 +46,7 @@ export function DictationBar({
   limitWarningAt = 0.85,
   disabled = false,
   waveColors,
+  waveVariant = "wave",
   colors,
   style,
 }: DictationBarProps) {
@@ -86,7 +88,11 @@ export function DictationBar({
       >
         {cancelIcon ?? <CrossGlyph size={13} color={palette.text} />}
       </Pressable>
-      <VoiceWave level={level} colors={waveColors ?? [palette.accent, "#3FC1F5", "#88C9F7"]} />
+      <VoiceWave
+        level={level}
+        variant={waveVariant}
+        colors={waveColors ?? (waveVariant === "bars" ? [palette.textSecondary, palette.textSecondary, palette.text] : [palette.accent, "#3FC1F5", "#88C9F7"])}
+      />
       <Text style={{ fontSize: 15, fontVariant: ["tabular-nums"], color: palette.textSecondary }}>{caption ?? formatElapsed(elapsedSeconds)}</Text>
       {limitProgress === undefined ? confirm : (
         <RemainingRing
