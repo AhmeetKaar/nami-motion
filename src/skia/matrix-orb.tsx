@@ -193,6 +193,7 @@ export type MatrixOrbProps = {
   size?: number;
   cover?: boolean;
   color?: string;
+  stateColors?: Partial<Record<MatrixOrbState, string>>;
   dots?: number;
 };
 
@@ -202,13 +203,17 @@ export function MatrixOrb({
   size = DEFAULT_SIZE,
   cover = false,
   color = DEFAULT_COLOR,
+  stateColors,
   dots = DEFAULT_DOTS,
 }: MatrixOrbProps) {
   const reduceMotion = useReducedMotion();
 
   const grid = Math.max(MIN_DOTS, Math.round(dots));
   const feather = 0.5 / PixelRatio.get();
-  const tint = useMemo(() => Array.from(Skia.Color(color)), [color]);
+  const tints = useMemo(
+    () => STATES.map((name) => Array.from(Skia.Color(stateColors?.[name] ?? color))),
+    [color, stateColors],
+  );
 
   const layout = useSharedValue(
     cover ? { width: 0, height: 0 } : { width: size, height: size },
@@ -302,7 +307,10 @@ export function MatrixOrb({
       scale: motion.value.scale,
       weights: motion.value.weights,
       feather,
-      tint,
+      tint: [0, 1, 2, 3].map((channel) =>
+        tints.reduce((sum, value, index) => sum + value[channel] * (motion.value.weights[index] ?? 0), 0) /
+        Math.max(motion.value.weights.reduce((sum, weight) => sum + weight, 0), 0.0001),
+      ),
     };
   });
 
