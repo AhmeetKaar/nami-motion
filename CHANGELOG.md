@@ -1,5 +1,19 @@
 # nami-motion
 
+## 0.3.0
+
+### Minor Changes
+
+- c4ad26c: AttachmentTile adds `progressPlacement="corner"` (a small ring in the corner instead of dimming the whole image) and `variant="chip"` for files (a single-line pill with icon, name and an inline remove button). AttachmentTray items now grow in with a short timed zoom instead of an overshooting spring.
+- 44522ee: DrawerReveal can reveal its children one after another: `stagger` gives each child its own slice of the drawer progress, and `scaleFrom` lets items grow slightly as they arrive.
+- 089ea82: MatrixOrb takes `stateColors` to give idle, listening and thinking their own color; the tint blends between them with the same easing as the state change.
+- ddbddb0: ShimmerBand can sit on a slowly drifting gradient: pass `backgroundColors` (and `driftDuration`) for a soft pastel field under the sweep. GeneratingImage forwards it as `tint`.
+- 2350401: ShimmerText sweeps cleanly from outside the text to outside again with a softer falloff, wraps long text across lines, and takes `highlightWidth`, `pause` (rest between sweeps) and `direction`.
+- 8214008: Skeleton gets `effect="wave"` (a soft highlight band sweeping across each bar, no gradient dependency) and `SkeletonGroup`, which drives every Skeleton inside it from one clock so pulses and waves stay in sync. `color` is now optional and falls back to the palette; `highlightColor` sets the wave tint.
+- 41868bc: SwipeActions can draw actions as circles: `actionShape="circle"` puts each action in a colored circle (`circleSize`) that scales and fades in as the row opens, and actions take an optional `label` shown under the circle (or under the icon on filled actions).
+- 2350401: ThinkingBlock can expand in place: `expandable` makes the header toggle a body with a left rail and the full reasoning (paragraphs fade in as they stream), with a rotating chevron when no `trailingIcon` is given. Control it with `expanded` / `defaultExpanded` / `onExpandedChange`, or replace the body with `renderBody`. `colors` is now optional and falls back to the palette; `onPress` keeps working for apps that open their own sheet.
+- 01c54cc: VoiceWave gains `variant="bars"`: rounded bars that scroll in from the right as the level is sampled every `barInterval` ms (`barWidth`, `barGap`, `height`). DictationBar passes it through with `waveVariant`.
+
 ## 0.2.0
 
 ### Minor Changes
