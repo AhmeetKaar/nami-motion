@@ -20,16 +20,16 @@ SwipeActions → DrawerReveal → VoiceWave → RemainingRing → Skeleton → S
 
 | # | Component | Referans | Paket | iOS showcase | Onay |
 | --- | --- | --- | --- | --- | --- |
-| 1 | StatusRow | REFERENCES.md §1 (Raycast, Linktree, Gemini) | shimmer etiket, yumuşak geçiş, `history`, `variant="card"` | adım geçmişli ekran, galeride kart | bekliyor |
-| 2 | ThinkingBlock | — | — | — | — |
-| 3 | ShimmerText | — | — | — | — |
-| 4 | SwipeActions | — | — | — | — |
-| 5 | DrawerReveal | — | — | — | — |
-| 6 | VoiceWave | — | — | — | — |
-| 7 | RemainingRing | — | — | — | — |
-| 8 | Skeleton | — | — | — | — |
-| 9 | ShimmerBand | — | — | — | — |
-| 10 | MatrixOrb | — | — | — | — |
+| 1 | StatusRow | §1 Raycast, Linktree, Gemini + Nami v3 | shimmer, geçiş, `history`, kart, Nami logosu, `SourceStack` (0.2.0) | adım geçmişi + favicon yığını | test bekliyor |
+| 2 | ThinkingBlock | §2 DeepSeek, Notion | yerinde açılan gövde, sol çizgi, dönen ok (0.3.0) | otomatik açılıp kapanan iz | test bekliyor |
+| 3 | ShimmerText | ChatGPT Creating image | temiz süpürme, yumuşak kenar, satır kaydırma, `pause`, `direction` (0.3.0) | sohbet akışı | test bekliyor |
+| 4 | SwipeActions | §3 Messages, Fiverr | `actionShape="circle"`, `label` (0.3.0) | daire aksiyonlu sohbet listesi | test bekliyor |
+| 5 | DrawerReveal | §8 Claude, Pi | `stagger`, `scaleFrom` (0.3.0) | sırayla dolan menü | test bekliyor |
+| 6 | VoiceWave | §4 ChatGPT, Notion dikte | `variant="bars"`, DictationBar `waveVariant` (0.3.0) | çubuk dalgalı dikte | test bekliyor |
+| 7 | RemainingRing | §5 Perplexity, Notion | köşe halka, `chip` dosya, sakin giriş (0.3.0) | köşe halkalı fotoğraflar | test bekliyor |
+| 8 | Skeleton | Linktree satırları | `effect="wave"`, `SkeletonGroup` (0.3.0) | senkron dalgalı hesap ekranı | test bekliyor |
+| 9 | ShimmerBand | §6 ChatGPT, Copilot | `backgroundColors` kayan pastel (0.3.0) | pastel görsel üretimi | test bekliyor |
+| 10 | MatrixOrb | §7 Meta AI, ChatGPT Voice | `stateColors` renk geçişi (0.3.0) | durum renkli sesli mod | test bekliyor |
 
 ## Faz 2 — Sürüm
 
