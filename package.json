@@ -1,7 +1,7 @@
 {
   "name": "nami-motion",
   "version": "0.3.0",
-  "description": "Production animations for React Native and Expo chat apps: shimmer, skeletons, thinking traces, voice waves, progress rings and drawer reveals.",
+  "description": "Production animations for React Native and Expo chat apps: shimmer text and a Skia voice wave.",
   "license": "MIT",
   "author": "Ahmet Kar",
   "repository": {
@@ -38,30 +38,10 @@
       "types": "./lib/typescript/src/text/index.d.ts",
       "default": "./lib/module/text/index.js"
     },
-    "./feedback": {
-      "source": "./src/feedback/index.ts",
-      "types": "./lib/typescript/src/feedback/index.d.ts",
-      "default": "./lib/module/feedback/index.js"
-    },
-    "./chat": {
-      "source": "./src/chat/index.ts",
-      "types": "./lib/typescript/src/chat/index.d.ts",
-      "default": "./lib/module/chat/index.js"
-    },
-    "./gestures": {
-      "source": "./src/gestures/index.ts",
-      "types": "./lib/typescript/src/gestures/index.d.ts",
-      "default": "./lib/module/gestures/index.js"
-    },
     "./skia": {
       "source": "./src/skia/index.ts",
       "types": "./lib/typescript/src/skia/index.d.ts",
       "default": "./lib/module/skia/index.js"
-    },
-    "./gradient": {
-      "source": "./src/gradient/index.ts",
-      "types": "./lib/typescript/src/gradient/index.d.ts",
-      "default": "./lib/module/gradient/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -70,7 +50,6 @@
     "lib",
     "!**/__tests__",
     "LICENSE",
-    "NOTICE.md",
     "README.md"
   ],
   "scripts": {
@@ -85,18 +64,10 @@
     "react-native": ">=0.83.0",
     "react-native-reanimated": ">=4.2.0",
     "react-native-worklets": ">=0.7.0",
-    "react-native-gesture-handler": ">=2.30.0",
-    "@shopify/react-native-skia": ">=2.4.0",
-    "expo-linear-gradient": "~55.0.0"
+    "@shopify/react-native-skia": ">=2.4.0"
   },
   "peerDependenciesMeta": {
     "@shopify/react-native-skia": {
-      "optional": true
-    },
-    "react-native-gesture-handler": {
-      "optional": true
-    },
-    "expo-linear-gradient": {
       "optional": true
     }
   },
@@ -126,11 +97,9 @@
     "@changesets/cli": "^3.0.3",
     "@shopify/react-native-skia": "2.4.18",
     "@types/react": "~19.2.2",
-    "expo-linear-gradient": "~55.0.0",
     "react": "19.2.0",
     "react-native": "0.83.10",
     "react-native-builder-bob": "^0.43.2",
-    "react-native-gesture-handler": "~2.30.0",
     "react-native-reanimated": "4.2.1",
     "react-native-worklets": "0.7.4",
     "typescript": "~5.9.2"

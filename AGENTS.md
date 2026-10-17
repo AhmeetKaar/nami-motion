@@ -3,6 +3,9 @@
 React Native / Expo için animasyon paketi `nami-motion` (MIT, builder-bob, ESM + tipler).
 Bu repo yalnızca npm paketidir; buradan yayınlanır. Componentler Nami uygulamasından
 (`/Users/ahmeetkaar/development/nami`) prop-driven hale getirilerek alındı.
+2026-10-17 kararı: paket yalnızca ShimmerText ve VoiceWave'i içerir; diğer tüm componentler
+(chat, feedback, gestures, gradient girişleri ve kalan skia componentleri) üç repodan da kaldırıldı.
+Eski kod git geçmişinde (`0855735` ve öncesi).
 
 ## Repolar
 
@@ -21,19 +24,14 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 | --- | --- | --- |
 | `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
 | `nami-motion/text` | ShimmerText | — |
-| `nami-motion/feedback` | Skeleton | — |
-| `nami-motion/chat` | StatusRow, ThinkingBlock, SourceChips, SourceBadge, MessageActions, FollowUpChips, ThinkingTrace, TraceSteps | — |
-| `nami-motion/gestures` | DrawerReveal, SwipeActions, SwipeActionsGroup | react-native-gesture-handler (SwipeActions) |
-| `nami-motion/gradient` | ShimmerBand, GeneratingImage | expo-linear-gradient (opsiyonel peer) |
-| `nami-motion/skia` | VoiceWave, RemainingRing, MatrixOrb, DictationBar, AttachmentTile, AttachmentTray | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/skia` | VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
 
-Kök `src/index.ts` theme, text, feedback, chat ve yalnızca DrawerReveal'ı export eder; Skia,
-gradient veya gesture-handler isteyen hiçbir şey köke girmez.
+Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
 ## Kurallar
 
 - Paket yöneticisi npm (`package-lock.json`). React 19.2.0, Expo SDK 55 hattı; sürüm yükseltilmez (Xcode 26.2).
-- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, RNGH ≥2.30, Skia ≥2.4).
+- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4).
 - Kaynak dosyalar İngilizce ve ASCII, dosya adları kebab-case, koda yorum satırı yazılmaz.
 - Paket içinde göreli import kullanılır; paket kodu hiçbir uygulama katmanına bağlanmaz — renk, metin, ikon, font, haptic prop olarak gelir.
 - Yeni componentler renkleri `useMotionPalette(colors)` ile okur: varsayılan Moodstone, `MotionThemeProvider` ile uygulama paleti (ve `colorScheme`), `colors` ile tek component override.
@@ -50,14 +48,13 @@ gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 4. `nami-motion-web`: `src/data/components.ts` girdisi (kurulum, kullanım, props, prompt) ve kayıt (`scripts/encode-videos.sh`).
 5. Üçüncü taraftan fikir alındıysa lisansı kontrol et, gerekiyorsa `NOTICE.md`'ye ekle.
 
-## Lisans durumu (2026-10-14)
+## Lisans durumu (2026-10-17)
 
 | Kaynak | Durum |
 | --- | --- |
-| rnmotion.dev (SchroederNathan/react-native-motion) | Kökte LICENSE yok. Nami'deki MorphText ve Toast oradan türetilmiş → izin gelene kadar pakete girmez. Yazara issue açılacak (kullanıcı açar). İzin gelmezse davranış tarifinden sıfırdan yazılır. |
-| makeitanimated.dev | Ücretli kişisel lisans, açık yayın yasak. Shimmer ve drawer kendi kodumuz, sorun yok. Oradan kod alınmaz. |
-| beautifului.dev | MIT (Shane Levine). ThinkingBlock/StatusRow için `NOTICE.md`'de kredi var. |
-| motion.dev Motion+ | Swipe actions referansı; koduna bakılmadan sıfırdan yazılır. |
+| rnmotion.dev (SchroederNathan/react-native-motion) | Kökte LICENSE yok; oradan türeyen hiçbir şey pakette yok. |
+| makeitanimated.dev | Ücretli kişisel lisans, açık yayın yasak. Shimmer kendi kodumuz, sorun yok. Oradan kod alınmaz. |
+| beautifului.dev | MIT. Oradan uyarlanan ThinkingBlock/StatusRow kaldırıldı; `NOTICE.md` silindi. |
 
 ## Durum
 
@@ -66,7 +63,5 @@ gradient veya gesture-handler isteyen hiçbir şey köke girmez.
 
 ## Sıradaki işler
 
-1. **Streaming markdown** (`nami-motion/chat`): Nami'deki yapı referans — blok bazlı split, son blok "frozen + live" diye bölünür (yalnızca canlı satır her tick'te yeniden render edilir). Animasyon yalnızca live kısma uygulanır: kelime/token bazlı fade + hafif blur, code block satır reveal'ı, tablo satır girişi, kaynak rozetleri ve follow-up chip'lerinde stagger. Paragraf/heading/liste tek `<Text selectable>` ağacında nested render edilir (paragraflar arası seçim için), animasyon seçilebilirliği bozmamalı. Markdown parser bağımlılığı opsiyonel peer olmalı.
-2. İlk yayın `0.1.0` (kullanıcı onayıyla): changeset ile sürüm, `npm run release` ya da CI (`NPM_TOKEN`). Yayından sonra Nami ve `nami-motion-ios` tarball yerine `nami-motion@^0.1.0` kurar.
-3. MorphText ve Toast: rnmotion izni ya da sıfırdan yazım sonrası `nami-motion/skia` ve `nami-motion/feedback`'e eklenir.
-4. Nami entegrasyonu: `feature/nami-motion` branch'inde paket `vendor/nami-motion-<sha>.tgz` (bun) ile kurulu. Paketten gelenler: StatusRow + canlı SourceChips (favicon ikonlu), ThinkingBlock, gerekçe sheet'inde ThinkingTrace (Adımlar/Kaynaklar), MessageActions, DictationBar, AttachmentTile/Tray, GeneratingImage, ShimmerText, Skeleton, MatrixOrb, DrawerReveal, SwipeActions. `src/providers/motion-theme-provider.tsx` Nami renklerini pakete bağlar. Nami'de veri olmadığı için FollowUpChips ve SourceBadge kullanılmıyor. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla.
+1. Sonraki yayın (kullanıcı onayıyla): changeset ile sürüm (`0.4.0`), `npm run release` ya da CI (`NPM_TOKEN`). Yayından sonra Nami ve `nami-motion-ios` yeni sürümü kurar.
+2. Nami entegrasyonu: `feature/nami-motion-v2` branch'i `nami-motion@0.2.0`'daki kaldırılan componentleri kullanıyor; yeni sürüme geçerken Nami kendi componentlerine döner, paketten yalnızca ShimmerText ve VoiceWave kalır. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla.
