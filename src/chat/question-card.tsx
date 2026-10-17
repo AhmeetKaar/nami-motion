@@ -229,7 +229,7 @@ export function QuestionCard({
     return (
       <Animated.View
         entering={reduceMotion ? undefined : ZoomIn.duration(260).easing(EASE)}
-        style={[{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 12, height: 30, borderRadius: 15, backgroundColor: withAlpha(palette.success, 0.14) }, style]}
+        style={[{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 12, height: 30, borderRadius: 15, backgroundColor: withAlpha(palette.success, 0.14) }, variant === "sheet" && { marginHorizontal: 20, marginTop: 12 }, style]}
       >
         {icons?.sent ?? <Text style={[metaStyle, { color: palette.success }]}>✓</Text>}
         <Text style={[metaStyle, { color: palette.success }]}>{copy.sent}</Text>
