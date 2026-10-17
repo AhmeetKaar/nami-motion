@@ -4,7 +4,7 @@ React Native / Expo için animasyon paketi `nami-motion` (MIT, builder-bob, ESM 
 Bu repo yalnızca npm paketidir; buradan yayınlanır. Componentler Nami uygulamasından
 (`/Users/ahmeetkaar/development/nami`) prop-driven hale getirilerek alındı.
 2026-10-17: paket önce ShimmerText + VoiceWave'e indirildi (0.4.0), aynı gün referans sitelerden
-yalnızca fikir alınarak 10 özelleştirilebilir test componenti eklendi (0.5.0). Eski 0.3.0 kodu `0855735`'te.
+yalnızca fikir alınarak test componentleri eklendi (0.5.0); SwipeActions kullanıcı kararıyla çıkarıldı. Eski 0.3.0 kodu `0855735`'te.
 
 ## Repolar
 
@@ -27,14 +27,13 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 | `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard | — |
 | `nami-motion/skia` | BlurText, ImageGenerating, VideoGenerating, MatrixOrb, VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
 | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge, CountUp | @shopify/react-native-skia |
-| `nami-motion/gestures` | SwipeActions, SwipeActionsGroup | react-native-gesture-handler (opsiyonel peer) |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
 ## Kurallar
 
 - Paket yöneticisi npm (`package-lock.json`). React 19.2.0, Expo SDK 55 hattı; sürüm yükseltilmez (Xcode 26.2).
-- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4, Gesture Handler ≥2.30).
+- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4).
 - Her component ikon (`icon`/`children`), font (`textStyle` ya da Skia `font`/`fontSource`/`fontFamily`), renk ve zamanlamayı prop olarak alır.
 - Kaynak dosyalar İngilizce ve ASCII, dosya adları kebab-case, koda yorum satırı yazılmaz.
 - Paket içinde göreli import kullanılır; paket kodu hiçbir uygulama katmanına bağlanmaz — renk, metin, ikon, font, haptic prop olarak gelir.
@@ -71,5 +70,5 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Sıradaki işler
 
 1. Yayın (kullanıcı onayıyla): `npm login --auth-type=web`, `npm publish --auth-type=web --provenance=false`, tag `v0.5.0` + push (üç repo).
-2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, tagline → BlurText, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, chat listesi swipe, Usage/Credits → charts). Commit ve merge Nami kurallarıyla.
+2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, tagline → BlurText, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, Usage/Credits → charts). Commit ve merge Nami kurallarıyla.
 3. Ertelenen componentler: MessageActions, FollowUpChips, JumpToBottom, IconSwap, EmptyState, StackToast, ErrorCard, UpgradeCard, CodeBlock, SourceBadge, TTS bar.
