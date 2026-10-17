@@ -3,9 +3,8 @@
 React Native / Expo için animasyon paketi `nami-motion` (MIT, builder-bob, ESM + tipler).
 Bu repo yalnızca npm paketidir; buradan yayınlanır. Componentler Nami uygulamasından
 (`/Users/ahmeetkaar/development/nami`) prop-driven hale getirilerek alındı.
-2026-10-17 kararı: paket yalnızca ShimmerText ve VoiceWave'i içerir; diğer tüm componentler
-(chat, feedback, gestures, gradient girişleri ve kalan skia componentleri) üç repodan da kaldırıldı.
-Eski kod git geçmişinde (`0855735` ve öncesi).
+2026-10-17: paket önce ShimmerText + VoiceWave'e indirildi (0.4.0), aynı gün referans sitelerden
+yalnızca fikir alınarak 10 özelleştirilebilir test componenti eklendi (0.5.0). Eski 0.3.0 kodu `0855735`'te.
 
 ## Repolar
 
@@ -23,15 +22,20 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 | Giriş | Componentler | Ek native bağımlılık |
 | --- | --- | --- |
 | `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
-| `nami-motion/text` | ShimmerText | — |
-| `nami-motion/skia` | VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/text` | ShimmerText, StreamingText | — |
+| `nami-motion/brand` | SpinningMark | — |
+| `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard | — |
+| `nami-motion/skia` | BlurText, ImageGenerating, VideoGenerating, MatrixOrb, VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge, CountUp | @shopify/react-native-skia |
+| `nami-motion/gestures` | SwipeActions, SwipeActionsGroup | react-native-gesture-handler (opsiyonel peer) |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
 ## Kurallar
 
 - Paket yöneticisi npm (`package-lock.json`). React 19.2.0, Expo SDK 55 hattı; sürüm yükseltilmez (Xcode 26.2).
-- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4).
+- Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4, Gesture Handler ≥2.30).
+- Her component ikon (`icon`/`children`), font (`textStyle` ya da Skia `font`/`fontSource`/`fontFamily`), renk ve zamanlamayı prop olarak alır.
 - Kaynak dosyalar İngilizce ve ASCII, dosya adları kebab-case, koda yorum satırı yazılmaz.
 - Paket içinde göreli import kullanılır; paket kodu hiçbir uygulama katmanına bağlanmaz — renk, metin, ikon, font, haptic prop olarak gelir.
 - Yeni componentler renkleri `useMotionPalette(colors)` ile okur: varsayılan Moodstone, `MotionThemeProvider` ile uygulama paleti (ve `colorScheme`), `colors` ile tek component override.
@@ -54,14 +58,18 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 | --- | --- |
 | rnmotion.dev (SchroederNathan/react-native-motion) | Kökte LICENSE yok; oradan türeyen hiçbir şey pakette yok. |
 | makeitanimated.dev | Ücretli kişisel lisans, açık yayın yasak. Shimmer kendi kodumuz, sorun yok. Oradan kod alınmaz. |
-| beautifului.dev | MIT. Oradan uyarlanan ThinkingBlock/StatusRow kaldırıldı; `NOTICE.md` silindi. |
+| beautifului.dev | MIT. Oradan uyarlanan ThinkingBlock/StatusRow kaldırıldı; `NOTICE.md` silindi. 0.5.0 componentleri sıfırdan yazıldı. |
+| ui.ozaco.com | Lisans yok; yalnızca chart fikirleri (stagger bar, çizilen line, ring gauge, count-up). Kod alınmadı. |
+| Nami `morphing-text.tsx` | rnmotion blurred-text-morph'tan türüyor; pakete alınmadı, BlurText farklı yöntemle (eşleme yok, çıkış/giriş katmanı) yazıldı. |
 
 ## Durum
 
-- GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` yalnızca yerel git reposu (2026-10-14).
-- npm adı `nami-motion` boş (2026-10-14); `@nami` scope başkasına ait. Henüz yayın yok.
+- GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
+- npm: `nami-motion@0.4.0` yayında. 0.5.0 (`Release 0.5.0`) yerelde hazır, yayın kullanıcının npm web onayını bekliyor.
+- Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
 
 ## Sıradaki işler
 
-1. Sonraki yayın (kullanıcı onayıyla): changeset ile sürüm (`0.4.0`), `npm run release` ya da CI (`NPM_TOKEN`). Yayından sonra Nami ve `nami-motion-ios` yeni sürümü kurar.
-2. Nami entegrasyonu: `feature/nami-motion-v2` branch'i `nami-motion@0.2.0`'daki kaldırılan componentleri kullanıyor; yeni sürüme geçerken Nami kendi componentlerine döner, paketten yalnızca ShimmerText ve VoiceWave kalır. Commit ve merge Nami kurallarıyla, kullanıcı onayıyla.
+1. Yayın (kullanıcı onayıyla): `npm login --auth-type=web`, `npm publish --auth-type=web --provenance=false`, tag `v0.5.0` + push (üç repo).
+2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, tagline → BlurText, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, chat listesi swipe, Usage/Credits → charts). Commit ve merge Nami kurallarıyla.
+3. Ertelenen componentler: MessageActions, FollowUpChips, JumpToBottom, IconSwap, EmptyState, StackToast, ErrorCard, UpgradeCard, CodeBlock, SourceBadge, TTS bar.
