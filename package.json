@@ -1,6 +1,6 @@
 {
   "name": "nami-motion",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Production animations for React Native and Expo chat apps: shimmer text and a Skia voice wave.",
   "license": "MIT",
   "author": "Ahmet Kar",
