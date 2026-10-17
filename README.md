@@ -46,11 +46,11 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Blur Text | `nami-motion/skia` | Phrases blur in and out letter by letter in your own font. |
 | Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with eight variants (blobs, matrix, orbit, scan, constellation, helix, ring, morph). `ImageGenerating` and `VideoGenerating` are its presets. |
 | DotOrb | `nami-motion/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
-| Voice Wave | `nami-motion/skia` | Three-layer Skia waveform driven by live microphone level. |
+| Voice Wave | `nami-motion/skia` | Live microphone waveform in five styles: lines, bars, dots, pulse and ring. |
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
-| Effort Bar | `nami-motion/chat` | Reasoning effort as rising gradient pills with the budget share, wired to `reasoning.effort` (low, medium, high); track and compact styles, per level icon and illustration. |
+| Effort Bar | `nami-motion/chat` | Reasoning effort as rising gradient pills with the budget share, wired to `reasoning.effort` (low, medium, high); track and compact styles and a per level icon. |
 | Charts | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge and CountUp for usage and credits. |
 
 Every component takes its icon, font, colors and timing as props and falls back
@@ -149,7 +149,8 @@ import { VoiceWave } from "nami-motion/skia";
 
 const level = useSharedValue(0);
 
-<VoiceWave level={level} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
+<VoiceWave level={level} variant="bars" colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
+<VoiceWave level={level} variant="ring" height={240} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
 ```
 
 ## Development

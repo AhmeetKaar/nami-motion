@@ -50,8 +50,6 @@ export type EffortBarProps = {
   title?: string;
   icon?: ReactNode | ((index: number) => ReactNode);
   badge?: ReactNode;
-  illustration?: (index: number) => ReactNode;
-  illustrationHeight?: number;
   showHeader?: boolean;
   showNumber?: boolean;
   formatNumber?: (index: number, filled: number) => string;
@@ -110,8 +108,6 @@ export function EffortBar({
   title,
   icon,
   badge,
-  illustration,
-  illustrationHeight = 132,
   showHeader = true,
   showNumber = true,
   formatNumber,
@@ -258,18 +254,6 @@ export function EffortBar({
         </>
       ) : (
         <>
-          {illustration ? (
-            <View style={{ height: illustrationHeight, alignItems: "center", justifyContent: "center" }}>
-              <Animated.View
-                key={`i${index}`}
-                entering={reduceMotion ? undefined : ZoomIn.duration(320).easing(EASE_OUT)}
-                exiting={reduceMotion ? undefined : FadeOut.duration(140)}
-                style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}
-              >
-                {illustration(index)}
-              </Animated.View>
-            </View>
-          ) : null}
           {showHeader && variant === "bars" ? (
             <View style={{ gap: 2 }}>
               {title || badge ? (

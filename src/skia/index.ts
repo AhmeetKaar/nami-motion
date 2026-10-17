@@ -13,4 +13,4 @@ export {
   type MediaGeneratingVariant,
   type VideoGeneratingProps,
 } from "./media-generating";
-export { VoiceWave, type VoiceWaveProps } from "./voice-wave";
+export { VoiceWave, type VoiceWaveProps, type VoiceWaveVariant } from "./voice-wave";
