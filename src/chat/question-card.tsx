@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  type LayoutChangeEvent,
   Pressable,
   Text,
   TextInput,
@@ -10,24 +11,34 @@ import {
 } from "react-native";
 import Animated, {
   Easing,
-  FadeInDown,
-  FadeInLeft,
-  FadeInRight,
-  FadeInUp,
+  FadeIn,
   FadeOut,
-  FadeOutLeft,
-  FadeOutRight,
-  LinearTransition,
+  interpolateColor,
+  useAnimatedStyle,
   useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
   ZoomIn,
+  ZoomOut,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { withAlpha } from "../internal/color";
 import { type MotionPalette } from "../theme/palette";
 import { useMotionPalette } from "../theme/provider";
 
-const EASE = Easing.bezier(0.23, 1, 0.32, 1);
-const ADVANCE_DELAY = 220;
-const DEFAULT_TITLE_STYLE: TextStyle = { fontSize: 18, lineHeight: 25, fontWeight: "600" };
+const EASE_OUT = Easing.bezier(0.22, 1, 0.36, 1);
+const ENTER_SPRING = { damping: 24, stiffness: 220, mass: 0.9 };
+const HEIGHT_SPRING = { damping: 28, stiffness: 260, mass: 0.9 };
+const CHIP_SPRING = { damping: 14, stiffness: 420, mass: 0.6 };
+const PAGE_OUT = 110;
+const PAGE_IN = 240;
+const PAGE_SHIFT = 12;
+const ADVANCE_DELAY = 260;
+const CHIP = 26;
+
+const DEFAULT_TITLE_STYLE: TextStyle = { fontSize: 19, lineHeight: 25, fontWeight: "500" };
 const DEFAULT_OPTION_STYLE: TextStyle = { fontSize: 16, lineHeight: 22 };
 const DEFAULT_META_STYLE: TextStyle = { fontSize: 13, lineHeight: 18, fontWeight: "500" };
 
@@ -62,6 +73,7 @@ export type QuestionCardIcons = {
   close?: ReactNode;
   check?: ReactNode;
   custom?: ReactNode;
+  send?: ReactNode;
   sent?: ReactNode;
 };
 
@@ -74,11 +86,12 @@ export type QuestionCardProps = {
   icons?: QuestionCardIcons;
   numbered?: boolean;
   autoAdvance?: boolean;
+  autoSubmit?: boolean;
   showSentState?: boolean;
   onSubmit: (answers: QuestionAnswer[]) => void;
   onClose?: () => void;
   onAnswerChange?: (answers: QuestionAnswer[]) => void;
-  onHaptic?: (kind: "select" | "submit") => void;
+  onHaptic?: (kind: "select" | "page" | "submit") => void;
   renderOption?: (option: { label: string; description?: string }, state: QuestionOptionState) => ReactNode;
   titleStyle?: StyleProp<TextStyle>;
   optionStyle?: StyleProp<TextStyle>;
@@ -89,7 +102,7 @@ export type QuestionCardProps = {
 
 const DEFAULT_LABELS: QuestionCardLabels = {
   progress: (current, total) => `${current} of ${total}`,
-  next: "Next",
+  next: "Continue",
   submit: "Send",
   customPlaceholder: "Type your answer...",
   sent: "Answers sent",
@@ -97,13 +110,19 @@ const DEFAULT_LABELS: QuestionCardLabels = {
 
 type Draft = { selected: number[]; custom: string };
 
+const emptyDraft = (): Draft => ({ selected: [], custom: "" });
+
 function normalize(option: QuestionOption) {
   return typeof option === "string" ? { label: option } : option;
 }
 
+function isAnswered(draft: Draft | undefined) {
+  return !!draft && (draft.selected.length > 0 || draft.custom.trim().length > 0);
+}
+
 function buildAnswers(questions: Question[], drafts: Draft[]): QuestionAnswer[] {
   return questions.map((question, index) => {
-    const draft = drafts[index] ?? { selected: [], custom: "" };
+    const draft = drafts[index] ?? emptyDraft();
     const options = question.options.map(normalize);
     const custom = draft.custom.trim();
     return {
@@ -122,6 +141,7 @@ export function QuestionCard({
   icons,
   numbered = true,
   autoAdvance = true,
+  autoSubmit = true,
   showSentState = true,
   onSubmit,
   onClose,
@@ -138,15 +158,29 @@ export function QuestionCard({
   const reduceMotion = useReducedMotion();
   const copy = { ...DEFAULT_LABELS, ...labels };
   const [page, setPage] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [drafts, setDrafts] = useState<Draft[]>(() => questions.map(() => ({ selected: [], custom: "" })));
-  const [editing, setEditing] = useState(false);
+  const [shown, setShown] = useState(0);
+  const [drafts, setDrafts] = useState<Draft[]>(() => questions.map(emptyDraft));
   const [sent, setSent] = useState(false);
-  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftsRef = useRef(drafts);
+  draftsRef.current = drafts;
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => {
-    if (advanceTimer.current) clearTimeout(advanceTimer.current);
-  }, []);
+  const enter = useSharedValue(reduceMotion ? 1 : 0);
+  const contentOpacity = useSharedValue(1);
+  const contentShift = useSharedValue(0);
+  const height = useSharedValue(0);
+  const measured = useRef(0);
+
+  useEffect(() => {
+    enter.value = reduceMotion ? 1 : withSpring(1, ENTER_SPRING);
+  }, [enter, reduceMotion]);
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   const signature = questions.map((item) => `${item.title}:${item.options.length}`).join("|");
   const lastSignature = useRef(signature);
@@ -154,36 +188,61 @@ export function QuestionCard({
     if (lastSignature.current === signature) return;
     lastSignature.current = signature;
     setPage(0);
-    setEditing(false);
+    setShown(0);
     setSent(false);
-    setDrafts(questions.map(() => ({ selected: [], custom: "" })));
+    setDrafts(questions.map(emptyDraft));
   }, [questions, signature]);
 
-  const question = questions[page];
-  const kind = question?.kind ?? "single";
-  const draft = drafts[page] ?? { selected: [], custom: "" };
-  const options = useMemo(() => question?.options.map(normalize) ?? [], [question]);
-  const answered = draft.selected.length > 0 || draft.custom.trim().length > 0;
-  const last = page === questions.length - 1;
-  const allAnswered = drafts.every((item) => item.selected.length > 0 || item.custom.trim().length > 0);
-  const hairline = withAlpha(palette.text, 0.1);
-  const layout = reduceMotion ? undefined : LinearTransition.duration(260).easing(EASE);
+  useEffect(() => {
+    if (page === shown) return;
+    const direction = page > shown ? 1 : -1;
+    if (reduceMotion) {
+      setShown(page);
+      return;
+    }
+    contentShift.value = withTiming(-direction * PAGE_SHIFT, { duration: PAGE_OUT, easing: Easing.in(Easing.quad) });
+    contentOpacity.value = withTiming(0, { duration: PAGE_OUT, easing: Easing.in(Easing.quad) }, (finished) => {
+      if (finished) scheduleOnRN(setShown, page);
+    });
+  }, [contentOpacity, contentShift, page, reduceMotion, shown]);
 
-  const update = (next: Draft[]) => {
+  const firstShown = useRef(true);
+  useEffect(() => {
+    if (firstShown.current) {
+      firstShown.current = false;
+      return;
+    }
+    if (reduceMotion) return;
+    contentShift.value = contentShift.value < 0 ? PAGE_SHIFT : -PAGE_SHIFT;
+    contentShift.value = withTiming(0, { duration: PAGE_IN, easing: EASE_OUT });
+    contentOpacity.value = withTiming(1, { duration: PAGE_IN, easing: EASE_OUT });
+  }, [contentOpacity, contentShift, reduceMotion, shown]);
+
+  const question = questions[shown];
+  const kind = question?.kind ?? "single";
+  const draft = drafts[shown] ?? emptyDraft();
+  const options = useMemo(() => question?.options.map(normalize) ?? [], [question]);
+  const last = shown === questions.length - 1;
+  const hairline = withAlpha(palette.text, 0.08);
+
+  const commit = (next: Draft[]) => {
+    draftsRef.current = next;
     setDrafts(next);
     onAnswerChange?.(buildAnswers(questions, next));
   };
 
   const goTo = (target: number) => {
     if (target < 0 || target >= questions.length || target === page) return;
-    setDirection(target > page ? 1 : -1);
-    setEditing(false);
+    if (timer.current) clearTimeout(timer.current);
+    onHaptic?.("page");
     setPage(target);
   };
 
-  const submit = (source: Draft[]) => {
+  const submit = () => {
+    const current = draftsRef.current;
+    if (!current.every(isAnswered)) return;
     onHaptic?.("submit");
-    onSubmit(buildAnswers(questions, source));
+    onSubmit(buildAnswers(questions, current));
     if (showSentState) setSent(true);
   };
 
@@ -195,178 +254,222 @@ export function QuestionCard({
         : draft.selected.includes(index)
           ? draft.selected.filter((value) => value !== index)
           : [...draft.selected, index].sort((a, b) => a - b);
-    const next = drafts.map((item, position) =>
-      position === page ? { selected, custom: kind === "single" ? "" : item.custom } : item,
+    commit(
+      drafts.map((item, position) =>
+        position === shown ? { selected, custom: kind === "single" ? "" : item.custom } : item,
+      ),
     );
-    update(next);
-    if (kind === "single" && autoAdvance && !last) {
-      if (advanceTimer.current) clearTimeout(advanceTimer.current);
-      advanceTimer.current = setTimeout(() => goTo(page + 1), ADVANCE_DELAY);
+    if (kind !== "single") return;
+    if (timer.current) clearTimeout(timer.current);
+    if (!last && autoAdvance) {
+      timer.current = setTimeout(() => goTo(shown + 1), ADVANCE_DELAY);
+    } else if (last && autoSubmit) {
+      timer.current = setTimeout(submit, ADVANCE_DELAY);
     }
   };
 
   const setCustom = (value: string) => {
-    update(
+    commit(
       drafts.map((item, position) =>
-        position === page ? { selected: kind === "single" && value ? [] : item.selected, custom: value } : item,
+        position === shown ? { selected: kind === "single" && value ? [] : item.selected, custom: value } : item,
       ),
     );
   };
 
+  const sendCustom = () => {
+    if (!draft.custom.trim()) return;
+    if (last) submit();
+    else goTo(shown + 1);
+  };
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const next = Math.ceil(event.nativeEvent.layout.height);
+    if (next === measured.current) return;
+    const initial = measured.current === 0;
+    measured.current = next;
+    height.value = initial || reduceMotion ? next : withSpring(next, HEIGHT_SPRING);
+  };
+
+  const shellStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(1, enter.value * 1.6),
+    transform: [{ translateY: (1 - enter.value) * 22 }, { scale: 0.985 + enter.value * 0.015 }],
+  }));
+  const clipStyle = useAnimatedStyle(() => (height.value > 0 ? { height: height.value } : {}));
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+    transform: [{ translateX: contentShift.value }],
+  }));
+
+  const radius = variant === "card" ? 26 : 0;
   const container: ViewStyle =
     variant === "card"
       ? {
-          borderRadius: 20,
+          borderRadius: radius,
           borderCurve: "continuous",
-          borderWidth: 1,
-          borderColor: hairline,
           backgroundColor: palette.card,
-          padding: 16,
+          borderWidth: 1,
+          borderColor: withAlpha(palette.text, 0.06),
+          shadowColor: "#000000",
+          shadowOpacity: 0.08,
+          shadowRadius: 22,
+          shadowOffset: { width: 0, height: 8 },
         }
-      : { paddingHorizontal: 20, paddingVertical: 8 };
-
-  if (sent) {
-    return (
-      <Animated.View
-        entering={reduceMotion ? undefined : ZoomIn.duration(260).easing(EASE)}
-        style={[{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 12, height: 30, borderRadius: 15, backgroundColor: withAlpha(palette.success, 0.14) }, variant === "sheet" && { marginHorizontal: 20, marginTop: 12 }, style]}
-      >
-        {icons?.sent ?? <Text style={[metaStyle, { color: palette.success }]}>✓</Text>}
-        <Text style={[metaStyle, { color: palette.success }]}>{copy.sent}</Text>
-      </Animated.View>
-    );
-  }
-
-  if (!question) return null;
-
-  const entering = reduceMotion ? undefined : (direction === 1 ? FadeInRight : FadeInLeft).duration(280).easing(EASE);
-  const exiting = reduceMotion ? undefined : (direction === 1 ? FadeOutLeft : FadeOutRight).duration(160);
+      : {};
+  const padding: ViewStyle =
+    variant === "card"
+      ? { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6 }
+      : { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 8 };
+  const showFooter = kind === "multiple" && draft.selected.length > 0;
 
   return (
-    <Animated.View
-      entering={reduceMotion || variant === "sheet" ? undefined : FadeInDown.duration(380).easing(EASE)}
-      layout={layout}
-      style={[container, { overflow: "hidden" }, style]}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10, minHeight: 28 }}>
-        {questions.length > 1 && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-            <IconButton label="Previous question" disabled={page === 0} onPress={() => goTo(page - 1)}>
-              {icons?.previous ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18 }]}>‹</Text>}
-            </IconButton>
-            <Animated.Text
-              key={page}
-              entering={reduceMotion ? undefined : (direction === 1 ? FadeInUp : FadeInDown).duration(220)}
-              style={[metaStyle, { color: palette.textSecondary, fontVariant: ["tabular-nums"], minWidth: 44, textAlign: "center" }]}
+    <Animated.View style={[container, shellStyle, style]}>
+      <Animated.View style={[{ overflow: "hidden", borderRadius: radius }, clipStyle]}>
+        <View onLayout={handleLayout} style={[padding, { position: "absolute", top: 0, left: 0, right: 0 }]}>
+          {sent ? (
+            <Animated.View
+              entering={reduceMotion ? undefined : FadeIn.duration(260).easing(EASE_OUT)}
+              style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 }}
             >
-              {copy.progress(page + 1, questions.length)}
-            </Animated.Text>
-            <IconButton label="Next question" disabled={last} onPress={() => goTo(page + 1)}>
-              {icons?.next ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18 }]}>›</Text>}
-            </IconButton>
-          </View>
-        )}
-        <View style={{ flex: 1 }} />
-        {onClose && (
-          <IconButton label="Close" onPress={onClose}>
-            {icons?.close ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18 }]}>×</Text>}
-          </IconButton>
-        )}
-      </View>
-
-      <Animated.View key={question.key ?? page} entering={entering} exiting={exiting}>
-        <Text accessibilityRole="header" style={[titleStyle, { color: palette.text, marginBottom: 12 }]}>
-          {question.title}
-        </Text>
-        <View accessibilityRole={kind === "single" ? "radiogroup" : undefined}>
-          {options.map((option, index) => {
-            const selected = draft.selected.includes(index);
-            return (
-              <Pressable
-                key={`${index}-${option.label}`}
-                onPress={() => select(index)}
-                accessibilityRole={kind === "single" ? "radio" : "checkbox"}
-                accessibilityState={{ checked: selected }}
-                accessibilityLabel={option.label}
-                style={({ pressed }) => ({
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 12,
-                  paddingVertical: 12,
-                  borderTopWidth: index === 0 ? 0 : 1,
-                  borderTopColor: hairline,
-                  opacity: pressed ? 0.6 : 1,
-                })}
+              <Animated.View
+                entering={reduceMotion ? undefined : ZoomIn.springify().damping(14).stiffness(320)}
+                style={{ width: CHIP, height: CHIP, borderRadius: CHIP / 2, alignItems: "center", justifyContent: "center", backgroundColor: palette.success }}
               >
-                {renderOption ? (
-                  renderOption(option, { index, selected, kind })
-                ) : (
-                  <>
-                    {numbered && (
-                      <Text style={[metaStyle, { color: palette.textTertiary, width: 18, fontVariant: ["tabular-nums"] }]}>
-                        {index + 1}
-                      </Text>
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Text style={[optionStyle, { color: palette.text }]}>{option.label}</Text>
-                      {option.description ? (
-                        <Text style={[metaStyle, { color: palette.textSecondary, marginTop: 2, fontWeight: "400" }]}>
-                          {option.description}
-                        </Text>
+                {icons?.sent ?? <Text style={{ color: palette.accentContrast, fontSize: 13, fontWeight: "700" }}>✓</Text>}
+              </Animated.View>
+              <Text style={[optionStyle, { color: palette.text, fontWeight: "500" }]}>{copy.sent}</Text>
+            </Animated.View>
+          ) : question ? (
+            <>
+              <View style={{ flexDirection: "row", alignItems: "center", minHeight: 32 }}>
+                {questions.length > 1 ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", marginLeft: -8 }}>
+                    <IconButton label="Previous question" disabled={page === 0} onPress={() => goTo(page - 1)}>
+                      {icons?.previous ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18, fontWeight: "400" }]}>‹</Text>}
+                    </IconButton>
+                    <Text style={[metaStyle, { color: palette.textSecondary, fontVariant: ["tabular-nums"] }]}>
+                      {copy.progress(page + 1, questions.length)}
+                    </Text>
+                    <IconButton
+                      label="Next question"
+                      disabled={page === questions.length - 1 || !isAnswered(drafts[page])}
+                      onPress={() => goTo(page + 1)}
+                    >
+                      {icons?.next ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18, fontWeight: "400" }]}>›</Text>}
+                    </IconButton>
+                  </View>
+                ) : null}
+                <View style={{ flex: 1 }} />
+                {onClose ? (
+                  <IconButton label="Close" onPress={onClose}>
+                    {icons?.close ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18, fontWeight: "400" }]}>×</Text>}
+                  </IconButton>
+                ) : null}
+              </View>
+
+              <Animated.View style={contentStyle}>
+                <Text accessibilityRole="header" style={[titleStyle, { color: palette.text, marginTop: 2, marginBottom: 6 }]}>
+                  {question.title}
+                </Text>
+                <View accessibilityRole={kind === "single" ? "radiogroup" : undefined}>
+                  {options.map((option, index) => (
+                    <OptionRow
+                      key={`${shown}-${index}`}
+                      label={option.label}
+                      description={option.description}
+                      index={index}
+                      kind={kind}
+                      selected={draft.selected.includes(index)}
+                      divider={index > 0}
+                      numbered={numbered}
+                      palette={palette}
+                      hairline={hairline}
+                      optionStyle={optionStyle}
+                      metaStyle={metaStyle}
+                      checkIcon={icons?.check}
+                      animate={!reduceMotion}
+                      renderOption={renderOption}
+                      onPress={() => select(index)}
+                    />
+                  ))}
+                  {question.allowCustom !== false ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 12,
+                        minHeight: 50,
+                        borderTopWidth: options.length ? 1 : 0,
+                        borderTopColor: hairline,
+                      }}
+                    >
+                      <View style={{ width: CHIP, height: CHIP, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: palette.surface }}>
+                        {icons?.custom ?? <Text style={[metaStyle, { color: palette.textSecondary }]}>✎</Text>}
+                      </View>
+                      <TextInput
+                        value={draft.custom}
+                        onChangeText={setCustom}
+                        placeholder={copy.customPlaceholder}
+                        placeholderTextColor={palette.textTertiary}
+                        returnKeyType={last ? "send" : "next"}
+                        onSubmitEditing={sendCustom}
+                        style={[optionStyle, { flex: 1, color: palette.text, paddingVertical: 12 }]}
+                      />
+                      {draft.custom.trim() ? (
+                        <Animated.View
+                          entering={reduceMotion ? undefined : ZoomIn.springify().damping(15).stiffness(340)}
+                          exiting={reduceMotion ? undefined : ZoomOut.duration(140)}
+                        >
+                          <Pressable
+                            onPress={sendCustom}
+                            accessibilityRole="button"
+                            accessibilityLabel={last ? copy.submit : copy.next}
+                            hitSlop={6}
+                            style={({ pressed }) => ({
+                              width: 32,
+                              height: 32,
+                              borderRadius: 16,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: palette.accent,
+                              opacity: pressed ? 0.8 : 1,
+                            })}
+                          >
+                            {icons?.send ?? <Text style={{ color: palette.accentContrast, fontSize: 16, fontWeight: "700" }}>↑</Text>}
+                          </Pressable>
+                        </Animated.View>
                       ) : null}
                     </View>
-                    <Check selected={selected} kind={kind} palette={palette} animate={!reduceMotion} icon={icons?.check} />
-                  </>
-                )}
-              </Pressable>
-            );
-          })}
-          {question.allowCustom !== false && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderTopWidth: options.length ? 1 : 0, borderTopColor: hairline }}>
-              <View style={{ width: numbered ? 18 : undefined, alignItems: "flex-start" }}>
-                {icons?.custom ?? <Text style={[metaStyle, { color: palette.textTertiary }]}>✎</Text>}
-              </View>
-              {editing || draft.custom ? (
-                <TextInput
-                  autoFocus={editing}
-                  value={draft.custom}
-                  onChangeText={setCustom}
-                  onBlur={() => setEditing(false)}
-                  placeholder={copy.customPlaceholder}
-                  placeholderTextColor={palette.textTertiary}
-                  returnKeyType={last ? "send" : "next"}
-                  onSubmitEditing={() => (last ? allAnswered && submit(drafts) : goTo(page + 1))}
-                  style={[optionStyle, { flex: 1, color: palette.text, paddingVertical: 2 }]}
-                />
-              ) : (
-                <Pressable style={{ flex: 1 }} onPress={() => setEditing(true)} accessibilityRole="button">
-                  <Text style={[optionStyle, { color: palette.textTertiary }]}>{copy.customPlaceholder}</Text>
-                </Pressable>
-              )}
-            </View>
-          )}
+                  ) : null}
+                </View>
+                {showFooter ? (
+                  <Animated.View
+                    entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}
+                    exiting={reduceMotion ? undefined : FadeOut.duration(120)}
+                    style={{ alignItems: "flex-end", paddingTop: 6, paddingBottom: 6 }}
+                  >
+                    <Pressable
+                      onPress={() => (last ? submit() : goTo(shown + 1))}
+                      accessibilityRole="button"
+                      style={({ pressed }) => ({
+                        paddingHorizontal: 18,
+                        height: 38,
+                        borderRadius: 19,
+                        justifyContent: "center",
+                        backgroundColor: palette.text,
+                        opacity: pressed ? 0.85 : 1,
+                      })}
+                    >
+                      <Text style={[metaStyle, { color: palette.background, fontSize: 15, fontWeight: "600" }]}>
+                        {last ? copy.submit : copy.next}
+                      </Text>
+                    </Pressable>
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
+            </>
+          ) : null}
         </View>
       </Animated.View>
-
-      {(answered && (kind === "multiple" || last || draft.custom.trim().length > 0)) && (
-        <Animated.View entering={reduceMotion ? undefined : FadeInUp.duration(200).easing(EASE)} exiting={reduceMotion ? undefined : FadeOut.duration(120)} style={{ marginTop: 12, alignItems: "flex-end" }}>
-          <Pressable
-            onPress={() => (last ? submit(drafts) : goTo(page + 1))}
-            disabled={last && !allAnswered}
-            accessibilityRole="button"
-            style={({ pressed }) => ({
-              paddingHorizontal: 18,
-              height: 38,
-              borderRadius: 19,
-              justifyContent: "center",
-              backgroundColor: palette.text,
-              opacity: last && !allAnswered ? 0.4 : pressed ? 0.8 : 1,
-            })}
-          >
-            <Text style={[metaStyle, { color: palette.background, fontSize: 15 }]}>{last ? copy.submit : copy.next}</Text>
-          </Pressable>
-        </Animated.View>
-      )}
     </Animated.View>
   );
 }
@@ -380,35 +483,142 @@ function IconButton({ label, disabled, onPress, children }: { label: string; dis
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: !!disabled }}
-      style={{ width: 28, height: 28, alignItems: "center", justifyContent: "center", opacity: disabled ? 0.3 : 1 }}
+      style={{ width: 30, height: 30, alignItems: "center", justifyContent: "center", opacity: disabled ? 0.28 : 1 }}
     >
       {children}
     </Pressable>
   );
 }
 
-type CheckProps = { selected: boolean; kind: "single" | "multiple"; palette: MotionPalette; animate: boolean; icon?: ReactNode };
+type OptionRowProps = {
+  label: string;
+  description?: string;
+  index: number;
+  kind: "single" | "multiple";
+  selected: boolean;
+  divider: boolean;
+  numbered: boolean;
+  palette: MotionPalette;
+  hairline: string;
+  optionStyle: StyleProp<TextStyle>;
+  metaStyle: StyleProp<TextStyle>;
+  checkIcon?: ReactNode;
+  animate: boolean;
+  renderOption?: QuestionCardProps["renderOption"];
+  onPress: () => void;
+};
 
-function Check({ selected, kind, palette, animate, icon }: CheckProps) {
-  const size = 22;
+function OptionRow({
+  label,
+  description,
+  index,
+  kind,
+  selected,
+  divider,
+  numbered,
+  palette,
+  hairline,
+  optionStyle,
+  metaStyle,
+  checkIcon,
+  animate,
+  renderOption,
+  onPress,
+}: OptionRowProps) {
+  const pop = useSharedValue(1);
+  const fill = useSharedValue(selected ? 1 : 0);
+  const pressed = useSharedValue(0);
+  const rest = withAlpha(palette.text, 0);
+  const press = withAlpha(palette.text, 0.05);
+
+  useEffect(() => {
+    fill.value = animate ? withTiming(selected ? 1 : 0, { duration: 180, easing: EASE_OUT }) : selected ? 1 : 0;
+    if (selected && animate) pop.value = withSequence(withTiming(0.86, { duration: 70 }), withSpring(1, CHIP_SPRING));
+  }, [animate, fill, pop, selected]);
+
+  const chipStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+  const chipFill = useAnimatedStyle(() => ({ opacity: fill.value }));
+  const rowStyle = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(pressed.value, [0, 1], [rest, press]) }));
+
   return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: kind === "single" ? size / 2 : 6,
-        borderWidth: selected ? 0 : 1.5,
-        borderColor: withAlpha(palette.text, 0.25),
-        backgroundColor: selected ? palette.accent : "transparent",
-        alignItems: "center",
-        justifyContent: "center",
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => {
+        pressed.value = withTiming(1, { duration: 80 });
       }}
+      onPressOut={() => {
+        pressed.value = withTiming(0, { duration: 220 });
+      }}
+      accessibilityRole={kind === "single" ? "radio" : "checkbox"}
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={label}
     >
-      {selected && (
-        <Animated.View entering={animate ? ZoomIn.duration(180).easing(EASE) : undefined} exiting={animate ? FadeOut.duration(100) : undefined}>
-          {icon ?? <Text style={{ color: palette.accentContrast, fontSize: 13, fontWeight: "700" }}>✓</Text>}
-        </Animated.View>
-      )}
-    </View>
+      <Animated.View
+        style={[
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+            minHeight: 50,
+            paddingVertical: 10,
+            marginHorizontal: -8,
+            paddingHorizontal: 8,
+            borderRadius: 12,
+          },
+          rowStyle,
+        ]}
+      >
+        {divider ? (
+          <View style={{ position: "absolute", top: 0, left: numbered ? CHIP + 20 : 8, right: 8, height: 1, backgroundColor: hairline }} />
+        ) : null}
+        {renderOption ? (
+          renderOption({ label, description }, { index, selected, kind })
+        ) : (
+          <>
+            {numbered ? (
+              <Animated.View
+                style={[
+                  { width: CHIP, height: CHIP, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: palette.surface },
+                  chipStyle,
+                ]}
+              >
+                <Animated.View
+                  style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: 8, backgroundColor: palette.text }, chipFill]}
+                />
+                <Text style={[metaStyle, { color: selected ? palette.background : palette.textSecondary, fontVariant: ["tabular-nums"] }]}>
+                  {index + 1}
+                </Text>
+              </Animated.View>
+            ) : null}
+            <View style={{ flex: 1 }}>
+              <Text style={[optionStyle, { color: palette.text }]}>{label}</Text>
+              {description ? (
+                <Text style={[metaStyle, { color: palette.textSecondary, marginTop: 1, fontWeight: "400" }]}>{description}</Text>
+              ) : null}
+            </View>
+            {kind === "multiple" ? (
+              <View
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 11,
+                  borderWidth: selected ? 0 : 1.5,
+                  borderColor: withAlpha(palette.text, 0.22),
+                  backgroundColor: selected ? palette.text : "transparent",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {selected ? (
+                  <Animated.View entering={animate ? ZoomIn.springify().damping(14).stiffness(380) : undefined}>
+                    {checkIcon ?? <Text style={{ color: palette.background, fontSize: 12, fontWeight: "700" }}>✓</Text>}
+                  </Animated.View>
+                ) : null}
+              </View>
+            ) : null}
+          </>
+        )}
+      </Animated.View>
+    </Pressable>
   );
 }
