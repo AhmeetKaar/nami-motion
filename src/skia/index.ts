@@ -1,10 +1,16 @@
 export { BlurText, type BlurTextProps, type BlurTextSplit } from "./blur-text";
-export { ImageGenerating, type ImageGeneratingProps } from "./image-generating";
+export { DotOrb, type DotOrbProps, type DotOrbVariant } from "./dot-orb";
 export { MatrixOrb, type MatrixOrbProps, type MatrixOrbState } from "./matrix-orb";
 export {
+  ImageGenerating,
+  MediaGenerating,
   VideoGenerating,
-  type VideoGeneratingLabels,
+  type ImageGeneratingProps,
+  type MediaGeneratingChrome,
+  type MediaGeneratingLabels,
+  type MediaGeneratingProps,
+  type MediaGeneratingStatus,
+  type MediaGeneratingVariant,
   type VideoGeneratingProps,
-  type VideoGeneratingStatus,
-} from "./video-generating";
+} from "./media-generating";
 export { VoiceWave, type VoiceWaveProps } from "./voice-wave";

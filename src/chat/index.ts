@@ -20,3 +20,4 @@ export {
   type QuestionOption,
   type QuestionOptionState,
 } from "./question-card";
+export { EffortBar, type EffortBarProps, type EffortLevel } from "./effort-bar";

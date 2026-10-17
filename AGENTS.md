@@ -24,8 +24,8 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 | `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
 | `nami-motion/text` | ShimmerText, StreamingText | — |
 | `nami-motion/brand` | SpinningMark | — |
-| `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard | — |
-| `nami-motion/skia` | BlurText, ImageGenerating, VideoGenerating, MatrixOrb, VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
+| `nami-motion/skia` | BlurText, MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
 | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge, CountUp | @shopify/react-native-skia |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
@@ -70,5 +70,5 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Sıradaki işler
 
 1. Yayın (kullanıcı onayıyla): `npm login --auth-type=web`, `npm publish --auth-type=web --provenance=false`, tag `v0.5.0` + push (üç repo).
-2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, tagline → BlurText, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, Usage/Credits → charts). Commit ve merge Nami kurallarıyla.
+2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, tagline → BlurText, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, reasoning effort → EffortBar, Usage/Credits → charts). Commit ve merge Nami kurallarıyla.
 3. Ertelenen componentler: MessageActions, FollowUpChips, JumpToBottom, IconSwap, EmptyState, StackToast, ErrorCard, UpgradeCard, CodeBlock, SourceBadge, TTS bar.

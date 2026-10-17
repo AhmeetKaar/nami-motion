@@ -21,9 +21,9 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/thinking-block.gif" width="200" alt="Thinking Block recording" /><br /><b>Thinking Block</b><br /><code>nami-motion/chat</code></td>
   </tr>
   <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/image-generating.gif" width="200" alt="Image Generating recording" /><br /><b>Image Generating</b><br /><code>nami-motion/skia</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/video-generating.gif" width="200" alt="Video Generating recording" /><br /><b>Video Generating</b><br /><code>nami-motion/skia</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/question-card.gif" width="200" alt="Question Card recording" /><br /><b>Question Card</b><br /><code>nami-motion/chat</code></td>
+    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/effort-bar.gif" width="200" alt="Effort Bar recording" /><br /><b>Effort Bar</b><br /><code>nami-motion/chat</code></td>
+    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/media-generating.gif" width="200" alt="Media Generating recording" /><br /><b>Media Generating</b><br /><code>nami-motion/skia</code></td>
   </tr>
   <tr>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/charts.gif" width="200" alt="Charts recording" /><br /><b>Charts</b><br /><code>nami-motion/charts</code></td>
@@ -44,12 +44,13 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Streaming Text | `nami-motion/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
 | Spinning Mark | `nami-motion/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
 | Blur Text | `nami-motion/skia` | Phrases blur in and out letter by letter in your own font. |
-| Image Generating | `nami-motion/skia` | Drifting color blobs, grain and a sweep band while an image is generated. |
-| Video Generating | `nami-motion/skia` | Dot-matrix shader cover with queued/generating label, progress and meta chips. |
+| Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with eight variants (blobs, matrix, orbit, scan, constellation, helix, ring, morph). `ImageGenerating` and `VideoGenerating` are its presets. |
+| DotOrb | `nami-motion/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
 | Voice Wave | `nami-motion/skia` | Three-layer Skia waveform driven by live microphone level. |
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
+| Effort Bar | `nami-motion/chat` | Reasoning effort as rising bars or a sliding track, with a compact row badge and an illustration per level. |
 | Charts | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge and CountUp for usage and credits. |
 
 Every component takes its icon, font, colors and timing as props and falls back
@@ -97,13 +98,30 @@ import { StatusRow, ThinkingBlock } from "nami-motion/chat";
 <StreamingText text={answer} streaming={streaming} textStyle={{ fontFamily: "Inter" }} />;
 ```
 
-### Image and Video Generating
+### Media Generating (shared by image and video)
 
 ```tsx
-import { ImageGenerating, VideoGenerating } from "nami-motion/skia";
+import { ImageGenerating, MediaGenerating, VideoGenerating } from "nami-motion/skia";
 
-<ImageGenerating label="Creating image" startedAt={startedAt} aspectRatio={1} />;
-<VideoGenerating status="generating" progress={0.42} meta="720p · 6s" startedAt={startedAt} />;
+<MediaGenerating variant="constellation" label="Creating image" startedAt={startedAt} />;
+<MediaGenerating variant="scan" chrome="overlay" status="generating" progress={0.42} meta="720p · 6s" aspectRatio={16 / 9} />;
+<ImageGenerating variant="helix" startedAt={startedAt} />;
+<VideoGenerating status="queued" variant="orbit" />;
+```
+
+### Effort Bar
+
+```tsx
+import { EffortBar } from "nami-motion/chat";
+import { DotOrb } from "nami-motion/skia";
+
+<EffortBar
+  levels={["Low", "Medium", "High", "Max"]}
+  value={effort}
+  onChange={setEffort}
+  title="Reasoning"
+  illustration={(index) => <DotOrb variant={["ring", "orbit", "constellation", "scan"][index]} size={120} />}
+/>;
 ```
 
 ### Question Card
