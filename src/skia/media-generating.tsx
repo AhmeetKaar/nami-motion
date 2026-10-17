@@ -137,7 +137,7 @@ export function MediaGenerating({
     ) : variant === "matrix" ? (
       <MatrixOrb cover dots={dots} color={dotColor ?? palette.accent} state={status === "queued" ? "idle" : "thinking"} />
     ) : (
-      <View style={{ flex: 1, padding: 18 }}>
+      <View style={{ flex: 1, padding: "9%" }}>
         <DotOrb variant={variant} color={dotColor ?? palette.text} accent={accentColor ?? palette.accent} />
       </View>
     )

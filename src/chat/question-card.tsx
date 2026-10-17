@@ -93,6 +93,7 @@ export type QuestionCardProps = {
   onAnswerChange?: (answers: QuestionAnswer[]) => void;
   onHaptic?: (kind: "select" | "page" | "submit") => void;
   renderOption?: (option: { label: string; description?: string }, state: QuestionOptionState) => ReactNode;
+  fontFamily?: string;
   titleStyle?: StyleProp<TextStyle>;
   optionStyle?: StyleProp<TextStyle>;
   metaStyle?: StyleProp<TextStyle>;
@@ -148,12 +149,17 @@ export function QuestionCard({
   onAnswerChange,
   onHaptic,
   renderOption,
-  titleStyle = DEFAULT_TITLE_STYLE,
-  optionStyle = DEFAULT_OPTION_STYLE,
-  metaStyle = DEFAULT_META_STYLE,
+  fontFamily,
+  titleStyle: titleStyleProp = DEFAULT_TITLE_STYLE,
+  optionStyle: optionStyleProp = DEFAULT_OPTION_STYLE,
+  metaStyle: metaStyleProp = DEFAULT_META_STYLE,
   colors,
   style,
 }: QuestionCardProps) {
+  const font = fontFamily ? { fontFamily } : null;
+  const titleStyle = [titleStyleProp, font];
+  const optionStyle = [optionStyleProp, font];
+  const metaStyle = [metaStyleProp, font];
   const palette = useMotionPalette(colors);
   const reduceMotion = useReducedMotion();
   const copy = { ...DEFAULT_LABELS, ...labels };

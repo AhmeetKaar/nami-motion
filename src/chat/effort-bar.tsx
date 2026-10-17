@@ -41,7 +41,7 @@ export type EffortBarProps = {
   variant?: "bars" | "track";
   size?: "regular" | "compact";
   title?: string;
-  icon?: ReactNode;
+  icon?: ReactNode | ((index: number) => ReactNode);
   badge?: ReactNode;
   illustration?: (index: number) => ReactNode;
   illustrationHeight?: number;
@@ -210,7 +210,19 @@ export function EffortBar({
           ) : null}
           {showHeader ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              {icon}
+              {typeof icon === "function" ? (
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                  <Animated.View
+                    key={`icon${index}`}
+                    entering={reduceMotion ? undefined : ZoomIn.springify().damping(13).stiffness(260)}
+                    exiting={reduceMotion ? undefined : FadeOut.duration(100)}
+                  >
+                    {icon(index)}
+                  </Animated.View>
+                </View>
+              ) : (
+                icon
+              )}
               <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
                 {title ? <Text style={[labelStyle, { color: palette.text }]}>{title}</Text> : null}
                 {badge}
