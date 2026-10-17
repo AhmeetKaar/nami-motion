@@ -50,7 +50,7 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
-| Effort Bar | `nami-motion/chat` | Reasoning effort as rising bars or a sliding track, with a compact row badge and an illustration per level. |
+| Effort Bar | `nami-motion/chat` | Reasoning effort as rising gradient pills with the budget share, wired to `reasoning.effort` (low, medium, high); track and compact styles, per level icon and illustration. |
 | Charts | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge and CountUp for usage and credits. |
 
 Every component takes its icon, font, colors and timing as props and falls back
@@ -111,17 +111,14 @@ import { ImageGenerating, MediaGenerating, VideoGenerating } from "nami-motion/s
 
 ### Effort Bar
 
-```tsx
-import { EffortBar } from "nami-motion/chat";
-import { DotOrb } from "nami-motion/skia";
+`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens.
 
-<EffortBar
-  levels={["Low", "Medium", "High", "Max"]}
-  value={effort}
-  onChange={setEffort}
-  title="Reasoning"
-  illustration={(index) => <DotOrb variant={["ring", "orbit", "constellation", "scan"][index]} size={120} />}
-/>;
+```tsx
+import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "nami-motion/chat";
+
+<EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i, level) => setEffort(level.value)} title="Reasoning" />;
+
+const body = { model, messages, max_tokens: 16000, ...reasoningRequest(effort) };
 ```
 
 ### Question Card
