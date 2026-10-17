@@ -1,7 +1,7 @@
 {
   "name": "nami-motion",
   "version": "0.4.0",
-  "description": "Production animations for React Native and Expo chat apps: shimmer text and a Skia voice wave.",
+  "description": "Production animations for React Native and Expo chat apps: brand marks, blur text, streaming, thinking, generation loaders, question cards, swipe actions and charts.",
   "license": "MIT",
   "author": "Ahmet Kar",
   "repository": {
@@ -38,6 +38,26 @@
       "types": "./lib/typescript/src/text/index.d.ts",
       "default": "./lib/module/text/index.js"
     },
+    "./brand": {
+      "source": "./src/brand/index.ts",
+      "types": "./lib/typescript/src/brand/index.d.ts",
+      "default": "./lib/module/brand/index.js"
+    },
+    "./chat": {
+      "source": "./src/chat/index.ts",
+      "types": "./lib/typescript/src/chat/index.d.ts",
+      "default": "./lib/module/chat/index.js"
+    },
+    "./charts": {
+      "source": "./src/charts/index.ts",
+      "types": "./lib/typescript/src/charts/index.d.ts",
+      "default": "./lib/module/charts/index.js"
+    },
+    "./gestures": {
+      "source": "./src/gestures/index.ts",
+      "types": "./lib/typescript/src/gestures/index.d.ts",
+      "default": "./lib/module/gestures/index.js"
+    },
     "./skia": {
       "source": "./src/skia/index.ts",
       "types": "./lib/typescript/src/skia/index.d.ts",
@@ -64,9 +84,13 @@
     "react-native": ">=0.83.0",
     "react-native-reanimated": ">=4.2.0",
     "react-native-worklets": ">=0.7.0",
+    "react-native-gesture-handler": ">=2.30.0",
     "@shopify/react-native-skia": ">=2.4.0"
   },
   "peerDependenciesMeta": {
+    "react-native-gesture-handler": {
+      "optional": true
+    },
     "@shopify/react-native-skia": {
       "optional": true
     }
@@ -100,6 +124,7 @@
     "react": "19.2.0",
     "react-native": "0.83.10",
     "react-native-builder-bob": "^0.43.2",
+    "react-native-gesture-handler": "2.30.0",
     "react-native-reanimated": "4.2.1",
     "react-native-worklets": "0.7.4",
     "typescript": "~5.9.2"
