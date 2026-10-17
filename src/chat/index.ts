@@ -10,3 +10,13 @@ export {
   type ThinkingStep,
   type ThinkingStepStatus,
 } from "./thinking-block";
+export {
+  QuestionCard,
+  type Question,
+  type QuestionAnswer,
+  type QuestionCardIcons,
+  type QuestionCardLabels,
+  type QuestionCardProps,
+  type QuestionOption,
+  type QuestionOptionState,
+} from "./question-card";
