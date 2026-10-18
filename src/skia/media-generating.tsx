@@ -184,7 +184,6 @@ export function MediaGenerating({
           borderRadius: radius,
           borderCurve: "continuous",
           overflow: "hidden",
-          backgroundColor: palette.surface,
         }}
       >
         <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>{field}</View>

@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - d5b5f9c: EffortBar is now only the bar, so you can place it anywhere with your own UX around it. The header and description it used to draw are gone, along with the `title`, `icon`, `badge`, `showHeader`, `showNumber`, `formatNumber`, `showDescription`, `labelStyle`, `numberStyle` and `detailStyle` props; render your own title, level label or description next to the bar instead. `accessibilityLabel` names the adjustable control for screen readers (it defaults to "Effort"). Track, segmented and slider keep their level labels, `levelIcon`, `tabLabel`, `fillColors` and `barHeight`, and `size="compact"` is now the small control on its own.
+- MediaGenerating no longer paints a gray surface behind its picture, so the dots, blobs or matrix sit straight on your screen; wrap it in your own view if you want a card behind it.
 
 ## 0.5.0
 
