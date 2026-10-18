@@ -27,6 +27,7 @@ export {
   VoiceWaveDots,
   VoiceWaveLines,
   VoiceWavePulse,
+  VoiceWaveRing,
   type VoiceWaveProps,
   type VoiceWaveStyleProps,
   type VoiceWaveVariant,
