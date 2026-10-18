@@ -138,6 +138,21 @@ const level = useSharedValue(0);
 <VoiceWave level={level} variant="ring" height={240} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
 ```
 
+### Liquid Orb and Spoken Text (voice mode)
+
+`LiquidOrb` is a Skia liquid orb in `metal`, `water` or `iridescent`; `state` switches between `idle`, `listening`, `thinking` and `speaking`, and `level` (0-1) makes it swell while listening or speaking. `SpokenText` highlights the word being read aloud: pass the index of the current word as `spoken`.
+
+```tsx
+import { useSharedValue } from "react-native-reanimated";
+import { LiquidOrb } from "nami-motion/skia";
+import { SpokenText } from "nami-motion/text";
+
+const level = useSharedValue(0);
+
+<LiquidOrb material="water" state={isRecording ? "listening" : "idle"} level={level} size={240} />;
+<SpokenText text={reply} spoken={wordIndex} textStyle={{ fontFamily: "Inter", fontSize: 20, lineHeight: 28 }} />;
+```
+
 ## Development
 
 ```bash
