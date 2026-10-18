@@ -63,6 +63,14 @@ export type MediaGeneratingLabels = Record<MediaGeneratingStatus, string>;
 
 export type MediaGeneratingChrome = "header" | "overlay" | "none";
 
+export type MediaGeneratingSize = "1024x1024" | "1024x1536" | "1536x1024";
+
+export const MEDIA_GENERATING_SIZES: Record<MediaGeneratingSize, { width: number; height: number }> = {
+  "1024x1024": { width: 1024, height: 1024 },
+  "1024x1536": { width: 1024, height: 1536 },
+  "1536x1024": { width: 1536, height: 1024 },
+};
+
 export type MediaGeneratingProps = {
   variant?: MediaGeneratingVariant;
   chrome?: MediaGeneratingChrome;
@@ -74,6 +82,7 @@ export type MediaGeneratingProps = {
   startedAt?: number;
   showTimer?: boolean;
   formatTimer?: (seconds: number) => string;
+  size?: MediaGeneratingSize;
   aspectRatio?: number;
   width?: DimensionValue;
   maxHeight?: number;
@@ -104,7 +113,8 @@ export function MediaGenerating({
   startedAt,
   showTimer = true,
   formatTimer = formatElapsed,
-  aspectRatio = 1,
+  size = "1024x1024",
+  aspectRatio,
   width = "100%",
   maxHeight = 360,
   radius = 16,
@@ -130,6 +140,8 @@ export function MediaGenerating({
   const chip = withAlpha(palette.background, 0.72);
   const showSweep = sweep ?? variant === "blobs";
   const timer = showTimer && startedAt !== undefined ? formatTimer(seconds) : null;
+  const dimensions = MEDIA_GENERATING_SIZES[size] ?? MEDIA_GENERATING_SIZES["1024x1024"];
+  const ratio = aspectRatio ?? dimensions.width / dimensions.height;
 
   const field = cover ?? (
     variant === "blobs" ? (
@@ -164,7 +176,9 @@ export function MediaGenerating({
       ) : null}
       <View
         style={{
-          aspectRatio,
+          width: "100%",
+          aspectRatio: ratio,
+          maxWidth: maxHeight * ratio,
           maxHeight,
           borderRadius: radius,
           borderCurve: "continuous",
@@ -213,8 +227,8 @@ export function ImageGenerating({ header = true, label = "Creating image", width
 
 export type VideoGeneratingProps = Omit<MediaGeneratingProps, "status"> & { status: MediaGeneratingStatus };
 
-export function VideoGenerating({ variant = "matrix", chrome = "overlay", aspectRatio = 16 / 9, ...props }: VideoGeneratingProps) {
-  return <MediaGenerating variant={variant} chrome={chrome} aspectRatio={aspectRatio} {...props} />;
+export function VideoGenerating({ variant = "matrix", chrome = "overlay", size, aspectRatio = size ? undefined : 16 / 9, ...props }: VideoGeneratingProps) {
+  return <MediaGenerating variant={variant} chrome={chrome} size={size} aspectRatio={aspectRatio} {...props} />;
 }
 
 type BlobFieldProps = { colors: string[]; grain: boolean; sweep: boolean; sweepColor: string; still: boolean };
