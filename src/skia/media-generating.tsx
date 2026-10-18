@@ -24,7 +24,7 @@ import Animated, {
   cancelAnimation,
   Easing,
   FadeIn,
-  FadeOut,
+  LinearTransition,
   type SharedValue,
   useAnimatedStyle,
   useDerivedValue,
@@ -42,6 +42,7 @@ import { useMotionPalette } from "../theme/provider";
 import { DotOrb, type DotOrbVariant } from "./dot-orb";
 import { MatrixOrb } from "./matrix-orb";
 
+const EASE_IN_OUT = Easing.inOut(Easing.quad);
 const HEADER_TEXT: TextStyle = { fontSize: 14, lineHeight: 20, fontWeight: "500" };
 const CHIP_TEXT: TextStyle = { fontSize: 13, lineHeight: 18, fontWeight: "600" };
 const DEFAULT_BLOBS = [moodstoneSwatches.lilac, moodstoneSwatches.sky, moodstoneSwatches.blossom];
@@ -189,16 +190,22 @@ export function MediaGenerating({
         <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>{field}</View>
         {chrome === "overlay" ? (
           <View style={{ position: "absolute", top: 12, left: 12, right: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, height: 26, borderRadius: 13, backgroundColor: chip }}>
+            <Animated.View
+              layout={reduceMotion ? undefined : LinearTransition.duration(260).easing(EASE_IN_OUT)}
+              style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, height: 26, borderRadius: 13, backgroundColor: chip }}
+            >
               {icon}
               <PulseLabel key={title} text={title} animate={!reduceMotion} textStyle={[CHIP_TEXT, textStyle, { color: palette.text }]} />
               {timer ? <Text style={[CHIP_TEXT, textStyle, { color: palette.textSecondary, fontVariant: ["tabular-nums"] }]}>{timer}</Text> : null}
-            </View>
+            </Animated.View>
             <View style={{ flex: 1 }} />
             {percent !== undefined ? (
-              <View style={{ paddingHorizontal: 10, height: 26, borderRadius: 13, justifyContent: "center", backgroundColor: chip }}>
+              <Animated.View
+                entering={reduceMotion ? undefined : FadeIn.duration(260).easing(EASE_IN_OUT)}
+                style={{ paddingHorizontal: 10, height: 26, borderRadius: 13, justifyContent: "center", backgroundColor: chip }}
+              >
                 <Text style={[CHIP_TEXT, textStyle, { color: palette.text, fontVariant: ["tabular-nums"] }]}>{`${percent}%`}</Text>
-              </View>
+              </Animated.View>
             ) : null}
           </View>
         ) : null}
@@ -305,7 +312,7 @@ function PulseLabel({ text, animate, textStyle }: { text: string; animate: boole
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   return (
-    <Animated.View entering={animate ? FadeIn.duration(240) : undefined} exiting={animate ? FadeOut.duration(160) : undefined}>
+    <Animated.View entering={animate ? FadeIn.duration(260).easing(EASE_IN_OUT) : undefined}>
       <Animated.Text style={[textStyle, animatedStyle]}>{text}</Animated.Text>
     </Animated.View>
   );
@@ -346,8 +353,12 @@ function ProgressTrack({ progress, active, animate, color, track }: ProgressTrac
   if (!active && !determinate) return null;
 
   return (
-    <View onLayout={handleLayout} style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: TRACK, backgroundColor: track, overflow: "hidden" }}>
+    <Animated.View
+      entering={animate ? FadeIn.duration(260).easing(EASE_IN_OUT) : undefined}
+      onLayout={handleLayout}
+      style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: TRACK, backgroundColor: track, overflow: "hidden" }}
+    >
       <Animated.View style={[{ height: TRACK, backgroundColor: color, borderRadius: TRACK / 2 }, fillStyle]} />
-    </View>
+    </Animated.View>
   );
 }
