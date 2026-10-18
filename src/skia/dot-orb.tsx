@@ -1,7 +1,7 @@
 import { Canvas, Path, Skia, type SkPath, useClock } from "@shopify/react-native-skia";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { type StyleProp, type ViewStyle } from "react-native";
-import { useDerivedValue, useReducedMotion, useSharedValue } from "react-native-reanimated";
+import { Easing, useDerivedValue, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
 import { useMotionPalette } from "../theme/provider";
 
 export type DotOrbVariant = "orbit" | "scan" | "constellation" | "helix";
@@ -14,6 +14,8 @@ export type DotOrbProps = {
   speed?: number;
   dotScale?: number;
   paused?: boolean;
+  inset?: number;
+  scatter?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -21,6 +23,7 @@ type Frame = { back: SkPath; mid: SkPath; front: SkPath; accent: SkPath; lines: 
 
 const TAU = Math.PI * 2;
 const STILL_TIME = 1800;
+const SCATTER_MS = 700;
 
 function fibonacciSphere(count: number) {
   const points: number[] = [];
@@ -82,6 +85,8 @@ export function DotOrb({
   speed = 1,
   dotScale = 1,
   paused = false,
+  inset = 0,
+  scatter = false,
   style,
 }: DotOrbProps) {
   const palette = useMotionPalette();
@@ -91,6 +96,11 @@ export function DotOrb({
   const clock = useClock();
   const layout = useSharedValue({ width: size ?? 0, height: size ?? 0 });
   const still = reduceMotion || paused;
+  const spread = useSharedValue(scatter ? 1 : 0);
+
+  useEffect(() => {
+    spread.value = scatter && !reduceMotion ? withTiming(1, { duration: SCATTER_MS, easing: Easing.out(Easing.cubic) }) : scatter ? 1 : 0;
+  }, [reduceMotion, scatter, spread]);
 
   const sphere = useMemo(() => fibonacciSphere(variant === "constellation" ? 46 : 240), [variant]);
   const edges = useMemo(() => (variant === "constellation" ? buildEdges(sphere, 0.6) : []), [sphere, variant]);
@@ -101,7 +111,10 @@ export function DotOrb({
     const height = layout.value.height;
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.min(width, height) * 0.4;
+    const pad = inset * width;
+    const radius = Math.min(width - pad * 2, height - pad * 2) * 0.4;
+    const s = spread.value;
+    let order = 0;
     const dot = Math.max(0.6, radius * 0.045 * dotScale);
     const back = Skia.Path.Make();
     const mid = Skia.Path.Make();
@@ -110,11 +123,24 @@ export function DotOrb({
     const lines = Skia.Path.Make();
     let linesOpacity = 0;
 
+    const spot = (x: number, y: number) => {
+      const px = cx + x * radius;
+      const py = cy + y * radius;
+      order += 1;
+      if (s === 0) return [px, py];
+      const hx = Math.sin(order * 12.9898) * 43758.5453;
+      const hy = Math.sin(order * 78.233) * 43758.5453;
+      const tx = width * (0.06 + 0.88 * (hx - Math.floor(hx)));
+      const ty = height * (0.06 + 0.88 * (hy - Math.floor(hy)));
+      return [px + (tx - px) * s, py + (ty - py) * s];
+    };
+
     const place = (x: number, y: number, z: number, scale: number) => {
       const depth = (z + 1) / 2;
       const r = dot * scale * (0.45 + 0.55 * depth);
       const target = z < -0.3 ? back : z < 0.35 ? mid : front;
-      target.addCircle(cx + x * radius, cy + y * radius, r);
+      const at = spot(x, y);
+      target.addCircle(at[0], at[1], r);
     };
 
     if (variant === "orbit") {
@@ -152,7 +178,8 @@ export function DotOrb({
         const longitude = Math.atan2(projected[0], projected[2]);
         const near = Math.abs(longitude - sweep);
         if (projected[2] > 0 && near < 0.2) {
-          accentPath.addCircle(cx + projected[0] * radius, cy + projected[1] * radius, dot * 0.95 * (1.25 - near * 2));
+          const at = spot(projected[0], projected[1]);
+          accentPath.addCircle(at[0], at[1], dot * 0.95 * (1.25 - near * 2));
         } else {
           place(projected[0], projected[1], projected[2], 0.62);
         }
@@ -161,7 +188,7 @@ export function DotOrb({
       const spin = t * 0.22;
       const cycle = (t % 6.5) / 6.5;
       const grow = smooth(cycle / 0.6);
-      linesOpacity = cycle < 0.85 ? 0.42 : 0.42 * (1 - smooth((cycle - 0.85) / 0.15));
+      linesOpacity = (cycle < 0.85 ? 0.42 : 0.42 * (1 - smooth((cycle - 0.85) / 0.15))) * (1 - s);
       const points: number[] = [];
       for (let index = 0; index < sphere.length; index += 3) {
         const projected = project(sphere[index], sphere[index + 1], sphere[index + 2], spin, 0.35);

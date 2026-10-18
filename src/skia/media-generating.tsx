@@ -94,6 +94,7 @@ export type MediaGeneratingProps = {
   grain?: boolean;
   sweep?: boolean;
   dots?: number;
+  scatter?: boolean;
   cover?: ReactNode;
   icon?: ReactNode;
   textStyle?: StyleProp<TextStyle>;
@@ -125,6 +126,7 @@ export function MediaGenerating({
   grain = true,
   sweep,
   dots = 14,
+  scatter = false,
   cover,
   icon,
   textStyle,
@@ -150,9 +152,7 @@ export function MediaGenerating({
     ) : variant === "matrix" ? (
       <MatrixOrb cover dots={dots} color={dotColor ?? palette.accent} state={status === "queued" ? "idle" : "thinking"} />
     ) : (
-      <View style={{ flex: 1, padding: "9%" }}>
-        <DotOrb variant={variant} color={dotColor ?? palette.text} accent={accentColor ?? palette.accent} />
-      </View>
+      <DotOrb variant={variant} color={dotColor ?? palette.text} accent={accentColor ?? palette.accent} inset={0.09} scatter={scatter} />
     )
   );
 
