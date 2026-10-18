@@ -20,7 +20,7 @@ export {
   type QuestionOption,
   type QuestionOptionState,
 } from "./question-card";
-export { EffortBar, type EffortBarProps, type EffortLevel, type EffortSelection } from "./effort-bar";
+export { EffortBar, type EffortBarProps, type EffortBarVariant, type EffortLevel, type EffortSelection } from "./effort-bar";
 export {
   DEFAULT_REASONING_EFFORT,
   REASONING_EFFORTS,

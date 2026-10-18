@@ -29,12 +29,21 @@ import { type MotionPalette } from "../theme/palette";
 import { useMotionPalette } from "../theme/provider";
 
 const LEVEL_SPRING = { damping: 20, stiffness: 190, mass: 0.9 };
+const GRAB_SPRING = { damping: 22, stiffness: 320, mass: 0.7 };
 const EASE_OUT = Easing.bezier(0.22, 1, 0.36, 1);
 const DEFAULT_LABEL_STYLE: TextStyle = { fontSize: 16, lineHeight: 22, fontWeight: "600" };
 const DEFAULT_NUMBER_STYLE: TextStyle = { fontSize: 30, lineHeight: 34, fontWeight: "700" };
 const DEFAULT_DETAIL_STYLE: TextStyle = { fontSize: 13, lineHeight: 18 };
 const DEFAULT_SEGMENT_STYLE: TextStyle = { fontSize: 13, lineHeight: 18, fontWeight: "600" };
 const DEFAULT_GRADIENT = ["#53C26B", "#9BCB4A", "#F0C64A", "#F19A3E", "#EC6A4F", "#E5486F"];
+const DIAL_SWEEP = 270;
+const DOT_ROWS = 4;
+const COMPACT_DOT = 3.5;
+const COMPACT_DOT_GAP = 1.5;
+const SLIDER_KNOB = 26;
+const COMPACT_SLIDER_KNOB = 10;
+
+export type EffortBarVariant = "bars" | "track" | "segmented" | "dial" | "dots" | "slider";
 
 export type EffortLevel = string | { key?: string; label: string; description?: string; value?: string; budget?: number };
 
@@ -44,7 +53,7 @@ export type EffortBarProps = {
   levels: EffortLevel[];
   value: number;
   onChange?: (index: number, level: EffortSelection) => void;
-  variant?: "bars" | "track";
+  variant?: EffortBarVariant;
   size?: "regular" | "compact";
   steps?: number;
   title?: string;
@@ -98,6 +107,12 @@ function filledFor(index: number, count: number, steps: number) {
   return Math.max(1, Math.round(((index + 1) / count) * steps));
 }
 
+function defaultSteps(variant: EffortBarVariant, compact: boolean, count: number) {
+  if (variant === "dial") return compact ? 5 : 27;
+  if (variant === "dots") return compact ? count : 16;
+  return compact ? count : Math.max(count, 10);
+}
+
 export function EffortBar({
   levels,
   value,
@@ -130,15 +145,25 @@ export function EffortBar({
   const index = Math.min(count - 1, Math.max(0, value));
   const current = items[index];
   const compact = size === "compact";
-  const steps = variant === "track" ? count : Math.max(count, stepsProp ?? (compact ? count : Math.max(count, 10)));
+  const meter = variant === "bars" || variant === "dial" || variant === "dots";
+  const stops = fillColors && fillColors.length > 0 ? fillColors : undefined;
+  const custom = !!stops;
+  const tinted = custom || variant === "bars";
+  const steps = meter ? Math.max(count, stepsProp ?? defaultSteps(variant, compact, count)) : count;
   const filled = filledFor(index, count, steps);
+  const ratio = count > 1 ? index / (count - 1) : 0;
   const fill = useSharedValue(filled);
   const level = useSharedValue(index);
-  const [width, setWidth] = useState(0);
+  const knob = useSharedValue(ratio);
+  const pressed = useSharedValue(0);
+  const [layout, setLayout] = useState({ width: 0, height: 0 });
   const lastIndex = useRef(index);
+  const indexRef = useRef(index);
   const previous = useRef(index);
+  const dragging = useRef(false);
   const rising = index >= previous.current;
   const interactive = !!onChange && !disabled;
+  indexRef.current = index;
 
   useEffect(() => {
     fill.value = reduceMotion ? filled : withSpring(filled, LEVEL_SPRING);
@@ -146,19 +171,30 @@ export function EffortBar({
     previous.current = index;
   }, [fill, filled, index, level, reduceMotion]);
 
-  const barColors = useMemo(() => spread(fillColors && fillColors.length > 0 ? fillColors : DEFAULT_GRADIENT, steps), [fillColors, steps]);
+  useEffect(() => {
+    if (dragging.current) return;
+    knob.value = reduceMotion ? ratio : withSpring(ratio, LEVEL_SPRING);
+  }, [knob, ratio, reduceMotion]);
+
+  const barColors = useMemo(
+    () => (tinted ? spread(stops ?? DEFAULT_GRADIENT, steps) : new Array(steps).fill(palette.text)),
+    [palette.text, steps, stops, tinted],
+  );
   const levelColors = useMemo(() => items.map((_, position) => barColors[filledFor(position, count, steps) - 1]), [barColors, count, items, steps]);
   const trackFills = useMemo(
-    () => (fillColors && fillColors.length > 0 ? spread(fillColors, count) : items.map(() => palette.text)),
-    [count, fillColors, items, palette.text],
+    () => (stops ? spread(stops, count) : items.map(() => palette.text)),
+    [count, items, palette.text, stops],
   );
   const accent = levelColors[index] ?? palette.accent;
+  const meterLabelColor = meter && tinted ? accent : palette.textSecondary;
   const numberFor = (position: number) => {
     if (formatNumber) return formatNumber(position, filledFor(position, count, steps));
     const budget = items[position]?.budget;
     return budget !== undefined ? `${Math.round(budget * 100)}%` : String(filledFor(position, count, steps));
   };
   const numberWidth = Math.max(...items.map((_, position) => numberFor(position).length)) * 19;
+  const knobSize = compact ? COMPACT_SLIDER_KNOB : SLIDER_KNOB;
+  const diameter = barHeight ?? (compact ? 20 : 148);
 
   const select = (next: number) => {
     const item = items[next];
@@ -166,15 +202,38 @@ export function EffortBar({
     onChange?.(next, { index: next, label: item.label, value: item.value, budget: item.budget });
   };
 
-  const pick = (x: number) => {
-    if (!interactive || width === 0) return;
-    const next = Math.min(count - 1, Math.max(0, Math.floor((x / width) * count)));
+  const pick = (x: number, y: number, grant: boolean) => {
+    if (!interactive || layout.width === 0) return;
+    let next: number;
+    if (variant === "slider") {
+      const position = Math.min(1, Math.max(0, (x - knobSize / 2) / Math.max(1, layout.width - knobSize)));
+      dragging.current = true;
+      knob.value = reduceMotion || !grant ? position : withSpring(position, GRAB_SPRING);
+      if (grant && !reduceMotion) pressed.value = withSpring(1, GRAB_SPRING);
+      next = Math.round(position * (count - 1));
+    } else if (variant === "dial") {
+      const angle = (Math.atan2(x - layout.width / 2, diameter / 2 - y) * 180) / Math.PI;
+      const clamped = Math.min(DIAL_SWEEP / 2, Math.max(-DIAL_SWEEP / 2, angle));
+      next = Math.min(count - 1, Math.floor(((clamped + DIAL_SWEEP / 2) / DIAL_SWEEP) * count));
+    } else {
+      next = Math.min(count - 1, Math.max(0, Math.floor((x / layout.width) * count)));
+    }
     if (next === lastIndex.current) return;
     lastIndex.current = next;
     select(next);
   };
   const pickRef = useRef(pick);
   pickRef.current = pick;
+
+  const release = () => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    const target = count > 1 ? indexRef.current / (count - 1) : 0;
+    knob.value = reduceMotion ? target : withSpring(target, LEVEL_SPRING);
+    pressed.value = reduceMotion ? 0 : withSpring(0, LEVEL_SPRING);
+  };
+  const releaseRef = useRef(release);
+  releaseRef.current = release;
 
   useEffect(() => {
     lastIndex.current = index;
@@ -186,13 +245,18 @@ export function EffortBar({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 4,
         onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (event) => pickRef.current(event.nativeEvent.locationX),
-        onPanResponderMove: (event) => pickRef.current(event.nativeEvent.locationX),
+        onPanResponderGrant: (event) => pickRef.current(event.nativeEvent.locationX, event.nativeEvent.locationY, true),
+        onPanResponderMove: (event) => pickRef.current(event.nativeEvent.locationX, event.nativeEvent.locationY, false),
+        onPanResponderRelease: () => releaseRef.current(),
+        onPanResponderTerminate: () => releaseRef.current(),
       }),
     [],
   );
 
-  const handleLayout = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setLayout({ width, height });
+  };
 
   const handleAction = (event: AccessibilityActionEvent) => {
     if (!interactive) return;
@@ -201,15 +265,92 @@ export function EffortBar({
     if (next !== index) select(next);
   };
 
-  const height = barHeight ?? (compact ? 14 : variant === "track" ? 44 : 56);
+  const dotRows = compact ? Math.min(steps, DOT_ROWS) : DOT_ROWS;
+  const height =
+    variant === "dial"
+      ? compact
+        ? diameter
+        : Math.ceil(diameter * 0.86)
+      : variant === "slider"
+        ? compact
+          ? knobSize
+          : knobSize + 28
+        : variant === "dots"
+          ? compact
+            ? dotRows * COMPACT_DOT + (dotRows - 1) * COMPACT_DOT_GAP
+            : barHeight
+          : barHeight ?? (compact ? 14 : variant === "track" ? 44 : variant === "segmented" ? 40 : 56);
+  const compactWidth =
+    variant === "dial"
+      ? diameter
+      : variant === "segmented"
+        ? count * 12 + 4
+        : variant === "slider"
+          ? 40
+          : variant === "dots"
+            ? steps * COMPACT_DOT + (steps - 1) * COMPACT_DOT_GAP
+            : steps * 5 + (steps - 1) * 2.5;
+
+  const dialCenter =
+    !compact && current ? (
+      <View style={{ alignItems: "center", gap: 2 }}>
+        {showNumber ? (
+          <View style={{ overflow: "hidden" }}>
+            <Animated.Text
+              key={`n${index}`}
+              entering={reduceMotion ? undefined : (rising ? FadeInUp : FadeInDown).delay(70).duration(240).easing(EASE_OUT)}
+              exiting={reduceMotion ? undefined : FadeOut.duration(60)}
+              style={[numberStyle, { color: palette.text, fontVariant: ["tabular-nums"] }]}
+            >
+              {numberFor(index)}
+            </Animated.Text>
+          </View>
+        ) : null}
+        <Animated.Text
+          key={`l${index}`}
+          entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
+          style={[segmentStyle, { color: meterLabelColor }]}
+        >
+          {current.label}
+        </Animated.Text>
+      </View>
+    ) : null;
+
+  const visual =
+    variant === "track" ? (
+      <Track items={items} level={level} width={layout.width} height={height ?? 44} fills={trackFills} palette={palette} compact={compact} segmentStyle={segmentStyle} />
+    ) : variant === "segmented" ? (
+      <Segmented items={items} level={level} width={layout.width} height={height ?? 40} fills={trackFills} custom={custom} palette={palette} compact={compact} segmentStyle={segmentStyle} />
+    ) : variant === "dial" ? (
+      <Dial steps={steps} fill={fill} size={diameter} colors={barColors} palette={palette} compact={compact}>
+        {dialCenter}
+      </Dial>
+    ) : variant === "dots" ? (
+      <Dots steps={steps} rows={dotRows} fill={fill} height={height} colors={barColors} palette={palette} compact={compact} />
+    ) : variant === "slider" ? (
+      <Slider
+        items={items}
+        level={level}
+        knob={knob}
+        pressed={pressed}
+        width={layout.width}
+        knobSize={knobSize}
+        fills={trackFills}
+        palette={palette}
+        compact={compact}
+        segmentStyle={segmentStyle}
+      />
+    ) : (
+      <Bars steps={steps} fill={fill} height={height ?? 56} colors={barColors} palette={palette} compact={compact} />
+    );
 
   const control = (
-    <View onLayout={handleLayout} {...(interactive ? responder.panHandlers : {})} style={{ height, justifyContent: "flex-end" }}>
-      {variant === "track" ? (
-        <Track items={items} level={level} width={width} height={height} fills={trackFills} palette={palette} compact={compact} segmentStyle={segmentStyle} />
-      ) : (
-        <Bars steps={steps} fill={fill} height={height} colors={barColors} palette={palette} compact={compact} />
-      )}
+    <View
+      onLayout={handleLayout}
+      {...(interactive ? responder.panHandlers : {})}
+      style={{ height, justifyContent: variant === "dial" ? "flex-start" : "flex-end", alignItems: variant === "dial" ? "center" : "stretch" }}
+    >
+      <View pointerEvents="none">{visual}</View>
     </View>
   );
 
@@ -228,6 +369,8 @@ export function EffortBar({
       icon
     );
 
+  const labelled = variant === "track" || variant === "segmented" || variant === "slider" || variant === "dots";
+
   return (
     <View
       accessible
@@ -241,12 +384,12 @@ export function EffortBar({
     >
       {compact ? (
         <>
-          <View style={{ width: steps * 5 + (steps - 1) * 2.5 }}>{control}</View>
+          <View style={{ width: compactWidth }}>{control}</View>
           {showHeader && current ? (
             <Animated.Text
               key={index}
               entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}
-              style={[segmentStyle, { color: variant === "track" ? palette.textSecondary : accent }]}
+              style={[segmentStyle, { color: meterLabelColor }]}
             >
               {current.label}
             </Animated.Text>
@@ -287,7 +430,7 @@ export function EffortBar({
               </View>
             </View>
           ) : null}
-          {showHeader && variant === "track" ? (
+          {showHeader && labelled ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               {iconNode}
               <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -303,12 +446,19 @@ export function EffortBar({
               </Animated.Text>
             </View>
           ) : null}
+          {showHeader && variant === "dial" && (iconNode || title || badge) ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              {iconNode}
+              {title ? <Text style={[labelStyle, { color: palette.text }]}>{title}</Text> : null}
+              {badge}
+            </View>
+          ) : null}
           {control}
           {showDescription && current?.description ? (
             <Animated.Text
               key={`d${index}`}
               entering={reduceMotion ? undefined : FadeIn.duration(240).easing(EASE_OUT)}
-              style={[detailStyle, { color: palette.textSecondary }]}
+              style={[detailStyle, { color: palette.textSecondary, textAlign: variant === "dial" ? "center" : "auto" }]}
             >
               {current.description}
             </Animated.Text>
@@ -432,4 +582,329 @@ function Track({ items, level, width, height, fills, palette, compact, segmentSt
       ) : null}
     </View>
   );
+}
+
+type LevelLabelProps = {
+  label: string;
+  position: number;
+  level: SharedValue<number>;
+  on: string;
+  off: string;
+  segmentStyle: StyleProp<TextStyle>;
+  align?: "left" | "center" | "right";
+  style?: StyleProp<ViewStyle>;
+};
+
+function LevelLabel({ label, position, level, on, off, segmentStyle, align = "center", style }: LevelLabelProps) {
+  const colorStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(Math.min(1, Math.abs(level.value - position)), [0, 1], [on, off]),
+  }));
+  return (
+    <View style={style}>
+      <Animated.Text numberOfLines={1} style={[segmentStyle, { textAlign: align }, colorStyle]}>
+        {label}
+      </Animated.Text>
+    </View>
+  );
+}
+
+type SegmentedProps = {
+  items: { label: string }[];
+  level: SharedValue<number>;
+  width: number;
+  height: number;
+  fills: string[];
+  custom: boolean;
+  palette: MotionPalette;
+  compact: boolean;
+  segmentStyle: StyleProp<TextStyle>;
+};
+
+function Segmented({ items, level, width, height, fills, custom, palette, compact, segmentStyle }: SegmentedProps) {
+  const count = items.length;
+  const inset = compact ? 2 : 3;
+  const radius = height / 2;
+  const segment = Math.max(0, (width - inset * 2) / Math.max(1, count));
+  const inputs = items.map((_, position) => position);
+  const thumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: segment * level.value }],
+    backgroundColor: custom ? (count > 1 ? interpolateColor(level.value, inputs, fills) : fills[0]) : compact ? palette.text : palette.card,
+  }));
+
+  return (
+    <View style={{ height, flexDirection: "row", padding: inset, borderRadius: radius, borderCurve: "continuous", backgroundColor: palette.surface }}>
+      {width > 0 ? (
+        <Animated.View
+          style={[
+            { position: "absolute", top: inset, left: inset, bottom: inset, width: segment, borderRadius: radius - inset, borderCurve: "continuous" },
+            !custom && !compact ? { shadowColor: "#000000", shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } } : null,
+            thumbStyle,
+          ]}
+        />
+      ) : null}
+      {!compact
+        ? items.map((item, position) => (
+            <LevelLabel
+              key={`${position}-${item.label}`}
+              label={item.label}
+              position={position}
+              level={level}
+              on={custom ? palette.background : palette.text}
+              off={palette.textSecondary}
+              segmentStyle={segmentStyle}
+              style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+            />
+          ))
+        : null}
+    </View>
+  );
+}
+
+type DialProps = {
+  steps: number;
+  fill: SharedValue<number>;
+  size: number;
+  colors: string[];
+  palette: MotionPalette;
+  compact: boolean;
+  children?: ReactNode;
+};
+
+function Dial({ steps, fill, size, colors, palette, compact, children }: DialProps) {
+  const radius = size / 2;
+  const length = compact ? Math.max(3, size * 0.3) : size * 0.085;
+  const thickness = compact ? 3 : 3.5;
+  const track = withAlpha(palette.text, compact ? 0.16 : 0.1);
+  return (
+    <View style={{ width: size, height: size }}>
+      {Array.from({ length: steps }, (_, position) => (
+        <Tick
+          key={position}
+          position={position}
+          angle={steps > 1 ? -DIAL_SWEEP / 2 + (DIAL_SWEEP * position) / (steps - 1) : 0}
+          radius={radius}
+          length={length}
+          thickness={thickness}
+          fill={fill}
+          color={colors[position]}
+          track={track}
+          compact={compact}
+        />
+      ))}
+      {children ? (
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>{children}</View>
+      ) : null}
+    </View>
+  );
+}
+
+type TickProps = {
+  position: number;
+  angle: number;
+  radius: number;
+  length: number;
+  thickness: number;
+  fill: SharedValue<number>;
+  color: string;
+  track: string;
+  compact: boolean;
+};
+
+function Tick({ position, angle, radius, length, thickness, fill, color, track, compact }: TickProps) {
+  const amount = useDerivedValue(() => Math.min(1, Math.max(0, fill.value - position)));
+  const colorStyle = useAnimatedStyle(() => ({ opacity: amount.value }));
+  const popStyle = useAnimatedStyle(() => {
+    const near = Math.max(0, 1 - Math.abs(fill.value - (position + 1)));
+    return { transform: [{ scaleY: 1 + near * (compact ? 0 : 0.4) }] };
+  });
+  return (
+    <View style={{ position: "absolute", top: 0, left: radius - thickness / 2, width: thickness, height: radius * 2, transform: [{ rotate: `${angle}deg` }] }}>
+      <Animated.View style={[{ width: thickness, height: length, borderRadius: thickness / 2, backgroundColor: track, overflow: "hidden" }, popStyle]}>
+        <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: color }, colorStyle]} />
+      </Animated.View>
+    </View>
+  );
+}
+
+type DotsProps = {
+  steps: number;
+  rows: number;
+  fill: SharedValue<number>;
+  height?: number;
+  colors: string[];
+  palette: MotionPalette;
+  compact: boolean;
+};
+
+function Dots({ steps, rows, fill, height, colors, palette, compact }: DotsProps) {
+  const track = withAlpha(palette.text, compact ? 0.16 : 0.1);
+  return (
+    <View
+      style={[
+        { flexDirection: "row" },
+        compact ? { height, gap: COMPACT_DOT_GAP } : height !== undefined ? { height } : { width: "100%", aspectRatio: steps / rows },
+      ]}
+    >
+      {Array.from({ length: steps }, (_, column) => {
+        const tall = Math.max(1, Math.ceil(((column + 1) / steps) * rows));
+        return (
+          <View key={column} style={[{ flexDirection: "column-reverse" }, compact ? { width: COMPACT_DOT, gap: COMPACT_DOT_GAP } : { flex: 1 }]}>
+            {Array.from({ length: rows }, (_, row) =>
+              row < tall ? (
+                <Dot key={row} column={column} row={row} tall={tall} fill={fill} color={colors[column]} track={track} compact={compact} />
+              ) : (
+                <View key={row} style={compact ? { height: COMPACT_DOT } : { flex: 1 }} />
+              ),
+            )}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+type DotProps = {
+  column: number;
+  row: number;
+  tall: number;
+  fill: SharedValue<number>;
+  color: string;
+  track: string;
+  compact: boolean;
+};
+
+function Dot({ column, row, tall, fill, color, track, compact }: DotProps) {
+  const amount = useDerivedValue(() => Math.min(1, Math.max(0, (fill.value - column) * tall - row)));
+  const colorStyle = useAnimatedStyle(() => ({ opacity: amount.value }));
+  const popStyle = useAnimatedStyle(() => {
+    const near = Math.max(0, 1 - Math.abs(fill.value - (column + 1)));
+    return { transform: [{ scale: 1 + near * (compact ? 0 : 0.18) }] };
+  });
+  const dot = (
+    <Animated.View
+      style={[
+        compact ? { width: COMPACT_DOT, height: COMPACT_DOT } : { width: "52%", aspectRatio: 1 },
+        { borderRadius: 999, backgroundColor: track, overflow: "hidden" },
+        popStyle,
+      ]}
+    >
+      <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: color }, colorStyle]} />
+    </Animated.View>
+  );
+  return compact ? dot : <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>{dot}</View>;
+}
+
+type SliderProps = {
+  items: { label: string }[];
+  level: SharedValue<number>;
+  knob: SharedValue<number>;
+  pressed: SharedValue<number>;
+  width: number;
+  knobSize: number;
+  fills: string[];
+  palette: MotionPalette;
+  compact: boolean;
+  segmentStyle: StyleProp<TextStyle>;
+};
+
+function Slider({ items, level, knob, pressed, width, knobSize, fills, palette, compact, segmentStyle }: SliderProps) {
+  const count = items.length;
+  const inset = knobSize / 2;
+  const span = Math.max(0, width - knobSize);
+  const rail = compact ? 4 : 6;
+  const gap = count > 1 ? span / (count - 1) : 0;
+  const inputs = items.map((_, position) => position);
+  const fillStyle = useAnimatedStyle(() => ({
+    width: inset + span * knob.value,
+    backgroundColor: count > 1 ? interpolateColor(knob.value * (count - 1), inputs, fills) : fills[0],
+  }));
+  const knobStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: span * knob.value }, { scale: 1 + pressed.value * 0.14 }],
+  }));
+
+  return (
+    <View style={{ gap: compact ? 0 : 10 }}>
+      <View style={{ height: knobSize, justifyContent: "center" }}>
+        <View style={{ height: rail, borderRadius: rail / 2, backgroundColor: palette.surface, overflow: "hidden" }}>
+          {width > 0 ? <Animated.View style={[{ position: "absolute", top: 0, left: 0, bottom: 0, borderRadius: rail / 2 }, fillStyle]} /> : null}
+        </View>
+        {!compact && width > 0
+          ? items.map((item, position) => (
+              <Stop
+                key={`${position}-${item.label}`}
+                position={position}
+                count={count}
+                knob={knob}
+                left={inset + gap * position}
+                on={withAlpha(palette.background, 0.85)}
+                off={withAlpha(palette.text, 0.22)}
+              />
+            ))
+          : null}
+        {width > 0 ? (
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: knobSize,
+                height: knobSize,
+                borderRadius: knobSize / 2,
+                backgroundColor: palette.card,
+                borderWidth: 1,
+                borderColor: withAlpha(palette.text, 0.08),
+                shadowColor: "#000000",
+                shadowOpacity: compact ? 0.08 : 0.14,
+                shadowRadius: compact ? 2 : 5,
+                shadowOffset: { width: 0, height: compact ? 1 : 2 },
+              },
+              knobStyle,
+            ]}
+          />
+        ) : null}
+      </View>
+      {!compact && width > 0 ? (
+        <View style={{ height: 18 }}>
+          {items.map((item, position) => {
+            const first = position === 0 && count > 1;
+            const last = position === count - 1 && count > 1;
+            const box = count > 1 ? gap : width;
+            return (
+              <LevelLabel
+                key={`${position}-${item.label}`}
+                label={item.label}
+                position={position}
+                level={level}
+                on={palette.text}
+                off={palette.textSecondary}
+                segmentStyle={segmentStyle}
+                align={first ? "left" : last ? "right" : "center"}
+                style={[
+                  { position: "absolute", top: 0, width: box },
+                  first ? { left: 0 } : last ? { right: 0 } : { left: inset + gap * position - box / 2 },
+                ]}
+              />
+            );
+          })}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+type StopProps = {
+  position: number;
+  count: number;
+  knob: SharedValue<number>;
+  left: number;
+  on: string;
+  off: string;
+};
+
+function Stop({ position, count, knob, left, on, off }: StopProps) {
+  const colorStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(Math.min(1, Math.max(0, knob.value * (count - 1) - position + 0.5)), [0, 1], [off, on]),
+  }));
+  return <Animated.View style={[{ position: "absolute", left: left - 2, top: "50%", marginTop: -2, width: 4, height: 4, borderRadius: 2 }, colorStyle]} />;
 }
