@@ -1,4 +1,4 @@
-import { Blur, Canvas, Fill, Group, Oval, Paint, Shader, Skia } from "@shopify/react-native-skia";
+import { Blur, Canvas, Fill, Group, Oval, Paint, Path, Shader, Skia } from "@shopify/react-native-skia";
 import { useEffect, useMemo } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
 import {
@@ -11,7 +11,7 @@ import {
 } from "react-native-reanimated";
 import { useMotionPalette } from "../theme/provider";
 
-export type LiquidOrbMaterial = "metal" | "water" | "iridescent";
+export type LiquidOrbMaterial = "metal" | "water" | "iridescent" | "ring";
 
 export type LiquidOrbState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -25,12 +25,18 @@ export type LiquidOrbProps = {
   distortion?: number;
   detail?: number;
   tint?: string;
+  colors?: [string, string, string];
   shadow?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
-const MATERIALS: Record<LiquidOrbMaterial, number> = { metal: 0, water: 1, iridescent: 2 };
-const DEFAULT_TINTS: Record<LiquidOrbMaterial, string> = { metal: "#B8C0CC", water: "#6FA8E8", iridescent: "#F2E9FF" };
+const MATERIALS: Record<LiquidOrbMaterial, number> = { metal: 0, water: 1, iridescent: 2, ring: 1 };
+const DEFAULT_TINTS: Record<LiquidOrbMaterial, string> = { metal: "#B8C0CC", water: "#6FA8E8", iridescent: "#F2E9FF", ring: "#3FA9F5" };
+const RING_LAYERS = [
+  { lobes: 3, speed: 2.1, phase: 0, amplitude: 1, opacity: 1, stroke: 2 },
+  { lobes: 5, speed: -1.6, phase: 1.7, amplitude: 0.7, opacity: 0.6, stroke: 1.5 },
+  { lobes: 4, speed: 1.2, phase: 3.1, amplitude: 0.5, opacity: 0.4, stroke: 1.5 },
+];
 const STATE_MOTION: Record<LiquidOrbState, { speed: number; wobble: number; scale: number; distortion: number }> = {
   idle: { speed: 0.6, wobble: 0.7, scale: 0.94, distortion: 0.8 },
   listening: { speed: 1, wobble: 1, scale: 1, distortion: 1 },
@@ -128,6 +134,38 @@ half4 main(float2 xy) {
 }
 `);
 
+type RingLayerProps = {
+  index: number;
+  size: number;
+  time: SharedValue<number>;
+  level: SharedValue<number>;
+  scale: SharedValue<number>;
+  still: boolean;
+  color: string;
+};
+
+function RingLayer({ index, size, time, level, scale, still, color }: RingLayerProps) {
+  const layer = RING_LAYERS[index];
+  const path = useDerivedValue(() => {
+    const center = size / 2;
+    const base = size * 0.3 * scale.value;
+    const amp = size * 0.14 * layer.amplitude * (0.12 + level.value * 0.88);
+    const t = (still ? 2.4 : time.value) * layer.speed + layer.phase;
+    const next = Skia.Path.Make();
+    for (let step = 0; step <= 96; step += 1) {
+      const theta = (step / 96) * Math.PI * 2;
+      const r = base + amp * Math.sin(layer.lobes * theta + t) * Math.cos(2 * theta - t * 0.7);
+      const x = center + Math.cos(theta) * r;
+      const y = center + Math.sin(theta) * r;
+      if (step === 0) next.moveTo(x, y);
+      else next.lineTo(x, y);
+    }
+    next.close();
+    return next;
+  }, [size, still]);
+  return <Path path={path} style="stroke" strokeWidth={layer.stroke * (size / 120)} strokeJoin="round" color={color} opacity={layer.opacity} />;
+}
+
 export function LiquidOrb({
   material = "water",
   state = "idle",
@@ -138,6 +176,7 @@ export function LiquidOrb({
   distortion = 0.5,
   detail = 1,
   tint,
+  colors,
   shadow = true,
   style,
 }: LiquidOrbProps) {
@@ -189,13 +228,16 @@ export function LiquidOrb({
   const shadowWidth = useDerivedValue(() => size * 0.5 * shape.value * (1 + smooth.value * 0.08));
   const shadowX = useDerivedValue(() => (size - shadowWidth.value) / 2);
   const shadowOpacity = material === "iridescent" ? 0.1 : material === "water" ? 0.16 : 0.22;
+  const ring = material === "ring";
+  const hasShadow = shadow && !ring;
+  const ringColors = colors ?? [color, color, color];
 
   if (!ORB) return null;
 
   return (
-    <View style={[{ width: size, height: size * (shadow ? 1.12 : 1) }, style]}>
-      <Canvas style={{ width: size, height: size * (shadow ? 1.12 : 1) }}>
-        {shadow ? (
+    <View style={[{ width: size, height: size * (hasShadow ? 1.12 : 1) }, style]}>
+      <Canvas style={{ width: size, height: size * (hasShadow ? 1.12 : 1) }}>
+        {hasShadow ? (
           <Group
             layer={
               <Paint>
@@ -206,11 +248,26 @@ export function LiquidOrb({
             <Oval x={shadowX} y={size * 0.98} width={shadowWidth} height={size * 0.07} color={palette.text} opacity={shadowOpacity} />
           </Group>
         ) : null}
-        <Group clip={Skia.XYWHRect(0, 0, size, size)}>
-          <Fill>
-            <Shader source={ORB} uniforms={uniforms} />
-          </Fill>
-        </Group>
+        {ring ? (
+          RING_LAYERS.map((_, index) => (
+            <RingLayer
+              key={index}
+              index={index}
+              size={size}
+              time={time}
+              level={smooth}
+              scale={shape}
+              still={reduceMotion}
+              color={ringColors[index]}
+            />
+          ))
+        ) : (
+          <Group clip={Skia.XYWHRect(0, 0, size, size)}>
+            <Fill>
+              <Shader source={ORB} uniforms={uniforms} />
+            </Fill>
+          </Group>
+        )}
       </Canvas>
     </View>
   );
