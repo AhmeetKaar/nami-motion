@@ -1,7 +1,7 @@
 # nami-motion
 
-Production animations for React Native and Expo chat apps: brand marks, blur
-text, streaming, thinking, generation loaders, question cards and charts.
+Production animations for React Native and Expo chat apps: brand marks,
+streaming, thinking, generation loaders, question cards and charts.
 
 ```bash
 npx expo install nami-motion react-native-reanimated react-native-worklets
@@ -12,21 +12,20 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 <table>
   <tr>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/spinning-mark.gif" width="200" alt="Spinning Mark recording" /><br /><b>Spinning Mark</b><br /><code>nami-motion/brand</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/blur-text.gif" width="200" alt="Blur Text recording" /><br /><b>Blur Text</b><br /><code>nami-motion/skia</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/shimmer-text.gif" width="200" alt="Shimmer Text recording" /><br /><b>Shimmer Text</b><br /><code>nami-motion/text</code></td>
+    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/streaming-text.gif" width="200" alt="Streaming Text recording" /><br /><b>Streaming Text</b><br /><code>nami-motion/text</code></td>
   </tr>
   <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/streaming-text.gif" width="200" alt="Streaming Text recording" /><br /><b>Streaming Text</b><br /><code>nami-motion/text</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/status-row.gif" width="200" alt="Status Row recording" /><br /><b>Status Row</b><br /><code>nami-motion/chat</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/thinking-block.gif" width="200" alt="Thinking Block recording" /><br /><b>Thinking Block</b><br /><code>nami-motion/chat</code></td>
+    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/question-card.gif" width="200" alt="Question Card recording" /><br /><b>Question Card</b><br /><code>nami-motion/chat</code></td>
   </tr>
   <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/question-card.gif" width="200" alt="Question Card recording" /><br /><b>Question Card</b><br /><code>nami-motion/chat</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/effort-bar.gif" width="200" alt="Effort Bar recording" /><br /><b>Effort Bar</b><br /><code>nami-motion/chat</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/media-generating.gif" width="200" alt="Media Generating recording" /><br /><b>Media Generating</b><br /><code>nami-motion/skia</code></td>
+    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/charts.gif" width="200" alt="Charts recording" /><br /><b>Charts</b><br /><code>nami-motion/charts</code></td>
   </tr>
   <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/charts.gif" width="200" alt="Charts recording" /><br /><b>Charts</b><br /><code>nami-motion/charts</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/voice-wave.gif" width="200" alt="Voice Wave recording" /><br /><b>Voice Wave</b><br /><code>nami-motion/skia</code></td>
   </tr>
 </table>
@@ -43,7 +42,6 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Shimmer Text | `nami-motion/text` | A light band sweeping across text while a response is being generated. |
 | Streaming Text | `nami-motion/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
 | Spinning Mark | `nami-motion/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
-| Blur Text | `nami-motion/skia` | Phrases blur in and out letter by letter in your own font. |
 | Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with eight variants (blobs, matrix, orbit, scan, constellation, helix, ring, morph). `ImageGenerating` and `VideoGenerating` are its presets. |
 | DotOrb | `nami-motion/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
 | Voice Wave | `nami-motion/skia` | Live microphone waveform in five styles: lines, bars, dots, pulse and ring. |
@@ -77,14 +75,6 @@ import { SpinningMark } from "nami-motion/brand";
 <SpinningMark size={160} duration={3600} breathe entrance>
   <Image source={require("./logo.png")} style={{ width: 160, height: 160 }} />
 </SpinningMark>;
-```
-
-### Blur Text
-
-```tsx
-import { BlurText } from "nami-motion/skia";
-
-<BlurText texts={["Ask anything", "Think out loud"]} fontSource={require("./font.otf")} fontSize={32} />;
 ```
 
 ### Streaming Text, Status Row, Thinking Block

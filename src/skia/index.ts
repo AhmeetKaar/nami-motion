@@ -1,4 +1,3 @@
-export { BlurText, type BlurTextProps, type BlurTextSplit } from "./blur-text";
 export { DotOrb, type DotOrbProps, type DotOrbVariant } from "./dot-orb";
 export { MatrixOrb, type MatrixOrbProps, type MatrixOrbState } from "./matrix-orb";
 export {

@@ -1,7 +1,7 @@
 {
   "name": "nami-motion",
   "version": "0.5.0",
-  "description": "Production animations for React Native and Expo chat apps: brand marks, blur text, streaming, thinking, generation loaders, question cards and charts.",
+  "description": "Production animations for React Native and Expo chat apps: brand marks, streaming, thinking, generation loaders, question cards and charts.",
   "license": "MIT",
   "author": "Ahmet Kar",
   "repository": {
