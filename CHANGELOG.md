@@ -1,5 +1,11 @@
 # nami-motion
 
+## 0.7.0
+
+### Minor Changes
+
+- 0f18220: Ring moves from VoiceWave to LiquidOrb: use `<LiquidOrb material="ring" />` with the same `state`, `level` and `size` as the other materials, and `colors` for its three loops. `VoiceWave` keeps four styles (lines, bars, dots, pulse) and `VoiceWaveRing` is removed.
+
 ## 0.6.0
 
 ### Minor Changes
