@@ -63,7 +63,7 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Durum
 
 - GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
-- npm: `nami-motion@0.5.0` 2026-10-18'de yayımlandı (tag `v0.5.0` → `10ff360`). Bekleyen dört changeset ve LiquidOrb + SpokenText 0.5.0 changelog'una katıldı. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
+- npm: `nami-motion@0.5.0` yayında (tag `v0.5.0` → `10ff360`). 0.6.0 (EffortBar yalnızca bar; başlık ve açıklama uygulamada) yerelde hazır, Nami ve iOS'ta test ediliyor; yayın kullanıcı onayıyla. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
 - Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
 
 ## Sıradaki işler
