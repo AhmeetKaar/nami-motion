@@ -1,52 +1,71 @@
 # React Native AI Animations
 
+[![npm](https://img.shields.io/npm/v/react-native-ai-animations)](https://www.npmjs.com/package/react-native-ai-animations)
+[![license](https://img.shields.io/npm/l/react-native-ai-animations)](LICENSE)
+
 Animated React Native and Expo components for AI chat apps: streaming text,
 shimmer loading text, thinking and status indicators, voice orbs and
 waveforms, image and video generation loaders, question cards and reasoning
 effort bars. Built on Reanimated and Skia, themeable, and reduce motion aware.
 
-Docs and live demos: [nami-motion-web.vercel.app](https://nami-motion-web.vercel.app/)
+**Docs and live demos:** [nami-motion-web.vercel.app](https://nami-motion-web.vercel.app/)
+
+## Installation
 
 ```bash
 npx expo install react-native-ai-animations react-native-reanimated react-native-worklets
 ```
 
-Formerly published as `nami-motion`: replace `nami-motion` with
-`react-native-ai-animations` in your imports.
+The orbs, waveforms and media loaders in `react-native-ai-animations/skia` also need Skia:
+
+```bash
+npx expo install @shopify/react-native-skia
+```
+
+| Peer | Version |
+| --- | --- |
+| `react` | 19.2 or newer |
+| `react-native` | 0.83 or newer |
+| `react-native-reanimated` | 4.2 or newer |
+| `react-native-worklets` | 0.7 or newer |
+| `@shopify/react-native-skia` | 2.4 or newer, optional |
+
+> Formerly published as `nami-motion`. Replace `nami-motion` with
+> `react-native-ai-animations` in your imports.
 
 ## Components
 
-See every component and style in motion, with copyable code and agent prompts, on
-the [website](https://nami-motion-web.vercel.app/).
+Every component and style is shown in motion, with copyable code and agent
+prompts, on the [website](https://nami-motion-web.vercel.app/).
 
 | Component | Entry | What it does |
 | --- | --- | --- |
-| Shimmer Text | `react-native-ai-animations/text` | A light band sweeping across text while a response is being generated. |
-| Streaming Text | `react-native-ai-animations/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
-| Spoken Text | `react-native-ai-animations/text` | Highlights the word being spoken and dims the words already read aloud, for voice replies. |
-| Spinning Mark | `react-native-ai-animations/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
-| Media Generating | `react-native-ai-animations/skia` | One loading state shared by image and video generation, with six variants (blobs, matrix, orbit, scan, constellation, helix). `ImageGenerating` and `VideoGenerating` are its presets. |
-| DotOrb | `react-native-ai-animations/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
-| Liquid Orb | `react-native-ai-animations/skia` | Liquid voice orb in metal, water, iridescent or ring material that reacts to idle, listening, thinking and speaking states and a live level. |
-| Voice Wave | `react-native-ai-animations/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
-| Status Row | `react-native-ai-animations/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
-| Thinking Block | `react-native-ai-animations/chat` | "Thought for Ns" header that springs open into a step timeline. |
-| Question Card | `react-native-ai-animations/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
-| Effort Bar | `react-native-ai-animations/chat` | Reasoning effort bar wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and a slider whose knob stretches as you drag and snaps to a level under a tab with your model name, each with a compact form and a per level icon. |
+| Shimmer Text | `/text` | A light band sweeping across text while a response is being generated. |
+| Streaming Text | `/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
+| Spoken Text | `/text` | Highlights the word being spoken and dims the words already read aloud, for voice replies. |
+| Spinning Mark | `/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
+| Status Row | `/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
+| Thinking Block | `/chat` | "Thought for Ns" header that springs open into a step timeline. |
+| Question Card | `/chat` | Paged questions with numbered options and a custom answer, as a card or a sheet. |
+| Effort Bar | `/chat` | Reasoning effort control wired to `reasoning.effort` (low, medium, high) in four styles: bars, track, segmented and slider. |
+| Media Generating | `/skia` | One loading state for image and video generation in six variants: blobs, matrix, orbit, scan, constellation and helix. |
+| Dot Orb | `/skia` | The dot sphere behind the media variants, also usable on its own. |
+| Matrix Orb | `/skia` | Dot matrix orb with idle, listening and thinking states and per state colors. |
+| Liquid Orb | `/skia` | Voice orb in metal, water, iridescent or ring material that reacts to idle, listening, thinking and speaking and a live level. |
+| Voice Wave | `/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
+
+Entries are subpaths of `react-native-ai-animations`. The root export holds
+`/theme` and `/text`; nothing that needs Skia is imported from the root.
 
 Every style is also its own component with the same props minus `variant`:
-`VoiceWaveLines`, `VoiceWaveBars`, `VoiceWaveDots` and `VoiceWavePulse`;
-`EffortBars`, `EffortTrack`, `EffortSegmented` and
-`EffortSlider`; `MediaGeneratingBlobs`, `MediaGeneratingMatrix`,
-`MediaGeneratingOrbit`, `MediaGeneratingScan`, `MediaGeneratingConstellation`
-and `MediaGeneratingHelix`; and `QuestionSheet`.
 
-Every component takes its icon, font, colors and timing as props and falls back
-to a static state when reduce motion is on. `react-native-ai-animations/theme` ships the
-Moodstone palette with `MotionThemeProvider` and `useMotionPalette`; pass
-`colors` to override one component.
+- `VoiceWaveLines`, `VoiceWaveBars`, `VoiceWaveDots`, `VoiceWavePulse`
+- `EffortBars`, `EffortTrack`, `EffortSegmented`, `EffortSlider`
+- `MediaGeneratingBlobs`, `MediaGeneratingMatrix`, `MediaGeneratingOrbit`,
+  `MediaGeneratingScan`, `MediaGeneratingConstellation`, `MediaGeneratingHelix`
+- `QuestionSheet`
 
-Optional peer: `@shopify/react-native-skia` for `react-native-ai-animations/skia`.
+## Usage
 
 ### Shimmer Text
 
@@ -54,16 +73,6 @@ Optional peer: `@shopify/react-native-skia` for `react-native-ai-animations/skia
 import { ShimmerText } from "react-native-ai-animations/text";
 
 <ShimmerText text="Generating a response" activeColor={colors.text} mutedColor={colors.textTertiary} />;
-```
-
-### Spinning Mark
-
-```tsx
-import { SpinningMark } from "react-native-ai-animations/brand";
-
-<SpinningMark size={160} duration={3600} breathe entrance>
-  <Image source={require("./logo.png")} style={{ width: 160, height: 160 }} />
-</SpinningMark>;
 ```
 
 ### Streaming Text, Status Row, Thinking Block
@@ -77,20 +86,33 @@ import { StatusRow, ThinkingBlock } from "react-native-ai-animations/chat";
 <StreamingText text={answer} streaming={streaming} textStyle={{ fontFamily: "Inter" }} />;
 ```
 
-### Media Generating (shared by image and video)
+### Spinning Mark
 
 ```tsx
-import { ImageGenerating, MediaGenerating, VideoGenerating } from "react-native-ai-animations/skia";
+import { SpinningMark } from "react-native-ai-animations/brand";
 
-<MediaGenerating variant="constellation" label="Creating image" startedAt={startedAt} />;
-<MediaGenerating variant="scan" chrome="overlay" status="generating" progress={0.42} meta="720p · 6s" aspectRatio={16 / 9} />;
-<ImageGenerating variant="helix" startedAt={startedAt} />;
-<VideoGenerating status="queued" variant="orbit" />;
+<SpinningMark size={160} duration={3600} breathe entrance>
+  <Image source={require("./logo.png")} style={{ width: 160, height: 160 }} />
+</SpinningMark>;
 ```
+
+### Question Card
+
+```tsx
+import { QuestionCard } from "react-native-ai-animations/chat";
+
+<QuestionCard questions={questions} variant="sheet" onSubmit={(answers) => send(answers)} />;
+```
+
+`QuestionCard` and `QuestionSheet` take a `ref` with `select(index)`,
+`goTo(page)` and `submit()`, so a demo, a voice flow or a test can drive the
+questions without touches.
 
 ### Effort Bar
 
-`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens. `variant` picks the style: `bars` (default), `track`, `segmented` or `slider`; `size="compact"` gives each one a small inline form for model rows, `fillColors` tints any of them, `tabLabel` puts your model name in the slider's tab and `levelIcon` swaps every level name for your own icon, so the state reads without text. EffortBar is only the bar: put your own title, level label or description around it, wherever your UX needs it.
+`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most
+reasoning APIs take (`low`, `medium`, `high`), with each level's share of
+`max_tokens`. `reasoningRequest(effort)` builds the request fields.
 
 ```tsx
 import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "react-native-ai-animations/chat";
@@ -103,15 +125,29 @@ import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "react-native-ai-
 const body = { model, messages, max_tokens: 16000, ...reasoningRequest(effort) };
 ```
 
-### Question Card
+| Prop | Does |
+| --- | --- |
+| `variant` | `bars` (default), `track`, `segmented` or `slider` |
+| `size="compact"` | Small inline form for model rows |
+| `fillColors` | Tints the fill of any style |
+| `tabLabel` | Your model name in the slider's tab |
+| `levelIcon` | Replaces every level name with your own icon |
+
+EffortBar is only the control: put your own title, level label or description
+around it.
+
+### Media Generating
 
 ```tsx
-import { QuestionCard } from "react-native-ai-animations/chat";
+import { ImageGenerating, MediaGenerating, VideoGenerating } from "react-native-ai-animations/skia";
 
-<QuestionCard questions={questions} variant="sheet" onSubmit={(answers) => send(answers)} />;
+<MediaGenerating variant="constellation" label="Creating image" startedAt={startedAt} />;
+<MediaGenerating variant="scan" chrome="overlay" status="generating" progress={0.42} meta="720p · 6s" aspectRatio={16 / 9} />;
+<ImageGenerating variant="helix" startedAt={startedAt} />;
+<VideoGenerating status="queued" variant="orbit" />;
 ```
 
-Both components take a `ref` with `select(index)`, `goTo(page)` and `submit()`, so a demo, a voice flow or a test can drive the questions without touches.
+`ImageGenerating` and `VideoGenerating` are presets of `MediaGenerating`.
 
 ### Voice Wave
 
@@ -124,9 +160,13 @@ const level = useSharedValue(0);
 <VoiceWave level={level} variant="bars" colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
 ```
 
-### Liquid Orb and Spoken Text (voice mode)
+### Liquid Orb and Spoken Text
 
-`LiquidOrb` is a Skia liquid orb in `metal`, `water` or `iridescent`, or three glowing loops with `ring` (color them with `colors`); `state` switches between `idle`, `listening`, `thinking` and `speaking`, and `level` (0-1) makes it swell while listening or speaking. `SpokenText` highlights the word being read aloud: pass the index of the current word as `spoken`.
+`LiquidOrb` comes in `metal`, `water` or `iridescent`, or three glowing loops
+with `ring` (color them with `colors`). `state` switches between `idle`,
+`listening`, `thinking` and `speaking`, and `level` (0 to 1) makes it swell
+while listening or speaking. `SpokenText` highlights the word being read aloud:
+pass the index of the current word as `spoken`.
 
 ```tsx
 import { useSharedValue } from "react-native-reanimated";
@@ -140,6 +180,38 @@ const level = useSharedValue(0);
 <SpokenText text={reply} spoken={wordIndex} textStyle={{ fontFamily: "Inter", fontSize: 20, lineHeight: 28 }} />;
 ```
 
+## Theming
+
+Components use the built-in Moodstone palette until you wrap your app in
+`MotionThemeProvider`. Pass one palette, or a `light` and `dark` pair with a
+`colorScheme`. Components that read the palette also take `colors` to override
+a single instance; Shimmer Text, Voice Wave, Dot Orb and Matrix Orb take their
+colors directly (`activeColor`, `colors`, `color`).
+
+```tsx
+import { useColorScheme } from "react-native";
+import { MotionThemeProvider } from "react-native-ai-animations/theme";
+
+<MotionThemeProvider
+  colorScheme={useColorScheme() ?? "light"}
+  palette={{ light: { accent: "#2F7BF5" }, dark: { accent: "#5AA2FF" } }}
+>
+  <App />
+</MotionThemeProvider>;
+```
+
+Palette keys: `background`, `card`, `surface`, `raised`, `text`,
+`textSecondary`, `textTertiary`, `accent`, `accentContrast`, `success`,
+`danger`. Read the active palette in your own components with
+`useMotionPalette()`.
+
+## Customization and accessibility
+
+- Icons, fonts, colors and timing are props on every component; nothing is
+  tied to a brand or an icon set.
+- When the system's reduce motion setting is on, every component settles to a
+  static final state.
+
 ## Development
 
 ```bash
@@ -152,4 +224,4 @@ Changes that affect the package need a changeset: `npm run changeset`.
 
 ## License
 
-MIT.
+[MIT](LICENSE)
