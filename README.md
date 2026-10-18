@@ -5,6 +5,8 @@ shimmer loading text, thinking and status indicators, voice orbs and
 waveforms, image and video generation loaders, question cards and reasoning
 effort bars. Built on Reanimated and Skia, themeable, and reduce motion aware.
 
+Docs and live demos: [nami-motion-web.vercel.app](https://nami-motion-web.vercel.app/)
+
 ```bash
 npx expo install react-native-ai-animations react-native-reanimated react-native-worklets
 ```
@@ -14,30 +16,8 @@ Formerly published as `nami-motion`: replace `nami-motion` with
 
 ## Components
 
-<table>
-  <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/spinning-mark.gif" width="200" alt="Spinning Mark recording" /><br /><b>Spinning Mark</b><br /><code>react-native-ai-animations/brand</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/shimmer-text.gif" width="200" alt="Shimmer Text recording" /><br /><b>Shimmer Text</b><br /><code>react-native-ai-animations/text</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/streaming-text.gif" width="200" alt="Streaming Text recording" /><br /><b>Streaming Text</b><br /><code>react-native-ai-animations/text</code></td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/status-row.gif" width="200" alt="Status Row recording" /><br /><b>Status Row</b><br /><code>react-native-ai-animations/chat</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/thinking-block.gif" width="200" alt="Thinking Block recording" /><br /><b>Thinking Block</b><br /><code>react-native-ai-animations/chat</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/question-card.gif" width="200" alt="Question Card recording" /><br /><b>Question Card</b><br /><code>react-native-ai-animations/chat</code></td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/effort-bar.gif" width="200" alt="Effort Bar recording" /><br /><b>Effort Bar</b><br /><code>react-native-ai-animations/chat</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/media-generating.gif" width="200" alt="Media Generating recording" /><br /><b>Media Generating</b><br /><code>react-native-ai-animations/skia</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/voice-wave.gif" width="200" alt="Voice Wave recording" /><br /><b>Voice Wave</b><br /><code>react-native-ai-animations/skia</code></td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td align="center" valign="top" width="50%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/shimmer-text.gif" width="160" alt="Shimmer Text recording" /><br /><b>Shimmer Text</b><br /><code>react-native-ai-animations/text</code><br /><a href="https://github.com/AhmeetKaar/nami-motion/raw/main/media/shimmer-text.mp4">10s video</a></td>
-    <td align="center" valign="top" width="50%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/voice-wave.gif" width="160" alt="Voice Wave recording" /><br /><b>Voice Wave</b><br /><code>react-native-ai-animations/skia</code><br /><a href="https://github.com/AhmeetKaar/nami-motion/raw/main/media/voice-wave.mp4">10s video</a></td>
-  </tr>
-</table>
+See every component and style in motion, with copyable code and agent prompts, on
+the [website](https://nami-motion-web.vercel.app/).
 
 | Component | Entry | What it does |
 | --- | --- | --- |

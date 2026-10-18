@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/AhmeetKaar/nami-motion.git"
   },
-  "homepage": "https://github.com/AhmeetKaar/nami-motion#readme",
+  "homepage": "https://nami-motion-web.vercel.app/",
   "keywords": [
     "react-native",
     "expo",
