@@ -94,7 +94,7 @@ export type MediaGeneratingProps = {
   grain?: boolean;
   sweep?: boolean;
   dots?: number;
-  scatter?: boolean;
+  scatter?: boolean | "loop";
   cover?: ReactNode;
   icon?: ReactNode;
   textStyle?: StyleProp<TextStyle>;

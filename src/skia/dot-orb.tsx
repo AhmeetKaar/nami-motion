@@ -1,7 +1,7 @@
 import { Canvas, Path, Skia, type SkPath, useClock } from "@shopify/react-native-skia";
 import { useEffect, useMemo } from "react";
 import { type StyleProp, type ViewStyle } from "react-native";
-import { Easing, useDerivedValue, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
+import { Easing, useDerivedValue, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useMotionPalette } from "../theme/provider";
 
 export type DotOrbVariant = "orbit" | "scan" | "constellation" | "helix";
@@ -15,7 +15,7 @@ export type DotOrbProps = {
   dotScale?: number;
   paused?: boolean;
   inset?: number;
-  scatter?: boolean;
+  scatter?: boolean | "loop";
   style?: StyleProp<ViewStyle>;
 };
 
@@ -24,6 +24,9 @@ type Frame = { back: SkPath; mid: SkPath; front: SkPath; accent: SkPath; lines: 
 const TAU = Math.PI * 2;
 const STILL_TIME = 1800;
 const SCATTER_MS = 700;
+const LOOP_MOVE_MS = 900;
+const LOOP_GATHERED_MS = 1100;
+const LOOP_SCATTERED_MS = 400;
 
 function fibonacciSphere(count: number) {
   const points: number[] = [];
@@ -96,10 +99,17 @@ export function DotOrb({
   const clock = useClock();
   const layout = useSharedValue({ width: size ?? 0, height: size ?? 0 });
   const still = reduceMotion || paused;
-  const spread = useSharedValue(scatter ? 1 : 0);
+  const spread = useSharedValue(scatter === true ? 1 : 0);
 
   useEffect(() => {
-    spread.value = scatter && !reduceMotion ? withTiming(1, { duration: SCATTER_MS, easing: Easing.out(Easing.cubic) }) : scatter ? 1 : 0;
+    if (reduceMotion) {
+      spread.value = scatter === true ? 1 : 0;
+    } else if (scatter === "loop") {
+      const move = { duration: LOOP_MOVE_MS, easing: Easing.inOut(Easing.cubic) };
+      spread.value = withRepeat(withSequence(withDelay(LOOP_GATHERED_MS, withTiming(1, move)), withDelay(LOOP_SCATTERED_MS, withTiming(0, move))), -1);
+    } else {
+      spread.value = withTiming(scatter ? 1 : 0, { duration: SCATTER_MS, easing: Easing.out(Easing.cubic) });
+    }
   }, [reduceMotion, scatter, spread]);
 
   const sphere = useMemo(() => fibonacciSphere(variant === "constellation" ? 46 : 240), [variant]);
