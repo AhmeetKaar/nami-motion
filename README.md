@@ -126,6 +126,8 @@ import { QuestionCard } from "nami-motion/chat";
 <QuestionCard questions={questions} variant="sheet" onSubmit={(answers) => send(answers)} />;
 ```
 
+Both components take a `ref` with `select(index)`, `goTo(page)` and `submit()`, so a demo, a voice flow or a test can drive the questions without touches.
+
 ### Voice Wave
 
 ```tsx

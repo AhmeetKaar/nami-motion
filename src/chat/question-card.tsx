@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   type LayoutChangeEvent,
   Pressable,
@@ -79,6 +79,12 @@ export type QuestionCardIcons = {
 
 export type QuestionOptionState = { index: number; selected: boolean; kind: "single" | "multiple" };
 
+export type QuestionCardHandle = {
+  select: (index: number) => void;
+  goTo: (page: number) => void;
+  submit: () => void;
+};
+
 export type QuestionCardProps = {
   questions: Question[];
   variant?: "card" | "sheet";
@@ -135,7 +141,7 @@ function buildAnswers(questions: Question[], drafts: Draft[]): QuestionAnswer[] 
   });
 }
 
-export function QuestionCard({
+export const QuestionCard = forwardRef<QuestionCardHandle, QuestionCardProps>(function QuestionCard({
   questions,
   variant = "card",
   labels,
@@ -155,7 +161,7 @@ export function QuestionCard({
   metaStyle: metaStyleProp = DEFAULT_META_STYLE,
   colors,
   style,
-}: QuestionCardProps) {
+}, ref) {
   const font = fontFamily ? { fontFamily } : null;
   const titleStyle = [titleStyleProp, font];
   const optionStyle = [optionStyleProp, font];
@@ -287,6 +293,8 @@ export function QuestionCard({
     if (last) submit();
     else goTo(shown + 1);
   };
+
+  useImperativeHandle(ref, () => ({ select, goTo, submit }));
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const next = Math.ceil(event.nativeEvent.layout.height);
@@ -485,7 +493,7 @@ export function QuestionCard({
       </Animated.View>
     </Animated.View>
   );
-}
+});
 
 function IconButton({ label, disabled, onPress, children }: { label: string; disabled?: boolean; onPress: () => void; children: ReactNode }) {
   return (
@@ -636,6 +644,6 @@ function OptionRow({
   );
 }
 
-export function QuestionSheet(props: Omit<QuestionCardProps, "variant">) {
-  return <QuestionCard {...props} variant="sheet" />;
-}
+export const QuestionSheet = forwardRef<QuestionCardHandle, Omit<QuestionCardProps, "variant">>(function QuestionSheet(props, ref) {
+  return <QuestionCard {...props} ref={ref} variant="sheet" />;
+});

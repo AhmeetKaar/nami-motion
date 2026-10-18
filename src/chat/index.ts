@@ -17,6 +17,7 @@ export {
   type QuestionAnswer,
   type QuestionCardIcons,
   type QuestionCardLabels,
+  type QuestionCardHandle,
   type QuestionCardProps,
   type QuestionOption,
   type QuestionOptionState,
