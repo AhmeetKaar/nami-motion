@@ -50,7 +50,7 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
-| Effort Bar | `nami-motion/chat` | Reasoning effort picker wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and snapping slider, each with a compact form and a per level icon. |
+| Effort Bar | `nami-motion/chat` | Reasoning effort picker wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and a slider whose knob stretches as you drag and snaps to a level under a tab with your model name, each with a compact form and a per level icon. |
 | Charts | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge and CountUp for usage and credits. |
 
 Every component takes its icon, font, colors and timing as props and falls back
@@ -111,13 +111,14 @@ import { ImageGenerating, MediaGenerating, VideoGenerating } from "nami-motion/s
 
 ### Effort Bar
 
-`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens. `variant` picks the style: `bars` (default), `track`, `segmented` or `slider`; `size="compact"` gives each one a small inline form for model rows, and `fillColors` tints any of them.
+`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens. `variant` picks the style: `bars` (default), `track`, `segmented` or `slider`; `size="compact"` gives each one a small inline form for model rows, `fillColors` tints any of them and `tabLabel` puts your model name in the slider's tab.
 
 ```tsx
 import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "nami-motion/chat";
 
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i, level) => setEffort(level.value)} title="Reasoning" />;
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="segmented" title="Reasoning" />;
+<EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="slider" tabLabel={model.name} fillColors={["#5AA2FF", "#2F7BF5"]} />;
 <EffortBar levels={REASONING_EFFORTS} value={index} variant="slider" size="compact" />;
 
 const body = { model, messages, max_tokens: 16000, ...reasoningRequest(effort) };

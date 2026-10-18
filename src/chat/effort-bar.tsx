@@ -36,7 +36,13 @@ const DEFAULT_NUMBER_STYLE: TextStyle = { fontSize: 30, lineHeight: 34, fontWeig
 const DEFAULT_DETAIL_STYLE: TextStyle = { fontSize: 13, lineHeight: 18 };
 const DEFAULT_SEGMENT_STYLE: TextStyle = { fontSize: 13, lineHeight: 18, fontWeight: "600" };
 const DEFAULT_GRADIENT = ["#53C26B", "#9BCB4A", "#F0C64A", "#F19A3E", "#EC6A4F", "#E5486F"];
-const SLIDER_KNOB = 26;
+const SLIDER_TRACK = 40;
+const SLIDER_RIM = 3;
+const SLIDER_KNOB = 40;
+const SLIDER_STRETCH = 1.4;
+const SLIDER_TAB = 28;
+const SLIDER_TAB_RADIUS = 10;
+const SLIDER_SHOULDER = 8;
 const COMPACT_SLIDER_KNOB = 10;
 
 export type EffortBarVariant = "bars" | "track" | "segmented" | "slider";
@@ -53,6 +59,7 @@ export type EffortBarProps = {
   size?: "regular" | "compact";
   steps?: number;
   title?: string;
+  tabLabel?: string;
   icon?: ReactNode | ((index: number) => ReactNode);
   badge?: ReactNode;
   showHeader?: boolean;
@@ -111,6 +118,7 @@ export function EffortBar({
   size = "regular",
   steps: stepsProp,
   title,
+  tabLabel,
   icon,
   badge,
   showHeader = true,
@@ -178,6 +186,7 @@ export function EffortBar({
   };
   const numberWidth = Math.max(...items.map((_, position) => numberFor(position).length)) * 19;
   const knobSize = compact ? COMPACT_SLIDER_KNOB : SLIDER_KNOB;
+  const knobInset = compact ? 0 : SLIDER_RIM;
 
   const select = (next: number) => {
     const item = items[next];
@@ -189,7 +198,7 @@ export function EffortBar({
     if (!interactive || width === 0) return;
     let next: number;
     if (variant === "slider") {
-      const position = Math.min(1, Math.max(0, (x - knobSize / 2) / Math.max(1, width - knobSize)));
+      const position = Math.min(1, Math.max(0, (x - knobInset - knobSize / 2) / Math.max(1, width - knobInset * 2 - knobSize)));
       dragging.current = true;
       knob.value = reduceMotion || !grant ? position : withSpring(position, GRAB_SPRING);
       if (grant && !reduceMotion) pressed.value = withSpring(1, GRAB_SPRING);
@@ -242,7 +251,7 @@ export function EffortBar({
   };
 
   const height =
-    variant === "slider" ? (compact ? knobSize : knobSize + 28) : barHeight ?? (compact ? 14 : variant === "track" ? 44 : variant === "segmented" ? 40 : 56);
+    variant === "slider" ? (compact ? knobSize : SLIDER_TAB + SLIDER_TRACK) : barHeight ?? (compact ? 14 : variant === "track" ? 44 : variant === "segmented" ? 40 : 56);
   const compactWidth = variant === "segmented" ? count * 12 + 4 : variant === "slider" ? 40 : steps * 5 + (steps - 1) * 2.5;
 
   const visual =
@@ -251,18 +260,23 @@ export function EffortBar({
     ) : variant === "segmented" ? (
       <Segmented items={items} level={level} width={width} height={height} fills={trackFills} custom={custom} palette={palette} compact={compact} segmentStyle={segmentStyle} />
     ) : variant === "slider" ? (
-      <Slider
-        items={items}
-        level={level}
-        knob={knob}
-        pressed={pressed}
-        width={width}
-        knobSize={knobSize}
-        fills={trackFills}
-        palette={palette}
-        compact={compact}
-        segmentStyle={segmentStyle}
-      />
+      compact ? (
+        <CompactSlider count={count} knob={knob} width={width} knobSize={knobSize} fills={trackFills} palette={palette} />
+      ) : (
+        <Slider
+          count={count}
+          label={current?.label ?? ""}
+          index={index}
+          tabLabel={tabLabel}
+          knob={knob}
+          pressed={pressed}
+          width={width}
+          fills={trackFills}
+          palette={palette}
+          reduceMotion={reduceMotion}
+          segmentStyle={segmentStyle}
+        />
+      )
     ) : (
       <Bars steps={steps} fill={fill} height={height} colors={barColors} palette={palette} compact={compact} />
     );
@@ -292,7 +306,7 @@ export function EffortBar({
       icon
     );
 
-  const labelled = variant !== "bars";
+  const labelled = variant !== "bars" && (variant !== "slider" || !!(title || badge || iconNode));
 
   return (
     <View
@@ -360,13 +374,15 @@ export function EffortBar({
                 {title ? <Text style={[labelStyle, { color: palette.text }]}>{title}</Text> : null}
                 {badge}
               </View>
-              <Animated.Text
-                key={index}
-                entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
-                style={[labelStyle, { color: title ? palette.textSecondary : palette.text, fontWeight: title ? "500" : "600" }]}
-              >
-                {current?.label}
-              </Animated.Text>
+              {variant !== "slider" ? (
+                <Animated.Text
+                  key={index}
+                  entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
+                  style={[labelStyle, { color: title ? palette.textSecondary : palette.text, fontWeight: title ? "500" : "600" }]}
+                >
+                  {current?.label}
+                </Animated.Text>
+              ) : null}
             </View>
           ) : null}
           {control}
@@ -577,99 +593,191 @@ function Segmented({ items, level, width, height, fills, custom, palette, compac
 }
 
 type SliderProps = {
-  items: { label: string }[];
-  level: SharedValue<number>;
+  count: number;
+  label: string;
+  index: number;
+  tabLabel?: string;
   knob: SharedValue<number>;
   pressed: SharedValue<number>;
+  width: number;
+  fills: string[];
+  palette: MotionPalette;
+  reduceMotion: boolean;
+  segmentStyle: StyleProp<TextStyle>;
+};
+
+function Slider({ count, label, index, tabLabel, knob, pressed, width, fills, palette, reduceMotion, segmentStyle }: SliderProps) {
+  const span = Math.max(0, width - SLIDER_RIM * 2 - SLIDER_KNOB);
+  const radius = SLIDER_TRACK / 2;
+  const edge = radius;
+  const tabWidth = useSharedValue(0);
+  const inputs = Array.from({ length: count }, (_, position) => position);
+  const knobFrame = useDerivedValue(() => {
+    const size = SLIDER_KNOB * (1 + pressed.value * (SLIDER_STRETCH - 1));
+    const center = SLIDER_RIM + SLIDER_KNOB / 2 + knob.value * span;
+    const left = Math.min(Math.max(center - size / 2, SLIDER_RIM), Math.max(SLIDER_RIM, width - SLIDER_RIM - size));
+    return { left, size, center };
+  });
+  const fillStyle = useAnimatedStyle(() => ({
+    width: knobFrame.value.left + knobFrame.value.size + SLIDER_RIM,
+    backgroundColor: count > 1 ? interpolateColor(knob.value * (count - 1), inputs, fills) : fills[0],
+  }));
+  const knobStyle = useAnimatedStyle(() => ({ width: knobFrame.value.size, transform: [{ translateX: knobFrame.value.left }] }));
+  const tabStyle = useAnimatedStyle(() => {
+    const wanted = knobFrame.value.center - tabWidth.value / 2;
+    const left = Math.min(Math.max(wanted, edge), Math.max(edge, width - edge - tabWidth.value));
+    return { opacity: tabWidth.value > 0 ? 1 : 0, transform: [{ translateX: left }] };
+  });
+
+  if (width === 0) return <View style={{ height: SLIDER_TAB + SLIDER_TRACK }} />;
+
+  return (
+    <View style={{ height: SLIDER_TAB + SLIDER_TRACK }}>
+      <Animated.View
+        onLayout={(event) => {
+          tabWidth.value = event.nativeEvent.layout.width;
+        }}
+        style={[{ position: "absolute", top: 0, left: 0 }, tabStyle]}
+      >
+        <View
+          style={{
+            height: SLIDER_TAB + 1,
+            paddingHorizontal: 12,
+            paddingBottom: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+            borderTopLeftRadius: SLIDER_TAB_RADIUS,
+            borderTopRightRadius: SLIDER_TAB_RADIUS,
+            borderCurve: "continuous",
+            backgroundColor: palette.surface,
+          }}
+        >
+          {tabLabel ? <Text style={[segmentStyle, { color: palette.text, fontWeight: "700" }]}>{tabLabel}</Text> : null}
+          <Animated.Text
+            key={index}
+            entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}
+            style={[segmentStyle, { color: palette.textSecondary, fontWeight: "500" }]}
+          >
+            {label}
+          </Animated.Text>
+        </View>
+        <Shoulder side="left" color={palette.surface} />
+        <Shoulder side="right" color={palette.surface} />
+      </Animated.View>
+      <View
+        style={{
+          position: "absolute",
+          top: SLIDER_TAB,
+          left: 0,
+          right: 0,
+          height: SLIDER_TRACK,
+          borderRadius: radius,
+          borderCurve: "continuous",
+          backgroundColor: palette.surface,
+          overflow: "hidden",
+        }}
+      >
+        <Animated.View style={[{ position: "absolute", top: 0, left: 0, bottom: 0, borderRadius: radius, borderCurve: "continuous" }, fillStyle]} />
+        {inputs.map((position) => (
+          <Stop
+            key={position}
+            position={position}
+            count={count}
+            knob={knob}
+            left={SLIDER_RIM + SLIDER_KNOB / 2 + (count > 1 ? (span * position) / (count - 1) : 0)}
+            on={withAlpha(palette.card, 0.55)}
+            off={withAlpha(palette.text, 0.18)}
+          />
+        ))}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              top: SLIDER_RIM,
+              left: 0,
+              height: SLIDER_TRACK - SLIDER_RIM * 2,
+              borderRadius: radius - SLIDER_RIM,
+              borderCurve: "continuous",
+              backgroundColor: palette.card,
+              shadowColor: "#000000",
+              shadowOpacity: 0.12,
+              shadowRadius: 4,
+              shadowOffset: { width: 0, height: 1 },
+            },
+            knobStyle,
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
+function Shoulder({ side, color }: { side: "left" | "right"; color: string }) {
+  const size = SLIDER_SHOULDER;
+  return (
+    <View style={[{ position: "absolute", bottom: 0, width: size, height: size, overflow: "hidden" }, side === "left" ? { left: -size } : { right: -size }]}>
+      <View
+        style={{
+          position: "absolute",
+          top: -size * 2,
+          left: side === "left" ? -size * 2 : -size,
+          width: size * 4,
+          height: size * 4,
+          borderRadius: size * 2,
+          borderWidth: size,
+          borderColor: color,
+        }}
+      />
+    </View>
+  );
+}
+
+type CompactSliderProps = {
+  count: number;
+  knob: SharedValue<number>;
   width: number;
   knobSize: number;
   fills: string[];
   palette: MotionPalette;
-  compact: boolean;
-  segmentStyle: StyleProp<TextStyle>;
 };
 
-function Slider({ items, level, knob, pressed, width, knobSize, fills, palette, compact, segmentStyle }: SliderProps) {
-  const count = items.length;
+function CompactSlider({ count, knob, width, knobSize, fills, palette }: CompactSliderProps) {
   const inset = knobSize / 2;
   const span = Math.max(0, width - knobSize);
-  const rail = compact ? 4 : 6;
-  const gap = count > 1 ? span / (count - 1) : 0;
-  const inputs = items.map((_, position) => position);
+  const inputs = Array.from({ length: count }, (_, position) => position);
   const fillStyle = useAnimatedStyle(() => ({
     width: inset + span * knob.value,
     backgroundColor: count > 1 ? interpolateColor(knob.value * (count - 1), inputs, fills) : fills[0],
   }));
-  const knobStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: span * knob.value }, { scale: 1 + pressed.value * 0.14 }],
-  }));
+  const knobStyle = useAnimatedStyle(() => ({ transform: [{ translateX: span * knob.value }] }));
 
   return (
-    <View style={{ gap: compact ? 0 : 10 }}>
-      <View style={{ height: knobSize, justifyContent: "center" }}>
-        <View style={{ height: rail, borderRadius: rail / 2, backgroundColor: palette.surface, overflow: "hidden" }}>
-          {width > 0 ? <Animated.View style={[{ position: "absolute", top: 0, left: 0, bottom: 0, borderRadius: rail / 2 }, fillStyle]} /> : null}
-        </View>
-        {!compact && width > 0
-          ? items.map((item, position) => (
-              <Stop
-                key={`${position}-${item.label}`}
-                position={position}
-                count={count}
-                knob={knob}
-                left={inset + gap * position}
-                on={withAlpha(palette.background, 0.85)}
-                off={withAlpha(palette.text, 0.22)}
-              />
-            ))
-          : null}
-        {width > 0 ? (
-          <Animated.View
-            style={[
-              {
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: knobSize,
-                height: knobSize,
-                borderRadius: knobSize / 2,
-                backgroundColor: palette.card,
-                borderWidth: 1,
-                borderColor: withAlpha(palette.text, 0.08),
-                shadowColor: "#000000",
-                shadowOpacity: compact ? 0.08 : 0.14,
-                shadowRadius: compact ? 2 : 5,
-                shadowOffset: { width: 0, height: compact ? 1 : 2 },
-              },
-              knobStyle,
-            ]}
-          />
-        ) : null}
+    <View style={{ height: knobSize, justifyContent: "center" }}>
+      <View style={{ height: 4, borderRadius: 2, backgroundColor: palette.surface, overflow: "hidden" }}>
+        {width > 0 ? <Animated.View style={[{ position: "absolute", top: 0, left: 0, bottom: 0, borderRadius: 2 }, fillStyle]} /> : null}
       </View>
-      {!compact && width > 0 ? (
-        <View style={{ height: 18 }}>
-          {items.map((item, position) => {
-            const first = position === 0 && count > 1;
-            const last = position === count - 1 && count > 1;
-            const box = count > 1 ? gap : width;
-            return (
-              <LevelLabel
-                key={`${position}-${item.label}`}
-                label={item.label}
-                position={position}
-                level={level}
-                on={palette.text}
-                off={palette.textSecondary}
-                segmentStyle={segmentStyle}
-                align={first ? "left" : last ? "right" : "center"}
-                style={[
-                  { position: "absolute", top: 0, width: box },
-                  first ? { left: 0 } : last ? { right: 0 } : { left: inset + gap * position - box / 2 },
-                ]}
-              />
-            );
-          })}
-        </View>
+      {width > 0 ? (
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: knobSize,
+              height: knobSize,
+              borderRadius: knobSize / 2,
+              backgroundColor: palette.card,
+              borderWidth: 1,
+              borderColor: withAlpha(palette.text, 0.08),
+              shadowColor: "#000000",
+              shadowOpacity: 0.08,
+              shadowRadius: 2,
+              shadowOffset: { width: 0, height: 1 },
+            },
+            knobStyle,
+          ]}
+        />
       ) : null}
     </View>
   );
@@ -688,5 +796,5 @@ function Stop({ position, count, knob, left, on, off }: StopProps) {
   const colorStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(Math.min(1, Math.max(0, knob.value * (count - 1) - position + 0.5)), [0, 1], [off, on]),
   }));
-  return <Animated.View style={[{ position: "absolute", left: left - 2, top: "50%", marginTop: -2, width: 4, height: 4, borderRadius: 2 }, colorStyle]} />;
+  return <Animated.View style={[{ position: "absolute", left: left - 1, top: "50%", marginTop: -6, width: 2, height: 12, borderRadius: 1 }, colorStyle]} />;
 }
