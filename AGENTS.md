@@ -22,10 +22,10 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 | Giriş | Componentler | Ek native bağımlılık |
 | --- | --- | --- |
 | `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
-| `nami-motion/text` | ShimmerText, StreamingText | — |
+| `nami-motion/text` | ShimmerText, StreamingText, SpokenText | — |
 | `nami-motion/brand` | SpinningMark | — |
 | `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
-| `nami-motion/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave | @shopify/react-native-skia (opsiyonel peer) |
+| `nami-motion/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave, LiquidOrb | @shopify/react-native-skia (opsiyonel peer) |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
@@ -63,11 +63,10 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Durum
 
 - GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
-- npm: `nami-motion@0.4.0` yayında. 0.5.0 (`Release 0.5.0`) yerelde hazır, yayın kullanıcının npm web onayını bekliyor.
+- npm: `nami-motion@0.5.0` 2026-10-18'de yayımlandı (tag `v0.5.0` → `10ff360`). Bekleyen dört changeset ve LiquidOrb + SpokenText 0.5.0 changelog'una katıldı. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
 - Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
 
 ## Sıradaki işler
 
-1. Yayın (kullanıcı onayıyla): `npm login --auth-type=web`, `npm publish --auth-type=web --provenance=false`, tag `v0.5.0` + push (üç repo).
-2. Yayından sonra `nami-motion-ios` `npx expo install nami-motion@0.5.0`; Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, reasoning effort → EffortBar). Commit ve merge Nami kurallarıyla.
-3. Ertelenen componentler: MessageActions, FollowUpChips, JumpToBottom, IconSwap, EmptyState, StackToast, ErrorCard, UpgradeCard, CodeBlock, SourceBadge, TTS bar.
+1. Nami `nami-motion` branch'i paketi kullanır (onboarding logo → SpinningMark, StatusRow, ReasoningBlock → ThinkingBlock, görsel/video loading, ApprovalCard içeriği → QuestionCard, reasoning effort → EffortBar). Commit ve merge Nami kurallarıyla.
+2. Ertelenen componentler: MessageActions, FollowUpChips, JumpToBottom, IconSwap, EmptyState, StackToast, ErrorCard, UpgradeCard, CodeBlock, SourceBadge, TTS bar.
