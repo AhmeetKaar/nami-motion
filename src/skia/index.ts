@@ -32,3 +32,4 @@ export {
   type VoiceWaveStyleProps,
   type VoiceWaveVariant,
 } from "./voice-wave";
+export { LiquidOrb, type LiquidOrbMaterial, type LiquidOrbProps, type LiquidOrbState } from "./liquid-orb";

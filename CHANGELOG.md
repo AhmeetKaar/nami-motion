@@ -5,6 +5,11 @@
 ### Minor Changes
 
 - b1cb0c9: Add customizable components: SpinningMark (`nami-motion/brand`), MediaGenerating (one loading state shared by image and video, with the ImageGenerating and VideoGenerating presets and six variants), DotOrb and MatrixOrb (`nami-motion/skia`), StreamingText (`nami-motion/text`), StatusRow, ThinkingBlock, QuestionCard, EffortBar (bars, track, segmented and slider styles, each with a compact size, a `tabLabel` for the slider's tab and `levelIcon` to show each level as an icon instead of text) and the reasoning helpers (`REASONING_EFFORTS`, `reasoningRequest`, `reasoningBudget`, matching OpenRouter's `reasoning.effort`) (`nami-motion/chat`). VoiceWave gains `variant` (lines, bars, dots, pulse, ring) and `height`. Every component takes its icon, font, colors and timing as props and settles to a static state when reduce motion is on.
+- DotOrb takes `scatter`, which flies its dots apart to points across the whole canvas (`"loop"` keeps scattering and gathering them), and `inset`, which sizes the orb inside the canvas. MediaGenerating passes `scatter` to its orb variants so the dots can spread just before the result replaces the loader.
+- EffortBar's `barHeight` now sets the slider's track and knob height too (40 by default); the tab above the knob keeps its size.
+- MediaGenerating takes a `size` prop (`"1024x1024"`, `"1024x1536"`, `"1536x1024"`) that sets the frame ratio; `aspectRatio` still overrides it, and the frame keeps its ratio when `maxHeight` caps it.
+- Every style ships as its own component with the same props minus `variant`: VoiceWaveLines, VoiceWaveBars, VoiceWaveDots, VoiceWavePulse, VoiceWaveRing, EffortBars, EffortTrack, EffortSegmented, EffortSlider, MediaGeneratingBlobs, MediaGeneratingMatrix, MediaGeneratingOrbit, MediaGeneratingScan, MediaGeneratingConstellation, MediaGeneratingHelix and QuestionSheet.
+- Add `LiquidOrb` (`nami-motion/skia`), a liquid voice orb in metal, water or iridescent material that follows idle, listening, thinking and speaking states and an optional live `level`, and `SpokenText` (`nami-motion/text`), which highlights the word being spoken and dims the words already read aloud.
 
 ## 0.4.0
 
