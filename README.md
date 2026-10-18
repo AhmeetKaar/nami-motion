@@ -47,6 +47,13 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
 | Effort Bar | `nami-motion/chat` | Reasoning effort picker wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and a slider whose knob stretches as you drag and snaps to a level under a tab with your model name, each with a compact form and a per level icon. |
 
+Every style is also its own component with the same props minus `variant`:
+`VoiceWaveLines`, `VoiceWaveBars`, `VoiceWaveDots`, `VoiceWavePulse` and
+`VoiceWaveRing`; `EffortBars`, `EffortTrack`, `EffortSegmented` and
+`EffortSlider`; `MediaGeneratingBlobs`, `MediaGeneratingMatrix`,
+`MediaGeneratingOrbit`, `MediaGeneratingScan`, `MediaGeneratingConstellation`
+and `MediaGeneratingHelix`; and `QuestionSheet`.
+
 Every component takes its icon, font, colors and timing as props and falls back
 to a static state when reduce motion is on. `nami-motion/theme` ships the
 Moodstone palette with `MotionThemeProvider` and `useMotionPalette`; pass

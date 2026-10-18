@@ -876,3 +876,21 @@ function Stop({ position, count, knob, left, size, on, off }: StopProps) {
   }));
   return <Animated.View style={[{ position: "absolute", left: left - 1, top: "50%", marginTop: -size / 2, width: 2, height: size, borderRadius: 1 }, colorStyle]} />;
 }
+
+export type EffortStyleProps = Omit<EffortBarProps, "variant">;
+
+export function EffortBars(props: EffortStyleProps) {
+  return <EffortBar {...props} variant="bars" />;
+}
+
+export function EffortTrack(props: EffortStyleProps) {
+  return <EffortBar {...props} variant="track" />;
+}
+
+export function EffortSegmented(props: EffortStyleProps) {
+  return <EffortBar {...props} variant="segmented" />;
+}
+
+export function EffortSlider(props: EffortStyleProps) {
+  return <EffortBar {...props} variant="slider" />;
+}

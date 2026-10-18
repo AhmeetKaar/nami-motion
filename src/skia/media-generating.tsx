@@ -362,3 +362,29 @@ function ProgressTrack({ progress, active, animate, color, track }: ProgressTrac
     </Animated.View>
   );
 }
+
+export type MediaGeneratingStyleProps = Omit<MediaGeneratingProps, "variant">;
+
+export function MediaGeneratingBlobs(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="blobs" />;
+}
+
+export function MediaGeneratingMatrix(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="matrix" />;
+}
+
+export function MediaGeneratingOrbit(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="orbit" />;
+}
+
+export function MediaGeneratingScan(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="scan" />;
+}
+
+export function MediaGeneratingConstellation(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="constellation" />;
+}
+
+export function MediaGeneratingHelix(props: MediaGeneratingStyleProps) {
+  return <MediaGenerating {...props} variant="helix" />;
+}

@@ -628,3 +628,7 @@ function OptionRow({
     </Pressable>
   );
 }
+
+export function QuestionSheet(props: Omit<QuestionCardProps, "variant">) {
+  return <QuestionCard {...props} variant="sheet" />;
+}

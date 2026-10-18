@@ -236,3 +236,25 @@ export function VoiceWave({ level, colors, variant = "lines", height = DEFAULT_H
     </View>
   );
 }
+
+export type VoiceWaveStyleProps = Omit<VoiceWaveProps, "variant">;
+
+export function VoiceWaveLines(props: VoiceWaveStyleProps) {
+  return <VoiceWave {...props} variant="lines" />;
+}
+
+export function VoiceWaveBars(props: VoiceWaveStyleProps) {
+  return <VoiceWave {...props} variant="bars" />;
+}
+
+export function VoiceWaveDots(props: VoiceWaveStyleProps) {
+  return <VoiceWave {...props} variant="dots" />;
+}
+
+export function VoiceWavePulse(props: VoiceWaveStyleProps) {
+  return <VoiceWave {...props} variant="pulse" />;
+}
+
+export function VoiceWaveRing(props: VoiceWaveStyleProps) {
+  return <VoiceWave {...props} variant="ring" />;
+}

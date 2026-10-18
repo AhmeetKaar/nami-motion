@@ -12,6 +12,7 @@ export {
 } from "./thinking-block";
 export {
   QuestionCard,
+  QuestionSheet,
   type Question,
   type QuestionAnswer,
   type QuestionCardIcons,
@@ -20,7 +21,18 @@ export {
   type QuestionOption,
   type QuestionOptionState,
 } from "./question-card";
-export { EffortBar, type EffortBarProps, type EffortBarVariant, type EffortLevel, type EffortSelection } from "./effort-bar";
+export {
+  EffortBar,
+  EffortBars,
+  EffortSegmented,
+  EffortSlider,
+  EffortTrack,
+  type EffortBarProps,
+  type EffortBarVariant,
+  type EffortLevel,
+  type EffortSelection,
+  type EffortStyleProps,
+} from "./effort-bar";
 export {
   DEFAULT_REASONING_EFFORT,
   REASONING_EFFORTS,
