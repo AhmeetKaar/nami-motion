@@ -111,14 +111,14 @@ import { ImageGenerating, MediaGenerating, VideoGenerating } from "nami-motion/s
 
 ### Effort Bar
 
-`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens. `variant` picks the style: `bars` (default), `track`, `segmented` or `slider`; `size="compact"` gives each one a small inline form for model rows, `fillColors` tints any of them and `tabLabel` puts your model name in the slider's tab.
+`REASONING_EFFORTS` matches the `reasoning.effort` values OpenRouter and most reasoning APIs take (`low`, `medium`, `high`), with each level's share of max_tokens. `variant` picks the style: `bars` (default), `track`, `segmented` or `slider`; `size="compact"` gives each one a small inline form for model rows, `fillColors` tints any of them, `tabLabel` puts your model name in the slider's tab and `levelIcon` swaps every level name for your own icon, so the state reads without text.
 
 ```tsx
 import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "nami-motion/chat";
 
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i, level) => setEffort(level.value)} title="Reasoning" />;
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="segmented" title="Reasoning" />;
-<EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="slider" tabLabel={model.name} fillColors={["#5AA2FF", "#2F7BF5"]} />;
+<EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="slider" tabLabel={model.name} fillColors={["#5AA2FF", "#2F7BF5"]} levelIcon={(i, color) => <BrainIcon level={i} color={color} />} />;
 <EffortBar levels={REASONING_EFFORTS} value={index} variant="slider" size="compact" />;
 
 const body = { model, messages, max_tokens: 16000, ...reasoningRequest(effort) };

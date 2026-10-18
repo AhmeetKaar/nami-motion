@@ -60,6 +60,7 @@ export type EffortBarProps = {
   steps?: number;
   title?: string;
   tabLabel?: string;
+  levelIcon?: (index: number, color: string) => ReactNode;
   icon?: ReactNode | ((index: number) => ReactNode);
   badge?: ReactNode;
   showHeader?: boolean;
@@ -119,6 +120,7 @@ export function EffortBar({
   steps: stepsProp,
   title,
   tabLabel,
+  levelIcon,
   icon,
   badge,
   showHeader = true,
@@ -256,9 +258,20 @@ export function EffortBar({
 
   const visual =
     variant === "track" ? (
-      <Track items={items} level={level} width={width} height={height} fills={trackFills} palette={palette} compact={compact} segmentStyle={segmentStyle} />
+      <Track items={items} level={level} width={width} height={height} fills={trackFills} palette={palette} compact={compact} segmentStyle={segmentStyle} levelIcon={levelIcon} />
     ) : variant === "segmented" ? (
-      <Segmented items={items} level={level} width={width} height={height} fills={trackFills} custom={custom} palette={palette} compact={compact} segmentStyle={segmentStyle} />
+      <Segmented
+        items={items}
+        level={level}
+        width={width}
+        height={height}
+        fills={trackFills}
+        custom={custom}
+        palette={palette}
+        compact={compact}
+        segmentStyle={segmentStyle}
+        levelIcon={levelIcon}
+      />
     ) : variant === "slider" ? (
       compact ? (
         <CompactSlider count={count} knob={knob} width={width} knobSize={knobSize} fills={trackFills} palette={palette} />
@@ -268,6 +281,7 @@ export function EffortBar({
           label={current?.label ?? ""}
           index={index}
           tabLabel={tabLabel}
+          levelIcon={levelIcon}
           knob={knob}
           pressed={pressed}
           width={width}
@@ -323,13 +337,19 @@ export function EffortBar({
         <>
           <View style={{ width: compactWidth }}>{control}</View>
           {showHeader && current ? (
-            <Animated.Text
-              key={index}
-              entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}
-              style={[segmentStyle, { color: variant === "bars" ? accent : palette.textSecondary }]}
-            >
-              {current.label}
-            </Animated.Text>
+            levelIcon ? (
+              <Animated.View key={index} entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}>
+                {levelIcon(index, variant === "bars" ? accent : palette.textSecondary)}
+              </Animated.View>
+            ) : (
+              <Animated.Text
+                key={index}
+                entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}
+                style={[segmentStyle, { color: variant === "bars" ? accent : palette.textSecondary }]}
+              >
+                {current.label}
+              </Animated.Text>
+            )
           ) : null}
         </>
       ) : (
@@ -355,13 +375,19 @@ export function EffortBar({
                     </Animated.Text>
                   </View>
                 ) : null}
-                <Animated.Text
-                  key={`l${index}`}
-                  entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
-                  style={[labelStyle, { color: accent }]}
-                >
-                  {current?.label}
-                </Animated.Text>
+                {levelIcon ? (
+                  <Animated.View key={`l${index}`} entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}>
+                    {levelIcon(index, accent)}
+                  </Animated.View>
+                ) : (
+                  <Animated.Text
+                    key={`l${index}`}
+                    entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
+                    style={[labelStyle, { color: accent }]}
+                  >
+                    {current?.label}
+                  </Animated.Text>
+                )}
                 <View style={{ flex: 1 }} />
                 {iconNode}
               </View>
@@ -375,13 +401,19 @@ export function EffortBar({
                 {badge}
               </View>
               {variant !== "slider" ? (
-                <Animated.Text
-                  key={index}
-                  entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
-                  style={[labelStyle, { color: title ? palette.textSecondary : palette.text, fontWeight: title ? "500" : "600" }]}
-                >
-                  {current?.label}
-                </Animated.Text>
+                levelIcon ? (
+                  <Animated.View key={index} entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}>
+                    {levelIcon(index, title ? palette.textSecondary : palette.text)}
+                  </Animated.View>
+                ) : (
+                  <Animated.Text
+                    key={index}
+                    entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
+                    style={[labelStyle, { color: title ? palette.textSecondary : palette.text, fontWeight: title ? "500" : "600" }]}
+                  >
+                    {current?.label}
+                  </Animated.Text>
+                )
               ) : null}
             </View>
           ) : null}
@@ -471,9 +503,10 @@ type TrackProps = {
   palette: MotionPalette;
   compact: boolean;
   segmentStyle: StyleProp<TextStyle>;
+  levelIcon?: (index: number, color: string) => ReactNode;
 };
 
-function Track({ items, level, width, height, fills, palette, compact, segmentStyle }: TrackProps) {
+function Track({ items, level, width, height, fills, palette, compact, segmentStyle, levelIcon }: TrackProps) {
   const count = items.length;
   const segment = width / Math.max(1, count);
   const radius = height / 2;
@@ -487,9 +520,13 @@ function Track({ items, level, width, height, fills, palette, compact, segmentSt
   const labels = (color: string) =>
     items.map((item, position) => (
       <View key={`${position}-${item.label}`} style={{ width: segment, alignItems: "center", justifyContent: "center" }}>
-        <Text numberOfLines={1} style={[segmentStyle, { color }]}>
-          {item.label}
-        </Text>
+        {levelIcon ? (
+          levelIcon(position, color)
+        ) : (
+          <Text numberOfLines={1} style={[segmentStyle, { color }]}>
+            {item.label}
+          </Text>
+        )}
       </View>
     ));
 
@@ -540,6 +577,28 @@ function LevelLabel({ label, position, level, on, off, segmentStyle, align = "ce
   );
 }
 
+function LevelGlyph({
+  position,
+  level,
+  render,
+  on,
+  off,
+}: {
+  position: number;
+  level: SharedValue<number>;
+  render: (index: number, color: string) => ReactNode;
+  on: string;
+  off: string;
+}) {
+  const onStyle = useAnimatedStyle(() => ({ opacity: 1 - Math.min(1, Math.abs(level.value - position)) }));
+  return (
+    <View style={{ alignItems: "center", justifyContent: "center" }}>
+      {render(position, off)}
+      <Animated.View style={[{ position: "absolute" }, onStyle]}>{render(position, on)}</Animated.View>
+    </View>
+  );
+}
+
 type SegmentedProps = {
   items: { label: string }[];
   level: SharedValue<number>;
@@ -550,9 +609,10 @@ type SegmentedProps = {
   palette: MotionPalette;
   compact: boolean;
   segmentStyle: StyleProp<TextStyle>;
+  levelIcon?: (index: number, color: string) => ReactNode;
 };
 
-function Segmented({ items, level, width, height, fills, custom, palette, compact, segmentStyle }: SegmentedProps) {
+function Segmented({ items, level, width, height, fills, custom, palette, compact, segmentStyle, levelIcon }: SegmentedProps) {
   const count = items.length;
   const inset = compact ? 2 : 3;
   const radius = height / 2;
@@ -574,7 +634,14 @@ function Segmented({ items, level, width, height, fills, custom, palette, compac
           ]}
         />
       ) : null}
-      {!compact
+      {!compact && levelIcon
+        ? items.map((item, position) => (
+            <View key={`${position}-${item.label}`} style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <LevelGlyph position={position} level={level} render={levelIcon} on={custom ? palette.background : palette.text} off={palette.textSecondary} />
+            </View>
+          ))
+        : null}
+      {!compact && !levelIcon
         ? items.map((item, position) => (
             <LevelLabel
               key={`${position}-${item.label}`}
@@ -597,6 +664,7 @@ type SliderProps = {
   label: string;
   index: number;
   tabLabel?: string;
+  levelIcon?: (index: number, color: string) => ReactNode;
   knob: SharedValue<number>;
   pressed: SharedValue<number>;
   width: number;
@@ -606,7 +674,7 @@ type SliderProps = {
   segmentStyle: StyleProp<TextStyle>;
 };
 
-function Slider({ count, label, index, tabLabel, knob, pressed, width, fills, palette, reduceMotion, segmentStyle }: SliderProps) {
+function Slider({ count, label, index, tabLabel, levelIcon, knob, pressed, width, fills, palette, reduceMotion, segmentStyle }: SliderProps) {
   const span = Math.max(0, width - SLIDER_RIM * 2 - SLIDER_KNOB);
   const radius = SLIDER_TRACK / 2;
   const edge = radius;
@@ -654,13 +722,19 @@ function Slider({ count, label, index, tabLabel, knob, pressed, width, fills, pa
           }}
         >
           {tabLabel ? <Text style={[segmentStyle, { color: palette.text, fontWeight: "700" }]}>{tabLabel}</Text> : null}
-          <Animated.Text
-            key={index}
-            entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}
-            style={[segmentStyle, { color: palette.textSecondary, fontWeight: "500" }]}
-          >
-            {label}
-          </Animated.Text>
+          {levelIcon ? (
+            <Animated.View key={index} entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}>
+              {levelIcon(index, palette.textSecondary)}
+            </Animated.View>
+          ) : (
+            <Animated.Text
+              key={index}
+              entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}
+              style={[segmentStyle, { color: palette.textSecondary, fontWeight: "500" }]}
+            >
+              {label}
+            </Animated.Text>
+          )}
         </View>
         <Shoulder side="left" color={palette.surface} />
         <Shoulder side="right" color={palette.surface} />
