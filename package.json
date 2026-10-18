@@ -1,7 +1,7 @@
 {
   "name": "nami-motion",
   "version": "0.5.0",
-  "description": "Production animations for React Native and Expo chat apps: brand marks, streaming, thinking, generation loaders, question cards and charts.",
+  "description": "Production animations for React Native and Expo chat apps: brand marks, streaming, thinking, generation loaders and question cards.",
   "license": "MIT",
   "author": "Ahmet Kar",
   "repository": {
@@ -47,11 +47,6 @@
       "source": "./src/chat/index.ts",
       "types": "./lib/typescript/src/chat/index.d.ts",
       "default": "./lib/module/chat/index.js"
-    },
-    "./charts": {
-      "source": "./src/charts/index.ts",
-      "types": "./lib/typescript/src/charts/index.d.ts",
-      "default": "./lib/module/charts/index.js"
     },
     "./skia": {
       "source": "./src/skia/index.ts",

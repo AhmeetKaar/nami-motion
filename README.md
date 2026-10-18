@@ -1,7 +1,7 @@
 # nami-motion
 
 Production animations for React Native and Expo chat apps: brand marks,
-streaming, thinking, generation loaders, question cards and charts.
+streaming, thinking, generation loaders and question cards.
 
 ```bash
 npx expo install nami-motion react-native-reanimated react-native-worklets
@@ -23,9 +23,6 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
   <tr>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/effort-bar.gif" width="200" alt="Effort Bar recording" /><br /><b>Effort Bar</b><br /><code>nami-motion/chat</code></td>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/media-generating.gif" width="200" alt="Media Generating recording" /><br /><b>Media Generating</b><br /><code>nami-motion/skia</code></td>
-    <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/charts.gif" width="200" alt="Charts recording" /><br /><b>Charts</b><br /><code>nami-motion/charts</code></td>
-  </tr>
-  <tr>
     <td align="center" valign="top" width="33%"><img src="https://raw.githubusercontent.com/AhmeetKaar/nami-motion/main/media/voice-wave.gif" width="200" alt="Voice Wave recording" /><br /><b>Voice Wave</b><br /><code>nami-motion/skia</code></td>
   </tr>
 </table>
@@ -49,15 +46,13 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
 | Effort Bar | `nami-motion/chat` | Reasoning effort picker wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and a slider whose knob stretches as you drag and snaps to a level under a tab with your model name, each with a compact form and a per level icon. |
-| Charts | `nami-motion/charts` | BarList, Meter, Sparkline, RingGauge and CountUp for usage and credits. |
 
 Every component takes its icon, font, colors and timing as props and falls back
 to a static state when reduce motion is on. `nami-motion/theme` ships the
 Moodstone palette with `MotionThemeProvider` and `useMotionPalette`; pass
 `colors` to override one component.
 
-Optional peer: `@shopify/react-native-skia` for `nami-motion/skia` and
-`nami-motion/charts`.
+Optional peer: `@shopify/react-native-skia` for `nami-motion/skia`.
 
 ### Shimmer Text
 
@@ -120,18 +115,6 @@ const body = { model, messages, max_tokens: 16000, ...reasoningRequest(effort) }
 import { QuestionCard } from "nami-motion/chat";
 
 <QuestionCard questions={questions} variant="sheet" onSubmit={(answers) => send(answers)} />;
-```
-
-### Charts
-
-```tsx
-import { BarList, CountUp, Meter, RingGauge, Sparkline } from "nami-motion/charts";
-
-<CountUp value={1240} />;
-<Meter value={used} max={total} warnAt={0.75} dangerAt={0.9} />;
-<RingGauge value={remaining} max={total}><CountUp value={remaining} /></RingGauge>;
-<BarList data={models} />;
-<Sparkline data={daily} />;
 ```
 
 ### Voice Wave
