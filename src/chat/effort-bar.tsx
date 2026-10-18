@@ -12,9 +12,6 @@ import {
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
-  FadeInUp,
-  FadeOut,
   type SharedValue,
   interpolateColor,
   useAnimatedStyle,
@@ -22,7 +19,6 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withSpring,
-  ZoomIn,
 } from "react-native-reanimated";
 import { withAlpha } from "../internal/color";
 import { type MotionPalette } from "../theme/palette";
@@ -31,9 +27,6 @@ import { useMotionPalette } from "../theme/provider";
 const LEVEL_SPRING = { damping: 20, stiffness: 190, mass: 0.9 };
 const GRAB_SPRING = { damping: 22, stiffness: 320, mass: 0.7 };
 const EASE_OUT = Easing.bezier(0.22, 1, 0.36, 1);
-const DEFAULT_LABEL_STYLE: TextStyle = { fontSize: 16, lineHeight: 22, fontWeight: "600" };
-const DEFAULT_NUMBER_STYLE: TextStyle = { fontSize: 30, lineHeight: 34, fontWeight: "700" };
-const DEFAULT_DETAIL_STYLE: TextStyle = { fontSize: 13, lineHeight: 18 };
 const DEFAULT_SEGMENT_STYLE: TextStyle = { fontSize: 13, lineHeight: 18, fontWeight: "600" };
 const DEFAULT_GRADIENT = ["#53C26B", "#9BCB4A", "#F0C64A", "#F19A3E", "#EC6A4F", "#E5486F"];
 const SLIDER_TRACK = 40;
@@ -57,22 +50,13 @@ export type EffortBarProps = {
   variant?: EffortBarVariant;
   size?: "regular" | "compact";
   steps?: number;
-  title?: string;
   tabLabel?: string;
   levelIcon?: (index: number, color: string) => ReactNode;
-  icon?: ReactNode | ((index: number) => ReactNode);
-  badge?: ReactNode;
-  showHeader?: boolean;
-  showNumber?: boolean;
-  formatNumber?: (index: number, filled: number) => string;
-  showDescription?: boolean;
   disabled?: boolean;
   fillColors?: string[];
   barHeight?: number;
   onHaptic?: (index: number) => void;
-  labelStyle?: StyleProp<TextStyle>;
-  numberStyle?: StyleProp<TextStyle>;
-  detailStyle?: StyleProp<TextStyle>;
+  accessibilityLabel?: string;
   segmentStyle?: StyleProp<TextStyle>;
   colors?: Partial<MotionPalette>;
   style?: StyleProp<ViewStyle>;
@@ -117,22 +101,13 @@ export function EffortBar({
   variant = "bars",
   size = "regular",
   steps: stepsProp,
-  title,
   tabLabel,
   levelIcon,
-  icon,
-  badge,
-  showHeader = true,
-  showNumber = true,
-  formatNumber,
-  showDescription = true,
   disabled = false,
   fillColors,
   barHeight,
   onHaptic,
-  labelStyle = DEFAULT_LABEL_STYLE,
-  numberStyle = DEFAULT_NUMBER_STYLE,
-  detailStyle = DEFAULT_DETAIL_STYLE,
+  accessibilityLabel,
   segmentStyle = DEFAULT_SEGMENT_STYLE,
   colors,
   style,
@@ -156,16 +131,13 @@ export function EffortBar({
   const [width, setWidth] = useState(0);
   const lastIndex = useRef(index);
   const indexRef = useRef(index);
-  const previous = useRef(index);
   const dragging = useRef(false);
-  const rising = index >= previous.current;
   const interactive = !!onChange && !disabled;
   indexRef.current = index;
 
   useEffect(() => {
     fill.value = reduceMotion ? filled : withSpring(filled, LEVEL_SPRING);
     level.value = reduceMotion ? index : withSpring(index, LEVEL_SPRING);
-    previous.current = index;
   }, [fill, filled, index, level, reduceMotion]);
 
   useEffect(() => {
@@ -174,18 +146,10 @@ export function EffortBar({
   }, [knob, ratio, reduceMotion]);
 
   const barColors = useMemo(() => spread(stops ?? DEFAULT_GRADIENT, steps), [steps, stops]);
-  const levelColors = useMemo(() => items.map((_, position) => barColors[filledFor(position, count, steps) - 1]), [barColors, count, items, steps]);
   const trackFills = useMemo(
     () => (stops ? spread(stops, count) : items.map(() => palette.text)),
     [count, items, palette.text, stops],
   );
-  const accent = levelColors[index] ?? palette.accent;
-  const numberFor = (position: number) => {
-    if (formatNumber) return formatNumber(position, filledFor(position, count, steps));
-    const budget = items[position]?.budget;
-    return budget !== undefined ? `${Math.round(budget * 100)}%` : String(filledFor(position, count, steps));
-  };
-  const numberWidth = Math.max(...items.map((_, position) => numberFor(position).length)) * 19;
   const sliderTrack = barHeight ?? SLIDER_TRACK;
   const knobSize = compact ? COMPACT_SLIDER_KNOB : sliderTrack;
   const knobInset = compact ? 0 : SLIDER_RIM;
@@ -306,130 +270,18 @@ export function EffortBar({
     </View>
   );
 
-  const iconNode =
-    typeof icon === "function" ? (
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Animated.View
-          key={`icon${index}`}
-          entering={reduceMotion ? undefined : ZoomIn.springify().damping(13).stiffness(260)}
-          exiting={reduceMotion ? undefined : FadeOut.duration(100)}
-        >
-          {icon(index)}
-        </Animated.View>
-      </View>
-    ) : (
-      icon
-    );
-
-  const labelled = variant !== "bars" && (variant !== "slider" || !!(title || badge || iconNode));
-
   return (
     <View
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel={title ?? "Effort"}
+      accessibilityLabel={accessibilityLabel ?? "Effort"}
       accessibilityValue={{ text: current?.label }}
       accessibilityState={{ disabled }}
       accessibilityActions={interactive ? [{ name: "increment" }, { name: "decrement" }] : undefined}
       onAccessibilityAction={handleAction}
-      style={[{ gap: compact ? 0 : 12, opacity: disabled ? 0.45 : 1 }, compact && { flexDirection: "row", alignItems: "center", gap: 8 }, style]}
+      style={[{ opacity: disabled ? 0.45 : 1 }, compact && { width: compactWidth }, style]}
     >
-      {compact ? (
-        <>
-          <View style={{ width: compactWidth }}>{control}</View>
-          {showHeader && current ? (
-            levelIcon ? (
-              <Animated.View key={index} entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}>
-                {levelIcon(index, variant === "bars" ? accent : palette.textSecondary)}
-              </Animated.View>
-            ) : (
-              <Animated.Text
-                key={index}
-                entering={reduceMotion ? undefined : FadeIn.duration(180).easing(EASE_OUT)}
-                style={[segmentStyle, { color: variant === "bars" ? accent : palette.textSecondary }]}
-              >
-                {current.label}
-              </Animated.Text>
-            )
-          ) : null}
-        </>
-      ) : (
-        <>
-          {showHeader && variant === "bars" ? (
-            <View style={{ gap: 2 }}>
-              {title || badge ? (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  {title ? <Text style={[segmentStyle, { color: palette.textSecondary }]}>{title}</Text> : null}
-                  {badge}
-                </View>
-              ) : null}
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 36 }}>
-                {showNumber ? (
-                  <View style={{ overflow: "hidden", minWidth: numberWidth }}>
-                    <Animated.Text
-                      key={`n${index}`}
-                      entering={reduceMotion ? undefined : (rising ? FadeInUp : FadeInDown).delay(70).duration(240).easing(EASE_OUT)}
-                      exiting={reduceMotion ? undefined : FadeOut.duration(60)}
-                      style={[numberStyle, { color: palette.text, fontVariant: ["tabular-nums"] }]}
-                    >
-                      {numberFor(index)}
-                    </Animated.Text>
-                  </View>
-                ) : null}
-                {levelIcon ? (
-                  <Animated.View key={`l${index}`} entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}>
-                    {levelIcon(index, accent)}
-                  </Animated.View>
-                ) : (
-                  <Animated.Text
-                    key={`l${index}`}
-                    entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
-                    style={[labelStyle, { color: accent }]}
-                  >
-                    {current?.label}
-                  </Animated.Text>
-                )}
-                <View style={{ flex: 1 }} />
-                {iconNode}
-              </View>
-            </View>
-          ) : null}
-          {showHeader && labelled ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              {iconNode}
-              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
-                {title ? <Text style={[labelStyle, { color: palette.text }]}>{title}</Text> : null}
-                {badge}
-              </View>
-              {variant !== "slider" ? (
-                levelIcon ? (
-                  <Animated.View key={index} entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}>
-                    {levelIcon(index, title ? palette.textSecondary : palette.text)}
-                  </Animated.View>
-                ) : (
-                  <Animated.Text
-                    key={index}
-                    entering={reduceMotion ? undefined : FadeIn.duration(220).easing(EASE_OUT)}
-                    style={[labelStyle, { color: title ? palette.textSecondary : palette.text, fontWeight: title ? "500" : "600" }]}
-                  >
-                    {current?.label}
-                  </Animated.Text>
-                )
-              ) : null}
-            </View>
-          ) : null}
-          {control}
-          {showDescription && current?.description ? (
-            <Animated.Text
-              key={`d${index}`}
-              entering={reduceMotion ? undefined : FadeIn.duration(240).easing(EASE_OUT)}
-              style={[detailStyle, { color: palette.textSecondary }]}
-            >
-              {current.description}
-            </Animated.Text>
-          ) : null}
-        </>
-      )}
+      {control}
     </View>
   );
 }
