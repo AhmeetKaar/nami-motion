@@ -4,7 +4,7 @@ import { type StyleProp, type ViewStyle } from "react-native";
 import { useDerivedValue, useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { useMotionPalette } from "../theme/provider";
 
-export type DotOrbVariant = "orbit" | "scan" | "constellation" | "helix" | "ring" | "morph";
+export type DotOrbVariant = "orbit" | "scan" | "constellation" | "helix";
 
 export type DotOrbProps = {
   variant?: DotOrbVariant;
@@ -187,57 +187,6 @@ export function DotOrb({
           place(projected[0], projected[1], projected[2], 0.85 + 0.6 * Math.sin(Math.PI * u));
         }
       }
-    } else if (variant === "ring") {
-      const count = 64;
-      for (let index = 0; index < count; index += 1) {
-        const theta = (index / count) * TAU;
-        const rho =
-          0.82 +
-          0.07 * Math.sin(3 * theta + t * 1.2) +
-          0.05 * Math.sin(5 * theta - t * 0.85) +
-          0.04 * Math.sin(2 * theta + t * 0.6);
-        const inner = rho - 0.07;
-        const outer = rho + 0.07;
-        const dx = Math.cos(theta);
-        const dy = Math.sin(theta) * 0.92;
-        const depth = Math.sin(theta + t * 0.3);
-        const target = depth < -0.35 ? back : depth < 0.35 ? mid : front;
-        target.moveTo(cx + dx * inner * radius, cy + dy * inner * radius);
-        target.lineTo(cx + dx * outer * radius, cy + dy * outer * radius);
-      }
-    } else {
-      const count = 42;
-      const hold = 1.3;
-      const shift = 0.9;
-      const span = hold + shift;
-      const step = Math.floor(t / span);
-      const local = t - step * span;
-      const mix = local < hold ? 0 : smooth((local - hold) / shift);
-      const from = step % 3;
-      const to = (step + 1) % 3;
-      const shape = (kind: number, s: number) => {
-        if (kind === 0) {
-          const a = s * TAU - Math.PI / 2;
-          return [Math.cos(a) * 0.85, Math.sin(a) * 0.85];
-        }
-        const corners = kind === 1 ? 3 : 4;
-        const offset = kind === 1 ? -Math.PI / 2 : -Math.PI / 4;
-        const side = Math.floor(s * corners);
-        const f = s * corners - side;
-        const a0 = offset + (side / corners) * TAU;
-        const a1 = offset + ((side + 1) / corners) * TAU;
-        const reach = kind === 1 ? 0.95 : 1.05;
-        return [
-          (Math.cos(a0) + (Math.cos(a1) - Math.cos(a0)) * f) * reach,
-          (Math.sin(a0) + (Math.sin(a1) - Math.sin(a0)) * f) * reach + (kind === 1 ? 0.12 : 0),
-        ];
-      };
-      for (let index = 0; index < count; index += 1) {
-        const s = index / count;
-        const a = shape(from, s);
-        const b = shape(to, s);
-        front.addCircle(cx + (a[0] + (b[0] - a[0]) * mix) * radius, cy + (a[1] + (b[1] - a[1]) * mix) * radius, dot * 0.85);
-      }
     }
 
     return { back, mid, front, accent: accentPath, lines, linesOpacity };
@@ -249,15 +198,13 @@ export function DotOrb({
   const accentLayer = useDerivedValue(() => frame.value.accent);
   const lines = useDerivedValue(() => frame.value.lines);
   const linesOpacity = useDerivedValue(() => frame.value.linesOpacity);
-  const stroke = useDerivedValue(() => Math.max(1, Math.min(layout.value.width, layout.value.height) * 0.011));
-  const ringStroke = variant === "ring";
 
   return (
     <Canvas onSize={layout} style={[size !== undefined ? { width: size, height: size } : { flex: 1, alignSelf: "stretch" }, style]}>
       {variant === "constellation" ? <Path path={lines} style="stroke" strokeWidth={1} color={ink} opacity={linesOpacity} /> : null}
-      <Path path={back} color={ink} opacity={0.25} style={ringStroke ? "stroke" : "fill"} strokeWidth={stroke} strokeCap="round" />
-      <Path path={mid} color={ink} opacity={0.55} style={ringStroke ? "stroke" : "fill"} strokeWidth={stroke} strokeCap="round" />
-      <Path path={front} color={ink} opacity={0.95} style={ringStroke ? "stroke" : "fill"} strokeWidth={stroke} strokeCap="round" />
+      <Path path={back} color={ink} opacity={0.25} />
+      <Path path={mid} color={ink} opacity={0.55} />
+      <Path path={front} color={ink} opacity={0.95} />
       {variant === "scan" ? <Path path={accentLayer} color={highlight} /> : null}
     </Canvas>
   );

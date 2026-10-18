@@ -39,7 +39,7 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Shimmer Text | `nami-motion/text` | A light band sweeping across text while a response is being generated. |
 | Streaming Text | `nami-motion/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
 | Spinning Mark | `nami-motion/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
-| Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with eight variants (blobs, matrix, orbit, scan, constellation, helix, ring, morph). `ImageGenerating` and `VideoGenerating` are its presets. |
+| Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with six variants (blobs, matrix, orbit, scan, constellation, helix). `ImageGenerating` and `VideoGenerating` are its presets. |
 | DotOrb | `nami-motion/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
 | Voice Wave | `nami-motion/skia` | Live microphone waveform in five styles: lines, bars, dots, pulse and ring. |
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
