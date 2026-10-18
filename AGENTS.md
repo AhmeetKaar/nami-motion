@@ -31,6 +31,7 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 
 ## Kurallar
 
+- Yapı üç yerde birebir aynıdır (2026-10-18): proje hakkındaki her istek önce pakette (`~/development/nami-motion`), sonra iOS showcase'te (`~/development/nami-motion-ios`), sonra web'de (`~/development/nami-motion-web`) uygulanır. Paket bir component'i stillere ayırıyorsa (ör. QuestionCard/QuestionSheet, EffortBars/Track/Segmented/Slider) iOS her stili ayrı ekranda kullanımıyla, web her stili ayrı bölüm ve videoyla gösterir; isim ve sıra üçünde aynıdır.
 - Paket yöneticisi npm (`package-lock.json`). React 19.2.0, Expo SDK 55 hattı; sürüm yükseltilmez (Xcode 26.2).
 - Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4).
 - Her component ikon (`icon`/`children`), font (`textStyle` ya da Skia `font`/`fontSource`/`fontFamily`), renk ve zamanlamayı prop olarak alır.
