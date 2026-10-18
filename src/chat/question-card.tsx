@@ -321,16 +321,16 @@ export function QuestionCard({
           shadowOffset: { width: 0, height: 8 },
         }
       : {};
-  const padding: ViewStyle =
-    variant === "card"
-      ? { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6 }
-      : { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 8 };
+  const sheet = variant === "sheet";
+  const padding: ViewStyle = sheet
+    ? { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 }
+    : { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 };
   const showFooter = kind === "multiple" && draft.selected.length > 0;
 
   return (
     <Animated.View style={[container, shellStyle, style]}>
-      <Animated.View style={[{ overflow: "hidden", borderRadius: radius }, clipStyle]}>
-        <View onLayout={handleLayout} style={[padding, { position: "absolute", top: 0, left: 0, right: 0 }]}>
+      <Animated.View style={[{ overflow: "hidden", borderRadius: radius }, sheet ? null : clipStyle]}>
+        <View onLayout={sheet ? undefined : handleLayout} style={[padding, sheet ? null : { position: "absolute", top: 0, left: 0, right: 0 }]}>
           {sent ? (
             <Animated.View
               entering={reduceMotion ? undefined : FadeIn.duration(260).easing(EASE_OUT)}
@@ -366,14 +366,16 @@ export function QuestionCard({
                 ) : null}
                 <View style={{ flex: 1 }} />
                 {onClose ? (
-                  <IconButton label="Close" onPress={onClose}>
-                    {icons?.close ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18, fontWeight: "400" }]}>×</Text>}
-                  </IconButton>
+                  <View style={{ marginRight: -8 }}>
+                    <IconButton label="Close" onPress={onClose}>
+                      {icons?.close ?? <Text style={[metaStyle, { color: palette.textSecondary, fontSize: 18, fontWeight: "400" }]}>×</Text>}
+                    </IconButton>
+                  </View>
                 ) : null}
               </View>
 
               <Animated.View style={contentStyle}>
-                <Text accessibilityRole="header" style={[titleStyle, { color: palette.text, marginTop: 2, marginBottom: 6 }]}>
+                <Text accessibilityRole="header" style={[titleStyle, { color: palette.text, marginTop: 4, marginBottom: 8 }]}>
                   {question.title}
                 </Text>
                 <View accessibilityRole={kind === "single" ? "radiogroup" : undefined}>
@@ -404,13 +406,18 @@ export function QuestionCard({
                         alignItems: "center",
                         gap: 12,
                         minHeight: 50,
-                        borderTopWidth: options.length ? 1 : 0,
-                        borderTopColor: hairline,
+                        marginHorizontal: -8,
+                        paddingHorizontal: 8,
                       }}
                     >
-                      <View style={{ width: CHIP, height: CHIP, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: palette.surface }}>
-                        {icons?.custom ?? <Text style={[metaStyle, { color: palette.textSecondary }]}>✎</Text>}
-                      </View>
+                      {options.length ? (
+                        <View style={{ position: "absolute", top: 0, left: numbered ? CHIP + 20 : 8, right: 8, height: 1, backgroundColor: hairline }} />
+                      ) : null}
+                      {numbered ? (
+                        <View style={{ width: CHIP, height: CHIP, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: palette.surface }}>
+                          {icons?.custom ?? <Text style={[metaStyle, { color: palette.textSecondary }]}>✎</Text>}
+                        </View>
+                      ) : null}
                       <TextInput
                         value={draft.custom}
                         onChangeText={setCustom}
@@ -451,7 +458,7 @@ export function QuestionCard({
                   <Animated.View
                     entering={reduceMotion ? undefined : FadeIn.duration(200).easing(EASE_OUT)}
                     exiting={reduceMotion ? undefined : FadeOut.duration(120)}
-                    style={{ alignItems: "flex-end", paddingTop: 6, paddingBottom: 6 }}
+                    style={{ alignItems: "flex-end", paddingTop: 8 }}
                   >
                     <Pressable
                       onPress={() => (last ? submit() : goTo(shown + 1))}
