@@ -1,5 +1,11 @@
 # nami-motion
 
+## 0.8.0
+
+### Minor Changes
+
+- f566f2e: QuestionCard and QuestionSheet accept a `ref` with `select(index)`, `goTo(page)` and `submit()`, so a host can drive the questions programmatically (demos, voice input, tests).
+
 ## 0.7.0
 
 ### Minor Changes
