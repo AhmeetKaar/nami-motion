@@ -25,7 +25,7 @@ const LAYERS: WaveLayer[] = [
   { frequency: 1.6, speed: 0.0042, phase: 0, amplitude: 1, strokeWidth: 2, opacity: 1 },
 ];
 
-export type VoiceWaveVariant = "lines" | "bars" | "dots" | "pulse" | "ring";
+export type VoiceWaveVariant = "lines" | "bars" | "dots" | "pulse";
 
 export type VoiceWaveProps = {
   level: SharedValue<number>;
@@ -168,45 +168,6 @@ function Pulse({ width, height, level, clock, colors }: FieldProps) {
   );
 }
 
-const RING_LAYERS = [
-  { lobes: 3, speed: 0.0021, phase: 0, amplitude: 1, opacity: 1, stroke: 2 },
-  { lobes: 5, speed: -0.0016, phase: 1.7, amplitude: 0.7, opacity: 0.6, stroke: 1.5 },
-  { lobes: 4, speed: 0.0012, phase: 3.1, amplitude: 0.5, opacity: 0.4, stroke: 1.5 },
-];
-
-function RingLayer({ index, width, height, level, clock, color }: { index: number; width: number; height: number; level: SharedValue<number>; clock: SharedValue<number>; color: string }) {
-  const layer = RING_LAYERS[index];
-  const path = useDerivedValue(() => {
-    const cx = width / 2;
-    const cy = height / 2;
-    const base = Math.min(width, height) * 0.3;
-    const amp = Math.min(width, height) * 0.14 * layer.amplitude * (0.12 + level.value * 0.88);
-    const t = clock.value * layer.speed + layer.phase;
-    const next = Skia.Path.Make();
-    for (let step = 0; step <= 96; step += 1) {
-      const theta = (step / 96) * Math.PI * 2;
-      const r = base + amp * Math.sin(layer.lobes * theta + t) * Math.cos(2 * theta - t * 0.7);
-      const x = cx + Math.cos(theta) * r;
-      const y = cy + Math.sin(theta) * r;
-      if (step === 0) next.moveTo(x, y);
-      else next.lineTo(x, y);
-    }
-    next.close();
-    return next;
-  });
-  return <Path path={path} style="stroke" strokeWidth={layer.stroke} strokeJoin="round" color={color} opacity={layer.opacity} />;
-}
-
-function Ring({ width, height, level, clock, colors }: FieldProps) {
-  return (
-    <>
-      {RING_LAYERS.map((_, index) => (
-        <RingLayer key={index} index={index} width={width} height={height} level={level} clock={clock} color={colors[2 - index]} />
-      ))}
-    </>
-  );
-}
-
 export function VoiceWave({ level, colors, variant = "lines", height = DEFAULT_HEIGHT, style }: VoiceWaveProps) {
   const [width, setWidth] = useState(0);
   const reduceMotion = useReducedMotion();
@@ -226,8 +187,6 @@ export function VoiceWave({ level, colors, variant = "lines", height = DEFAULT_H
             <Dots {...props} />
           ) : variant === "pulse" ? (
             <Pulse {...props} />
-          ) : variant === "ring" ? (
-            <Ring {...props} />
           ) : (
             <Lines width={width} height={height} level={level} clock={clock} colors={colors} />
           )}
@@ -253,8 +212,4 @@ export function VoiceWaveDots(props: VoiceWaveStyleProps) {
 
 export function VoiceWavePulse(props: VoiceWaveStyleProps) {
   return <VoiceWave {...props} variant="pulse" />;
-}
-
-export function VoiceWaveRing(props: VoiceWaveStyleProps) {
-  return <VoiceWave {...props} variant="ring" />;
 }

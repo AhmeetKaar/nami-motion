@@ -43,15 +43,15 @@ npx expo install nami-motion react-native-reanimated react-native-worklets
 | Media Generating | `nami-motion/skia` | One loading state shared by image and video generation, with six variants (blobs, matrix, orbit, scan, constellation, helix). `ImageGenerating` and `VideoGenerating` are its presets. |
 | DotOrb | `nami-motion/skia` | Dot sphere pictures behind the media variants, also usable on their own. |
 | Liquid Orb | `nami-motion/skia` | Liquid voice orb in metal, water or iridescent material that reacts to idle, listening, thinking and speaking states and a live level. |
-| Voice Wave | `nami-motion/skia` | Live microphone waveform in five styles: lines, bars, dots, pulse and ring. |
+| Voice Wave | `nami-motion/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
 | Status Row | `nami-motion/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
 | Thinking Block | `nami-motion/chat` | "Thought for Ns" header that springs open into a step timeline. |
 | Question Card | `nami-motion/chat` | Paged questions with numbered options and a custom answer, for cards or sheets. |
 | Effort Bar | `nami-motion/chat` | Reasoning effort bar wired to `reasoning.effort` (low, medium, high) in four styles: rising bars (default), track, segmented pill and a slider whose knob stretches as you drag and snaps to a level under a tab with your model name, each with a compact form and a per level icon. |
 
 Every style is also its own component with the same props minus `variant`:
-`VoiceWaveLines`, `VoiceWaveBars`, `VoiceWaveDots`, `VoiceWavePulse` and
-`VoiceWaveRing`; `EffortBars`, `EffortTrack`, `EffortSegmented` and
+`VoiceWaveLines`, `VoiceWaveBars`, `VoiceWaveDots` and `VoiceWavePulse`;
+`EffortBars`, `EffortTrack`, `EffortSegmented` and
 `EffortSlider`; `MediaGeneratingBlobs`, `MediaGeneratingMatrix`,
 `MediaGeneratingOrbit`, `MediaGeneratingScan`, `MediaGeneratingConstellation`
 and `MediaGeneratingHelix`; and `QuestionSheet`.
@@ -135,7 +135,7 @@ import { VoiceWave } from "nami-motion/skia";
 const level = useSharedValue(0);
 
 <VoiceWave level={level} variant="bars" colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
-<VoiceWave level={level} variant="ring" height={240} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
+<VoiceWave level={level} variant="pulse" height={48} colors={["#1F8A70", "#88C9F7", "#5FC7B0"]} />;
 ```
 
 ### Liquid Orb and Spoken Text (voice mode)
