@@ -1,4 +1,4 @@
-# nami-motion
+# react-native-ai-animations
 
 ## 0.7.0
 

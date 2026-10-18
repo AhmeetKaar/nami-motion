@@ -1,6 +1,7 @@
-# nami-motion — Ajan Kuralları ve Devir Notu
+# react-native-ai-animations (eski adı nami-motion) — Ajan Kuralları ve Devir Notu
 
-React Native / Expo için animasyon paketi `nami-motion` (MIT, builder-bob, ESM + tipler).
+React Native / Expo için animasyon paketi `react-native-ai-animations` (MIT, builder-bob, ESM + tipler).
+2026-10-18: SEO için `nami-motion` → `react-native-ai-animations` (görünen ad "React Native AI Animations"); klasör ve GitHub repo adları şimdilik `nami-motion*` kalır.
 Bu repo yalnızca npm paketidir; buradan yayınlanır. Componentler Nami uygulamasından
 (`/Users/ahmeetkaar/development/nami`) prop-driven hale getirilerek alındı.
 2026-10-17: paket önce ShimmerText + VoiceWave'e indirildi (0.4.0), aynı gün referans sitelerden
@@ -21,11 +22,11 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 
 | Giriş | Componentler | Ek native bağımlılık |
 | --- | --- | --- |
-| `nami-motion/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
-| `nami-motion/text` | ShimmerText, StreamingText, SpokenText | — |
-| `nami-motion/brand` | SpinningMark | — |
-| `nami-motion/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
-| `nami-motion/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave, LiquidOrb | @shopify/react-native-skia (opsiyonel peer) |
+| `react-native-ai-animations/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
+| `react-native-ai-animations/text` | ShimmerText, StreamingText, SpokenText | — |
+| `react-native-ai-animations/brand` | SpinningMark | — |
+| `react-native-ai-animations/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
+| `react-native-ai-animations/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave, LiquidOrb | @shopify/react-native-skia (opsiyonel peer) |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
@@ -64,7 +65,7 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Durum
 
 - GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
-- npm: `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
+- npm: yeni ad `react-native-ai-animations` henüz yayımlanmadı (ilk sürüm 0.8.0 olacak); yayından sonra `npm deprecate nami-motion "Renamed to react-native-ai-animations"` (kullanıcı izniyle). Eski ad: `nami-motion@0.7.0` son sürüm. `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
 - Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
 
 ## Sıradaki işler
