@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- b1cb0c9: Add customizable components: SpinningMark (`nami-motion/brand`), BlurText, MediaGenerating (one loading state shared by image and video, with the ImageGenerating and VideoGenerating presets and eight variants), DotOrb and MatrixOrb (`nami-motion/skia`), StreamingText (`nami-motion/text`), StatusRow, ThinkingBlock, QuestionCard, EffortBar (bars, track, segmented, dial, dots and slider styles, each with a compact size) and the reasoning helpers (`REASONING_EFFORTS`, `reasoningRequest`, `reasoningBudget`, matching OpenRouter's `reasoning.effort`) (`nami-motion/chat`) and BarList, Meter, Sparkline, RingGauge and CountUp (`nami-motion/charts`). VoiceWave gains `variant` (lines, bars, dots, pulse, ring) and `height`. Every component takes its icon, font, colors and timing as props and settles to a static state when reduce motion is on.
+- b1cb0c9: Add customizable components: SpinningMark (`nami-motion/brand`), BlurText, MediaGenerating (one loading state shared by image and video, with the ImageGenerating and VideoGenerating presets and eight variants), DotOrb and MatrixOrb (`nami-motion/skia`), StreamingText (`nami-motion/text`), StatusRow, ThinkingBlock, QuestionCard, EffortBar (bars, track, segmented and slider styles, each with a compact size) and the reasoning helpers (`REASONING_EFFORTS`, `reasoningRequest`, `reasoningBudget`, matching OpenRouter's `reasoning.effort`) (`nami-motion/chat`) and BarList, Meter, Sparkline, RingGauge and CountUp (`nami-motion/charts`). VoiceWave gains `variant` (lines, bars, dots, pulse, ring) and `height`. Every component takes its icon, font, colors and timing as props and settles to a static state when reduce motion is on.
 
 ## 0.4.0
 
