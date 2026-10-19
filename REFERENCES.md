@@ -13,7 +13,26 @@ Kaynaklardan yalnızca fikir alınır, kod alınmaz. Kullanıcının bulduğu re
 | [native-templates.com](https://www.native-templates.com/) | Hangi ekranların kapsanacağı | Ücretli lisans, yalnızca fikir |
 | [makeitanimated.dev](https://makeitanimated.dev/animations) | Animasyon kataloğu (shimmer text, drawer, onboarding) | Ücretli kişisel lisans, açık yayın yasak; kod alınmaz |
 | [Mobbin: Claude iOS](https://mobbin.com/apps/claude-ios-d4f0ada4-3325-4c8e-9c3e-1115dbd469c9/754cdd57-a1c5-4553-b8fa-1c3c4eba8b2e/screens) | Soru kartı, Effort sayfası, splash, kompozer | Yalnızca görüntü |
-| [JC Builds: Thinking Orbs](https://twitter.com/JC_builds/status/2101421513744544215) | DotOrb varyantları (yörünge, tarama, takımyıldız, sarmal, halka, şekil) ve ortak MediaGenerating | Kaynak RN paketinin lisansı bilinmiyor, yalnızca fikir |
+| [JC Builds: Thinking Orbs](https://twitter.com/JC_builds/status/2101421513744544215) ([ikinci gönderi](https://x.com/JC_builds/status/2104442200474202172)) | DotOrb varyantları (yörünge, tarama, takımyıldız, sarmal, halka, şekil) ve ortak MediaGenerating | Kaynak RN paketinin lisansı bilinmiyor, yalnızca fikir |
+
+## Nami'den gelen referanslar
+
+Componentler Nami'den alındığı için `nami/client-animations.md` referansları da paketin kaynağıdır.
+
+| Referans | Paketteki karşılığı |
+| --- | --- |
+| [makeitanimated: ChatGPT shimmer text](https://makeitanimated.dev/animations/chatgpt-shimmer-text-animation) | ShimmerText (kendi kodumuz) |
+| [beautifului: Streaming Text](https://www.beautifului.dev/#streaming-text) | StreamingText |
+| [beautifului: Loading State](https://www.beautifului.dev/#loading-state) | StatusRow |
+| [beautifului: Thinking](https://www.beautifului.dev/#thinking-state) | ThinkingBlock |
+| [Mobbin: Claude login](https://mobbin.com/screens/96dbe1cf-66ec-4aec-8171-2a28f3da8f15) | SpinningMark (onboarding logosu) |
+| [Mobbin: Claude STT](https://mobbin.com/screens/5cdaa55a-c9d5-424b-9f21-195b3c6e4bd9) | VoiceWave |
+| [Mobbin: Claude Select model sheet](https://mobbin.com/screens/e7e22711-6762-4d26-83aa-041f3f622fda), [Add to Chat sheet](https://mobbin.com/screens/42bb2da1-3873-4690-858f-dbfd808e6a6b) | QuestionSheet |
+| [rnmotion: blurred text morph](https://rnmotion.dev/animations/blurred-text-morph) | Yok (BlurText kaldırıldı) |
+| [motion.dev: swipe actions](https://motion.dev/examples/react-swipe-actions) | Yok (SwipeActions kaldırıldı) |
+| [rnmotion: spring toast](https://rnmotion.dev/animations/spring-toast) | Ertelendi (StackToast) |
+| [rnmotion: ChatGPT attachments](https://rnmotion.dev/animations/chatgpt-attachments) | Ertelendi |
+| [makeitanimated: X drawer](https://makeitanimated.dev/animations/x-drawer-aerildi) | Yok (Nami drawer'ı) |
 
 ## Component eşleşmeleri
 
