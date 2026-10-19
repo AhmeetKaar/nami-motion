@@ -11,7 +11,7 @@ yalnızca fikir alınarak test componentleri eklendi (0.5.0); SwipeActions kulla
 
 | Yol | Ne |
 | --- | --- |
-| `~/development/nami-motion` | Bu repo: paket kaynağı (`src/`), changeset'ler, CI + release, README GIF/videoları (`media/`) |
+| `~/development/nami-motion` | Bu repo: paket kaynağı (`src/`), changeset'ler, CI + release. README'de görsel yok, kayıtlar siteye bağlanır |
 | `~/development/nami-motion-web` | Vitrin sitesi (Vite + React + Tailwind 4); içerik `src/data/components.ts`, videolar `public/videos/<slug>.mp4` |
 | `~/development/nami-motion-ios` | Expo SDK 55 uygulaması: galeri + `showcase/[slug]` ekranları, Maestro akışları; paketi normal bağımlılık olarak kurar |
 
@@ -65,8 +65,8 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Durum
 
 - GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
-- npm: `react-native-ai-animations@0.8.0` 2026-10-18'de yayımlandı (tag `v0.8.0` → `e2399d4`); `nami-motion`'ın tüm sürümleri "Renamed to react-native-ai-animations" mesajıyla deprecate edildi (son sürüm 0.7.0). Her web onay bağlantısı yalnızca kendi çalışan `npm` sürecine geçerlidir; süreç kapanınca onay işe yaramaz. `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
-- Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
+- npm: `react-native-ai-animations@0.8.1` 2026-10-19'da yayımlandı (tag `v0.8.1` → `a61e3bd`, PR #1 ile main'e girdi; npm sayfası artık görselsiz README'yi ve site homepage'ini gösterir). `main` GitHub ruleset'iyle PR zorunlu, doğrudan push reddedilir; `release.yml` `NPM_TOKEN` secret'ı olmadığından yayımlamaz, yayın elle yapılır. 0.8.0 2026-10-18'de yayımlanmıştı (tag `v0.8.0` → `e2399d4`); `nami-motion`'ın tüm sürümleri "Renamed to react-native-ai-animations" mesajıyla deprecate edildi (son sürüm 0.7.0). Her web onay bağlantısı yalnızca kendi çalışan `npm` sürecine geçerlidir; süreç kapanınca onay işe yaramaz. `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
+- Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`. Paketteki `media/` klasörü 2026-10-19'da silindi (npm'deki 0.8.1 README'si görsele bağlanmıyor).
 
 ## Sıradaki işler
 
