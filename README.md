@@ -41,7 +41,7 @@ prompts, on the [website](https://nami-motion-web.vercel.app/).
 | Component | Entry | What it does |
 | --- | --- | --- |
 | Shimmer Text | `/text` | A light band sweeping across text while a response is being generated. |
-| Streaming Text | `/text` | Words of a streaming answer fade and rise in, with a blinking caret. |
+| Streaming Text | `/text` | A streaming answer fades in chunk by chunk with native text layout and a blinking caret. |
 | Spoken Text | `/text` | Highlights the word being spoken and dims the words already read aloud, for voice replies. |
 | Spinning Mark | `/brand` | Spins any icon you pass (your logo) with optional breathing and entrance. |
 | Status Row | `/chat` | Pulsing icon, shimmering label and elapsed timer for agent status. |
