@@ -1,5 +1,11 @@
 # react-native-ai-animations
 
+## 0.8.1
+
+### Patch Changes
+
+- The README no longer embeds the recordings and instead links to the docs site, and the package homepage points at https://nami-motion-web.vercel.app/ so the npm page shows the restructured README with install, theming and prop tables.
+
 ## 0.8.0
 
 ### Minor Changes
