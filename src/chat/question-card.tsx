@@ -333,7 +333,7 @@ export const QuestionCard = forwardRef<QuestionCardHandle, QuestionCardProps>(fu
   const padding: ViewStyle = sheet
     ? { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 }
     : { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 };
-  const showFooter = kind === "multiple" && draft.selected.length > 0;
+  const showFooter = draft.selected.length > 0 && (kind === "multiple" || (last ? !autoSubmit : !autoAdvance));
 
   return (
     <Animated.View style={[container, shellStyle, style]}>

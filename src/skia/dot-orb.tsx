@@ -1,7 +1,8 @@
-import { Canvas, Path, Skia, type SkPath, useClock } from "@shopify/react-native-skia";
+import { Canvas, Path, Skia, type SkPath } from "@shopify/react-native-skia";
 import { useEffect, useMemo } from "react";
 import { type StyleProp, type ViewStyle } from "react-native";
 import { Easing, useDerivedValue, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import { useMotionClock } from "../internal/use-motion-clock";
 import { useMotionPalette } from "../theme/provider";
 
 export type DotOrbVariant = "orbit" | "scan" | "constellation" | "helix";
@@ -96,9 +97,9 @@ export function DotOrb({
   const reduceMotion = useReducedMotion();
   const ink = color ?? palette.text;
   const highlight = accent ?? palette.accent;
-  const clock = useClock();
-  const layout = useSharedValue({ width: size ?? 0, height: size ?? 0 });
   const still = reduceMotion || paused;
+  const clock = useMotionClock(!still);
+  const layout = useSharedValue({ width: size ?? 0, height: size ?? 0 });
   const spread = useSharedValue(scatter === true ? 1 : 0);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export function DotOrb({
   const edges = useMemo(() => (variant === "constellation" ? buildEdges(sphere, 0.6) : []), [sphere, variant]);
 
   const frame = useDerivedValue<Frame>(() => {
-    const t = (still ? STILL_TIME : clock.value) * 0.001 * speed;
+    const t = (reduceMotion ? STILL_TIME : clock.value) * 0.001 * speed;
     const width = layout.value.width;
     const height = layout.value.height;
     const cx = width / 2;

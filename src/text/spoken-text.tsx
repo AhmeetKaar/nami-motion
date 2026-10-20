@@ -40,7 +40,11 @@ export function SpokenText({
   if (reduceMotion) {
     return (
       <Text accessibilityLabel={text} style={[textStyle, { color: active, textAlign: align }, style as StyleProp<TextStyle>]}>
-        {text}
+        {words.map((word, index) => (
+          <Text key={index} style={{ color: index < current ? done : index === current ? active : upcoming }}>
+            {word}
+          </Text>
+        ))}
       </Text>
     );
   }

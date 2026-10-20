@@ -7,7 +7,6 @@ import {
   LinearGradient,
   Paint,
   Rect,
-  useClock,
   vec,
 } from "@shopify/react-native-skia";
 import { useEffect, useState, type ReactNode } from "react";
@@ -36,6 +35,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { withAlpha } from "../internal/color";
 import { formatElapsed, useElapsed } from "../internal/use-elapsed";
+import { useMotionClock } from "../internal/use-motion-clock";
 import { ShimmerText } from "../text/shimmer-text";
 import { moodstoneSwatches, type MotionPalette } from "../theme/palette";
 import { useMotionPalette } from "../theme/provider";
@@ -138,7 +138,7 @@ export function MediaGenerating({
   const seconds = useElapsed(startedAt, true);
   const copy = { ...DEFAULT_LABELS, ...labels };
   const title = status ? copy[status] : (label ?? copy.generating);
-  const headline = chrome === "header" && label && status ? label : title;
+  const headline = chrome === "header" && label && status ? (status === "queued" ? `${label} \u00B7 ${copy.queued}` : label) : title;
   const percent = progress === undefined ? undefined : Math.round(Math.min(1, Math.max(0, progress)) * 100);
   const chip = withAlpha(palette.background, 0.72);
   const showSweep = sweep ?? variant === "blobs";
@@ -241,7 +241,7 @@ type BlobFieldProps = { colors: string[]; grain: boolean; sweep: boolean; sweepC
 
 function BlobField({ colors, grain, sweep, sweepColor, still }: BlobFieldProps) {
   const size = useSharedValue({ width: 0, height: 0 });
-  const clock = useClock();
+  const clock = useMotionClock(!still);
   const time = useDerivedValue(() => (still ? 0 : clock.value), [still]);
   const canvasWidth = useDerivedValue(() => size.value.width);
   const canvasHeight = useDerivedValue(() => size.value.height);

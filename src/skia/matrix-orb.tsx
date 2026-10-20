@@ -7,6 +7,8 @@ import {
   useReducedMotion,
   useSharedValue,
 } from "react-native-reanimated";
+import { type MotionPalette } from "../theme/palette";
+import { useMotionPalette } from "../theme/provider";
 
 export type MatrixOrbState = "idle" | "listening" | "thinking";
 
@@ -24,7 +26,6 @@ const MAX_DELTA = 0.05;
 const MIN_DOTS = 3;
 const DEFAULT_DOTS = 11;
 const DEFAULT_SIZE = 240;
-const DEFAULT_COLOR = "#FFFFFF";
 
 const ORB_SPAN = 0.74;
 const ORB_DOT = 0.6;
@@ -195,6 +196,7 @@ export type MatrixOrbProps = {
   color?: string;
   stateColors?: Partial<Record<MatrixOrbState, string>>;
   dots?: number;
+  colors?: Partial<MotionPalette>;
 };
 
 export function MatrixOrb({
@@ -202,10 +204,13 @@ export function MatrixOrb({
   level,
   size = DEFAULT_SIZE,
   cover = false,
-  color = DEFAULT_COLOR,
+  color: colorProp,
   stateColors,
   dots = DEFAULT_DOTS,
+  colors,
 }: MatrixOrbProps) {
+  const palette = useMotionPalette(colors);
+  const color = colorProp ?? palette.text;
   const reduceMotion = useReducedMotion();
 
   const grid = Math.max(MIN_DOTS, Math.round(dots));

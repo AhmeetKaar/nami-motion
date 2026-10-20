@@ -14,6 +14,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { isCjk, needsShaping, splitGraphemes } from "../internal/graphemes";
 
 const DEFAULT_DURATION = 1400;
 const DEFAULT_HIGHLIGHT_WIDTH = 0.22;
@@ -50,20 +51,26 @@ export function ShimmerText({
 }: ShimmerTextProps) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
+  const shaped = useMemo(() => needsShaping(text), [text]);
   const { words, total } = useMemo(() => {
-    const characters = Array.from(text);
+    const characters = shaped ? [] : splitGraphemes(text);
     const groups: Glyph[][] = [];
     let current: Glyph[] = [];
     characters.forEach((char, index) => {
+      const breakAfter = char === " " || isCjk(char);
+      if (isCjk(char) && current.length) {
+        groups.push(current);
+        current = [];
+      }
       current.push({ char, index });
-      if (char === " ") {
+      if (breakAfter) {
         groups.push(current);
         current = [];
       }
     });
     if (current.length) groups.push(current);
     return { words: groups, total: characters.length };
-  }, [text]);
+  }, [shaped, text]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -78,6 +85,21 @@ export function ShimmerText({
 
   if (reduceMotion) {
     return <Text style={[textStyle, { color: activeColor }]}>{text}</Text>;
+  }
+
+  if (shaped) {
+    return (
+      <ShimmerChar
+        char={text}
+        index={1}
+        total={3}
+        progress={progress}
+        activeColor={activeColor}
+        mutedColor={mutedColor}
+        textStyle={textStyle}
+        highlightWidth={Math.max(highlightWidth, 0.5)}
+      />
+    );
   }
 
   return (

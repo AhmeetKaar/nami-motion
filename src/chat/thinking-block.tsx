@@ -126,6 +126,7 @@ export function ThinkingBlock({
   };
 
   const heading = title ?? (thinking ? copy.thinking : copy.done(totalSeconds));
+  const label = thinking && startedAt !== undefined ? `${heading} ${elapsed}s` : heading;
 
   return (
     <View style={style}>
@@ -142,13 +143,13 @@ export function ThinkingBlock({
         <Animated.View key={thinking ? "thinking" : "done"} entering={reduceMotion ? undefined : FadeIn.duration(220)}>
           {thinking && !reduceMotion ? (
             <ShimmerText
-              text={thinking && startedAt !== undefined ? `${heading} ${elapsed}s` : heading}
+              text={label}
               activeColor={palette.text}
               mutedColor={palette.textTertiary}
               textStyle={textStyle}
             />
           ) : (
-            <Text style={[textStyle, { color: palette.textSecondary }]}>{heading}</Text>
+            <Text style={[textStyle, { color: palette.textSecondary }]}>{label}</Text>
           )}
         </Animated.View>
         {hasBody && (

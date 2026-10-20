@@ -1,7 +1,10 @@
-import { Canvas, LinearGradient, Path, Skia, useClock, vec } from "@shopify/react-native-skia";
+import { Canvas, LinearGradient, Path, Skia, vec } from "@shopify/react-native-skia";
 import { useState } from "react";
 import { View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from "react-native";
 import { type SharedValue, useDerivedValue, useFrameCallback, useReducedMotion, useSharedValue } from "react-native-reanimated";
+import { useMotionClock } from "../internal/use-motion-clock";
+import { moodstoneSwatches } from "../theme/palette";
+import { useMotionPalette } from "../theme/provider";
 
 const DEFAULT_HEIGHT = 32;
 const SAMPLE_STEP = 2;
@@ -29,7 +32,7 @@ export type VoiceWaveVariant = "lines" | "bars" | "dots" | "pulse";
 
 export type VoiceWaveProps = {
   level: SharedValue<number>;
-  colors: [string, string, string];
+  colors?: [string, string, string];
   variant?: VoiceWaveVariant;
   height?: number;
   style?: StyleProp<ViewStyle>;
@@ -168,10 +171,12 @@ function Pulse({ width, height, level, clock, colors }: FieldProps) {
   );
 }
 
-export function VoiceWave({ level, colors, variant = "lines", height = DEFAULT_HEIGHT, style }: VoiceWaveProps) {
+export function VoiceWave({ level, colors: colorsProp, variant = "lines", height = DEFAULT_HEIGHT, style }: VoiceWaveProps) {
+  const palette = useMotionPalette();
+  const colors = colorsProp ?? [palette.accent, moodstoneSwatches.sky, moodstoneSwatches.mint];
   const [width, setWidth] = useState(0);
   const reduceMotion = useReducedMotion();
-  const ticking = useClock();
+  const ticking = useMotionClock(!reduceMotion);
   const clock = useDerivedValue(() => (reduceMotion ? 1200 : ticking.value), [reduceMotion]);
 
   const handleLayout = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);

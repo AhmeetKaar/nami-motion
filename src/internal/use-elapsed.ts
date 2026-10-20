@@ -4,8 +4,9 @@ export function useElapsed(startedAt: number | undefined, running: boolean, inte
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!running || startedAt === undefined) return;
+    if (startedAt === undefined) return;
     setNow(Date.now());
+    if (!running) return;
     const id = setInterval(() => setNow(Date.now()), interval);
     return () => clearInterval(id);
   }, [interval, running, startedAt]);

@@ -20,7 +20,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { withAlpha } from "../internal/color";
+import { mixColors, withAlpha } from "../internal/color";
 import { type MotionPalette } from "../theme/palette";
 import { useMotionPalette } from "../theme/provider";
 
@@ -36,6 +36,7 @@ const SLIDER_TAB = 28;
 const SLIDER_TAB_RADIUS = 10;
 const SLIDER_SHOULDER = 8;
 const COMPACT_SLIDER_KNOB = 10;
+const DRAG_SLOP = 4;
 
 export type EffortBarVariant = "bars" | "track" | "segmented" | "slider";
 
@@ -66,16 +67,6 @@ function normalize(level: EffortLevel): { key?: string; label: string; descripti
   return typeof level === "string" ? { label: level } : level;
 }
 
-function mix(a: string, b: string, t: number) {
-  const parse = (hex: string) => {
-    const clean = hex.replace("#", "");
-    return [0, 2, 4].map((offset) => parseInt(clean.slice(offset, offset + 2), 16));
-  };
-  const from = parse(a);
-  const to = parse(b);
-  const channel = (index: number) => Math.round(from[index] + (to[index] - from[index]) * t).toString(16).padStart(2, "0");
-  return `#${channel(0)}${channel(1)}${channel(2)}`;
-}
 
 function spread(stops: string[], count: number) {
   if (count <= 1) return [stops[stops.length - 1]];
@@ -86,7 +77,7 @@ function spread(stops: string[], count: number) {
     const high = Math.min(stops.length - 1, low + 1);
     const a = stops[low];
     const b = stops[high];
-    return a.startsWith("#") && b.startsWith("#") ? mix(a, b, position - low) : position - low < 0.5 ? a : b;
+    return mixColors(a, b, position - low);
   });
 }
 
@@ -116,7 +107,7 @@ export function EffortBar({
   const reduceMotion = useReducedMotion();
   const items = useMemo(() => levels.map(normalize), [levels]);
   const count = Math.max(1, items.length);
-  const index = Math.min(count - 1, Math.max(0, value));
+  const index = Math.min(count - 1, Math.max(0, Number.isFinite(value) ? Math.round(value) : 0));
   const current = items[index];
   const compact = size === "compact";
   const stops = fillColors && fillColors.length > 0 ? fillColors : undefined;
@@ -132,6 +123,8 @@ export function EffortBar({
   const lastIndex = useRef(index);
   const indexRef = useRef(index);
   const dragging = useRef(false);
+  const moved = useRef(false);
+  const startX = useRef(0);
   const interactive = !!onChange && !disabled;
   indexRef.current = index;
 
@@ -160,14 +153,15 @@ export function EffortBar({
     onChange?.(next, { index: next, label: item.label, value: item.value, budget: item.budget });
   };
 
-  const pick = (x: number, grant: boolean) => {
+  const pick = (x: number, mode: "start" | "move" | "tap") => {
     if (!interactive || width === 0) return;
     let next: number;
     if (variant === "slider") {
       const position = Math.min(1, Math.max(0, (x - knobInset - knobSize / 2) / Math.max(1, width - knobInset * 2 - knobSize)));
-      dragging.current = true;
-      knob.value = reduceMotion || !grant ? position : withSpring(position, GRAB_SPRING);
-      if (grant && !reduceMotion) pressed.value = withSpring(1, GRAB_SPRING);
+      if (mode !== "tap") {
+        dragging.current = true;
+        knob.value = reduceMotion || mode === "move" ? position : withSpring(position, GRAB_SPRING);
+      }
       next = Math.round(position * (count - 1));
     } else {
       next = Math.min(count - 1, Math.max(0, Math.floor((x / width) * count)));
@@ -176,15 +170,34 @@ export function EffortBar({
     lastIndex.current = next;
     select(next);
   };
-  const pickRef = useRef(pick);
-  pickRef.current = pick;
 
-  const release = () => {
+  const grant = (x: number) => {
+    startX.current = x;
+    moved.current = false;
+    lastIndex.current = indexRef.current;
+    if (variant === "slider" && !reduceMotion) pressed.value = withSpring(1, GRAB_SPRING);
+  };
+  const grantRef = useRef(grant);
+  grantRef.current = grant;
+
+  const move = (x: number, dx: number) => {
+    if (!moved.current && Math.abs(dx) < DRAG_SLOP) return;
+    const first = !moved.current;
+    moved.current = true;
+    pick(x, first ? "start" : "move");
+  };
+  const moveRef = useRef(move);
+  moveRef.current = move;
+
+  const release = (commit: boolean) => {
+    const tap = commit && !moved.current;
+    moved.current = false;
+    if (tap) pick(startX.current, "tap");
+    if (variant === "slider") pressed.value = reduceMotion ? 0 : withSpring(0, LEVEL_SPRING);
     if (!dragging.current) return;
     dragging.current = false;
     const target = count > 1 ? indexRef.current / (count - 1) : 0;
     knob.value = reduceMotion ? target : withSpring(target, LEVEL_SPRING);
-    pressed.value = reduceMotion ? 0 : withSpring(0, LEVEL_SPRING);
   };
   const releaseRef = useRef(release);
   releaseRef.current = release;
@@ -197,12 +210,12 @@ export function EffortBar({
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 4,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (event) => pickRef.current(event.nativeEvent.locationX, true),
-        onPanResponderMove: (event) => pickRef.current(event.nativeEvent.locationX, false),
-        onPanResponderRelease: () => releaseRef.current(),
-        onPanResponderTerminate: () => releaseRef.current(),
+        onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > DRAG_SLOP,
+        onPanResponderTerminationRequest: () => !moved.current,
+        onPanResponderGrant: (event) => grantRef.current(event.nativeEvent.locationX),
+        onPanResponderMove: (event, gesture) => moveRef.current(event.nativeEvent.locationX, gesture.dx),
+        onPanResponderRelease: () => releaseRef.current(true),
+        onPanResponderTerminate: () => releaseRef.current(false),
       }),
     [],
   );

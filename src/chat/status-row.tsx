@@ -28,6 +28,7 @@ export type StatusRowProps = {
   iconSize?: number;
   active?: boolean;
   startedAt?: number;
+  seconds?: number;
   showTimer?: boolean;
   formatTimer?: (seconds: number) => string;
   textStyle?: StyleProp<TextStyle>;
@@ -43,6 +44,7 @@ export function StatusRow({
   iconSize = 18,
   active = true,
   startedAt,
+  seconds,
   showTimer = true,
   formatTimer = formatElapsed,
   textStyle = DEFAULT_TEXT_STYLE,
@@ -52,12 +54,13 @@ export function StatusRow({
 }: StatusRowProps) {
   const palette = useMotionPalette(colors);
   const reduceMotion = useReducedMotion();
-  const seconds = useElapsed(startedAt, active);
+  const elapsed = useElapsed(startedAt, active);
+  const shownSeconds = seconds ?? elapsed;
 
   return (
     <View
       accessible
-      accessibilityRole="progressbar"
+      accessibilityRole={active ? "progressbar" : "text"}
       accessibilityLabel={label}
       accessibilityState={{ busy: active }}
       style={[{ flexDirection: "row", alignItems: "center", gap: 8 }, style]}
@@ -83,9 +86,9 @@ export function StatusRow({
           )}
         </Animated.View>
       </View>
-      {showTimer && startedAt !== undefined && (
+      {showTimer && (startedAt !== undefined || seconds !== undefined) && (
         <Text style={[textStyle, { color: palette.textTertiary, fontVariant: ["tabular-nums"] }, timerStyle]}>
-          {formatTimer(seconds)}
+          {formatTimer(shownSeconds)}
         </Text>
       )}
     </View>
