@@ -1,18 +1,13 @@
+import { processColor } from "react-native";
+
 export function withAlpha(color: string, alpha: number): string {
-  if (color.startsWith("rgb")) {
-    const parts = color.replace(/rgba?\(|\)/g, "").split(",").map((part) => part.trim());
-    return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
-  }
-  const hex = color.replace("#", "");
-  const full =
-    hex.length === 3
-      ? hex
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : hex.slice(0, 6);
-  const r = parseInt(full.slice(0, 2), 16);
-  const g = parseInt(full.slice(2, 4), 16);
-  const b = parseInt(full.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  const processed = processColor(color);
+  if (typeof processed !== "number") return color;
+  const argb = processed >>> 0;
+  const red = (argb >>> 16) & 255;
+  const green = (argb >>> 8) & 255;
+  const blue = argb & 255;
+  const source = (argb >>> 24) / 255;
+  const value = Math.round(source * alpha * 1000) / 1000;
+  return `rgba(${red}, ${green}, ${blue}, ${value})`;
 }

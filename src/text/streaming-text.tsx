@@ -1,5 +1,5 @@
 import { isValidElement, memo, useEffect, useMemo, useState, type ReactNode } from "react";
-import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { StyleSheet, Text, View, type ColorValue, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,
@@ -9,7 +9,6 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { withAlpha } from "../internal/color";
 import { type MotionPalette } from "../theme/palette";
 import { useMotionPalette } from "../theme/provider";
 
@@ -108,7 +107,8 @@ export function StreamingText({
   const [reveal, setReveal] = useState<Reveal>(() => (streaming && animate ? settledReveal("") : settledReveal(text)));
   const [now, setNow] = useState(() => Date.now());
   const fading = reveal.chunks.length > 0;
-  const color = palette.text;
+  const flatStyle = StyleSheet.flatten(textStyle);
+  const color = flatStyle?.color ?? palette.text;
 
   useEffect(() => {
     if (!streaming || !animate) {
@@ -164,7 +164,7 @@ export function StreamingText({
               const value = text.slice(Math.max(piece.start, range.start), Math.min(piece.end, range.end));
               if (piece.alpha >= 1) return value;
               return (
-                <Text key={piece.start} style={{ color: withAlpha(color, piece.alpha) }}>
+                <Text key={piece.start} style={{ opacity: piece.alpha }}>
                   {value}
                 </Text>
               );
@@ -180,7 +180,7 @@ export function StreamingText({
 type PlainParagraphProps = {
   value: string;
   textStyle: StyleProp<TextStyle>;
-  color: string;
+  color: ColorValue;
   selectable: boolean;
 };
 
@@ -192,7 +192,7 @@ const PlainParagraph = memo(function PlainParagraph({ value, textStyle, color, s
   );
 });
 
-function Caret({ color, blink, textStyle }: { color: string; blink: boolean; textStyle: StyleProp<TextStyle> }) {
+function Caret({ color, blink, textStyle }: { color: ColorValue; blink: boolean; textStyle: StyleProp<TextStyle> }) {
   const opacity = useSharedValue(1);
   const flat = StyleSheet.flatten(textStyle);
   const height = Math.round((flat?.fontSize ?? 16) * 1.05);

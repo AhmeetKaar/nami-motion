@@ -86,6 +86,8 @@ import { StatusRow, ThinkingBlock } from "react-native-ai-animations/chat";
 <StreamingText text={answer} streaming={streaming} textStyle={{ fontFamily: "Inter" }} />;
 ```
 
+StreamingText takes its color from `textStyle.color` when you set one, otherwise from the palette text color.
+
 ### Spinning Mark
 
 ```tsx
