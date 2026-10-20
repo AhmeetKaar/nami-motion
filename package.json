@@ -1,6 +1,6 @@
 {
   "name": "react-native-ai-animations",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Animated React Native and Expo components for AI chat apps: streaming text, shimmer loading text, thinking and status indicators, voice orbs and waveforms, image and video generation loaders, question cards and reasoning effort bars. Built on Reanimated and Skia.",
   "license": "MIT",
   "author": "Ahmet Kar",
