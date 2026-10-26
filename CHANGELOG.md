@@ -1,4 +1,4 @@
-# react-native-ai-animations
+# craft-stuff
 
 ## 0.9.2
 

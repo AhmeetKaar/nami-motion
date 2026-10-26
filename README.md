@@ -1,22 +1,23 @@
-# React Native AI Animations
+# Craft Stuff
 
-[![npm](https://img.shields.io/npm/v/react-native-ai-animations)](https://www.npmjs.com/package/react-native-ai-animations)
-[![license](https://img.shields.io/npm/l/react-native-ai-animations)](LICENSE)
+[![npm](https://img.shields.io/npm/v/craft-stuff)](https://www.npmjs.com/package/craft-stuff)
+[![license](https://img.shields.io/npm/l/craft-stuff)](LICENSE)
 
-Animated React Native and Expo components for AI chat apps: streaming text,
-shimmer loading text, thinking and status indicators, voice orbs and
-waveforms, image and video generation loaders, question cards and reasoning
-effort bars. Built on Reanimated and Skia, themeable, and reduce motion aware.
+React Native AI animations: animated React Native and Expo components for AI
+chat apps. Streaming text, shimmer loading text, thinking and status
+indicators, voice orbs and waveforms, image and video generation loaders,
+question cards and reasoning effort bars. Built on Reanimated and Skia,
+themeable, and reduce motion aware.
 
 **Docs and live demos:** [nami-motion-web.vercel.app](https://nami-motion-web.vercel.app/)
 
 ## Installation
 
 ```bash
-npx expo install react-native-ai-animations react-native-reanimated react-native-worklets
+npx expo install craft-stuff react-native-reanimated react-native-worklets
 ```
 
-The orbs, waveforms and media loaders in `react-native-ai-animations/skia` also need Skia:
+The orbs, waveforms and media loaders in `craft-stuff/skia` also need Skia:
 
 ```bash
 npx expo install @shopify/react-native-skia
@@ -30,8 +31,8 @@ npx expo install @shopify/react-native-skia
 | `react-native-worklets` | 0.7 or newer, below 1.0 |
 | `@shopify/react-native-skia` | 2.4 or newer, below 3, optional |
 
-> Formerly published as `nami-motion`. Replace `nami-motion` with
-> `react-native-ai-animations` in your imports.
+> Formerly published as `react-native-ai-animations` and `nami-motion`.
+> Replace either name with `craft-stuff` in your imports.
 
 ## Components
 
@@ -54,7 +55,7 @@ prompts, on the [website](https://nami-motion-web.vercel.app/).
 | Liquid Orb | `/skia` | Voice orb in metal, water, iridescent or ring material that reacts to idle, listening, thinking and speaking and a live level. |
 | Voice Wave | `/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
 
-Entries are subpaths of `react-native-ai-animations`. The root export holds
+Entries are subpaths of `craft-stuff`. The root export holds
 `/theme` and `/text`; nothing that needs Skia is imported from the root.
 
 Every style is also its own component with the same props minus `variant`:
@@ -70,7 +71,7 @@ Every style is also its own component with the same props minus `variant`:
 ### Shimmer Text
 
 ```tsx
-import { ShimmerText } from "react-native-ai-animations/text";
+import { ShimmerText } from "craft-stuff/text";
 
 <ShimmerText text="Generating a response" activeColor={colors.text} mutedColor={colors.textTertiary} />;
 ```
@@ -78,8 +79,8 @@ import { ShimmerText } from "react-native-ai-animations/text";
 ### Streaming Text, Status Row, Thinking Block
 
 ```tsx
-import { StreamingText } from "react-native-ai-animations/text";
-import { StatusRow, ThinkingBlock } from "react-native-ai-animations/chat";
+import { StreamingText } from "craft-stuff/text";
+import { StatusRow, ThinkingBlock } from "craft-stuff/chat";
 
 <StatusRow label="Searching the web" icon={<Logo />} startedAt={startedAt} />;
 <ThinkingBlock thinking={thinking} startedAt={startedAt} steps={steps} />;
@@ -91,7 +92,7 @@ StreamingText takes its color from `textStyle.color` when you set one, otherwise
 ### Spinning Mark
 
 ```tsx
-import { SpinningMark } from "react-native-ai-animations/brand";
+import { SpinningMark } from "craft-stuff/brand";
 
 <SpinningMark size={160} duration={3600} breathe entrance>
   <Image source={require("./logo.png")} style={{ width: 160, height: 160 }} />
@@ -101,7 +102,7 @@ import { SpinningMark } from "react-native-ai-animations/brand";
 ### Question Card
 
 ```tsx
-import { QuestionCard } from "react-native-ai-animations/chat";
+import { QuestionCard } from "craft-stuff/chat";
 
 <QuestionCard questions={questions} variant="sheet" onSubmit={(answers) => send(answers)} />;
 ```
@@ -117,7 +118,7 @@ reasoning APIs take (`low`, `medium`, `high`), with each level's share of
 `max_tokens`. `reasoningRequest(effort)` builds the request fields.
 
 ```tsx
-import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "react-native-ai-animations/chat";
+import { EffortBar, REASONING_EFFORTS, reasoningRequest } from "craft-stuff/chat";
 
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i, level) => setEffort(level.value)} accessibilityLabel="Reasoning" />;
 <EffortBar levels={REASONING_EFFORTS} value={index} onChange={(i) => setIndex(i)} variant="segmented" />;
@@ -141,7 +142,7 @@ around it.
 ### Media Generating
 
 ```tsx
-import { ImageGenerating, MediaGenerating, VideoGenerating } from "react-native-ai-animations/skia";
+import { ImageGenerating, MediaGenerating, VideoGenerating } from "craft-stuff/skia";
 
 <MediaGenerating variant="constellation" label="Creating image" startedAt={startedAt} />;
 <MediaGenerating variant="scan" chrome="overlay" status="generating" progress={0.42} meta="720p · 6s" aspectRatio={16 / 9} />;
@@ -155,7 +156,7 @@ import { ImageGenerating, MediaGenerating, VideoGenerating } from "react-native-
 
 ```tsx
 import { useSharedValue } from "react-native-reanimated";
-import { VoiceWave } from "react-native-ai-animations/skia";
+import { VoiceWave } from "craft-stuff/skia";
 
 const level = useSharedValue(0);
 
@@ -172,8 +173,8 @@ pass the index of the current word as `spoken`.
 
 ```tsx
 import { useSharedValue } from "react-native-reanimated";
-import { LiquidOrb } from "react-native-ai-animations/skia";
-import { SpokenText } from "react-native-ai-animations/text";
+import { LiquidOrb } from "craft-stuff/skia";
+import { SpokenText } from "craft-stuff/text";
 
 const level = useSharedValue(0);
 
@@ -192,7 +193,7 @@ colors directly (`activeColor`, `colors`, `color`).
 
 ```tsx
 import { useColorScheme } from "react-native";
-import { MotionThemeProvider } from "react-native-ai-animations/theme";
+import { MotionThemeProvider } from "craft-stuff/theme";
 
 <MotionThemeProvider
   colorScheme={useColorScheme() ?? "light"}
