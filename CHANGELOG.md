@@ -1,5 +1,11 @@
 # react-native-ai-animations
 
+## 0.9.2
+
+### Patch Changes
+
+- Peer dependency ranges now stop below the next major version (`react` <20, `react-native` <1.0, `react-native-reanimated` <5, `react-native-worklets` <1.0, `@shopify/react-native-skia` <3). The open `>=` ranges let dependency scanners resolve `react-native` to the `1000.0.0` placeholder release and report its old dependency tree (deprecated, unmaintained and CVE alerts) against this package.
+
 ## 0.9.1
 
 ### Patch Changes

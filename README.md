@@ -24,11 +24,11 @@ npx expo install @shopify/react-native-skia
 
 | Peer | Version |
 | --- | --- |
-| `react` | 19.2 or newer |
-| `react-native` | 0.83 or newer |
-| `react-native-reanimated` | 4.2 or newer |
-| `react-native-worklets` | 0.7 or newer |
-| `@shopify/react-native-skia` | 2.4 or newer, optional |
+| `react` | 19.2 or newer, below 20 |
+| `react-native` | 0.83 or newer, below 1.0 |
+| `react-native-reanimated` | 4.2 or newer, below 5 |
+| `react-native-worklets` | 0.7 or newer, below 1.0 |
+| `@shopify/react-native-skia` | 2.4 or newer, below 3, optional |
 
 > Formerly published as `nami-motion`. Replace `nami-motion` with
 > `react-native-ai-animations` in your imports.
