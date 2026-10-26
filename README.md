@@ -41,6 +41,8 @@ prompts, on the [website](https://nami-motion-web.vercel.app/).
 
 | Component | Entry | What it does |
 | --- | --- | --- |
+| Liquid Orb | `/skia` | Voice orb in metal, water, iridescent or ring material that reacts to idle, listening, thinking and speaking and a live level. |
+| Voice Wave | `/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
 | Shimmer Text | `/text` | A light band sweeping across text while a response is being generated. |
 | Streaming Text | `/text` | A streaming answer fades in chunk by chunk with native text layout and a blinking caret. |
 | Spoken Text | `/text` | Highlights the word being spoken and dims the words already read aloud, for voice replies. |
@@ -52,8 +54,6 @@ prompts, on the [website](https://nami-motion-web.vercel.app/).
 | Media Generating | `/skia` | One loading state for image and video generation in six variants: blobs, matrix, orbit, scan, constellation and helix. |
 | Dot Orb | `/skia` | The dot sphere behind the media variants, also usable on its own. |
 | Matrix Orb | `/skia` | Dot matrix orb with idle, listening and thinking states and per state colors. |
-| Liquid Orb | `/skia` | Voice orb in metal, water, iridescent or ring material that reacts to idle, listening, thinking and speaking and a live level. |
-| Voice Wave | `/skia` | Live microphone waveform in four styles: lines, bars, dots and pulse. |
 
 Entries are subpaths of `craft-stuff`. The root export holds
 `/theme` and `/text`; nothing that needs Skia is imported from the root.
