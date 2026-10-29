@@ -1,5 +1,5 @@
 {
-  "name": "craft-stuff",
+  "name": "react-native-ai-animations",
   "version": "0.9.2",
   "description": "Craft Stuff: React Native AI animations. Animated React Native and Expo components for AI chat apps: streaming text, shimmer loading text, thinking and status indicators, voice orbs and waveforms, image and video generation loaders, question cards and reasoning effort bars. Built on Reanimated and Skia.",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/AhmeetKaar/nami-motion.git"
   },
-  "homepage": "https://nami-motion-web.vercel.app/",
+  "homepage": "https://motion.ahmetkar.com.tr/",
   "keywords": [
     "craft-stuff",
     "react-native-ai-animations",

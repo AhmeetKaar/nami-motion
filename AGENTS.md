@@ -1,7 +1,7 @@
-# craft-stuff (eski adları react-native-ai-animations, nami-motion) — Ajan Kuralları ve Devir Notu
+# react-native-ai-animations (eski adı nami-motion, görünen ad Craft Stuff) — Ajan Kuralları ve Devir Notu
 
-React Native / Expo için animasyon paketi `craft-stuff` (görünen ad "Craft Stuff"; MIT, builder-bob, ESM + tipler).
-2026-10-18: SEO için `nami-motion` → `react-native-ai-animations`. 2026-10-26: kullanıcı kararıyla `react-native-ai-animations` → `craft-stuff`; paket, iOS uygulaması ve site adı "Craft Stuff". "React Native AI animations" ifadesi SEO için description, keywords ve README girişinde kalır. Klasör, GitHub repo adları, iOS scheme `namimotion` ve bundle id `dev.namimotion.example` `nami-motion*` olarak kalır.
+React Native / Expo için animasyon paketi `react-native-ai-animations` (görünen ad "Craft Stuff"; MIT, builder-bob, ESM + tipler).
+2026-10-18: SEO için `nami-motion` → `react-native-ai-animations`. 2026-10-26'da paket `craft-stuff` olarak yeniden adlandırılmıştı ama npm'e hiç yayımlanmadı; 2026-10-29'da kullanıcı kararıyla npm adı yeniden `react-native-ai-animations` oldu. Görünen ad (README başlığı, site, iOS uygulaması) "Craft Stuff" kalır; kod, kurulum komutu ve import'lar her yerde `react-native-ai-animations`. "React Native AI animations" ifadesi SEO için description, keywords ve README girişinde kalır. `@craftstuff/*` ayrı bir proje (`~/development/craftstuff`). Klasör, GitHub repo adları, iOS scheme `namimotion` ve bundle id `dev.namimotion.example` `nami-motion*` olarak kalır.
 Bu repo yalnızca npm paketidir; buradan yayınlanır. Componentler Nami uygulamasından
 (`/Users/ahmeetkaar/development/nami`) prop-driven hale getirilerek alındı.
 2026-10-17: paket önce ShimmerText + VoiceWave'e indirildi (0.4.0), aynı gün referans sitelerden
@@ -11,9 +11,9 @@ yalnızca fikir alınarak test componentleri eklendi (0.5.0); SwipeActions kulla
 
 | Yol | Ne |
 | --- | --- |
-| `~/development/nami-motion` | Bu repo: paket kaynağı (`src/`), changeset'ler, CI + release, README GIF/videoları (`media/`) |
-| `~/development/nami-motion-web` | Vitrin sitesi (Vite + React + Tailwind 4); içerik `src/data/components.ts`, videolar `public/videos/<slug>.mp4` |
-| `~/development/nami-motion-ios` | Expo SDK 55 uygulaması: galeri + `showcase/[slug]` ekranları, Maestro akışları; paketi normal bağımlılık olarak kurar |
+| `~/development/react-native-ai-animations/nami-motion` | Bu repo: paket kaynağı (`src/`), changeset'ler, CI + release, README GIF/videoları (`media/`) |
+| `~/development/react-native-ai-animations/nami-motion-web` | Vitrin sitesi (Vite + React + Tailwind 4); içerik `src/data/components.ts`, videolar `public/videos/<slug>.mp4` |
+| `~/development/react-native-ai-animations/nami-motion-ios` | Expo SDK 55 uygulaması: galeri + `showcase/[slug]` ekranları, Maestro akışları; paketi normal bağımlılık olarak kurar |
 
 Komutlar: `npm install`, `npm run typecheck`, `npm run build`, `npm run changeset`, `npm pack`.
 Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm sürümüyle kullanır.
@@ -22,17 +22,17 @@ Uygulamalar paketi yayından önce `npm pack` tarball'ıyla, yayından sonra npm
 
 | Giriş | Componentler | Ek native bağımlılık |
 | --- | --- | --- |
-| `craft-stuff/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
-| `craft-stuff/text` | ShimmerText, StreamingText, SpokenText | — |
-| `craft-stuff/brand` | SpinningMark | — |
-| `craft-stuff/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
-| `craft-stuff/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave, LiquidOrb | @shopify/react-native-skia (opsiyonel peer) |
+| `react-native-ai-animations/theme` | moodstone, MotionThemeProvider, useMotionPalette | — |
+| `react-native-ai-animations/text` | ShimmerText, StreamingText, SpokenText | — |
+| `react-native-ai-animations/brand` | SpinningMark | — |
+| `react-native-ai-animations/chat` | StatusRow, ThinkingBlock, QuestionCard, EffortBar | — |
+| `react-native-ai-animations/skia` | MediaGenerating (görsel/video ortak; ImageGenerating, VideoGenerating preset), DotOrb, MatrixOrb, VoiceWave, LiquidOrb | @shopify/react-native-skia (opsiyonel peer) |
 
 Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke girmez.
 
 ## Kurallar
 
-- Yapı üç yerde birebir aynıdır (2026-10-18): proje hakkındaki her istek önce pakette (`~/development/nami-motion`), sonra iOS showcase'te (`~/development/nami-motion-ios`), sonra web'de (`~/development/nami-motion-web`) uygulanır. Paket bir component'i stillere ayırıyorsa (ör. QuestionCard/QuestionSheet, EffortBars/Track/Segmented/Slider) iOS her stili ayrı ekranda kullanımıyla, web her stili ayrı bölüm ve videoyla gösterir; isim ve sıra üçünde aynıdır.
+- Yapı üç yerde birebir aynıdır (2026-10-18): proje hakkındaki her istek önce pakette (`~/development/react-native-ai-animations/nami-motion`), sonra iOS showcase'te (`~/development/react-native-ai-animations/nami-motion-ios`), sonra web'de (`~/development/react-native-ai-animations/nami-motion-web`) uygulanır. Paket bir component'i stillere ayırıyorsa (ör. QuestionCard/QuestionSheet, EffortBars/Track/Segmented/Slider) iOS her stili ayrı ekranda kullanımıyla, web her stili ayrı bölüm ve videoyla gösterir; isim ve sıra üçünde aynıdır.
 - Paket yöneticisi npm (`package-lock.json`). React 19.2.0, Expo SDK 55 hattı; sürüm yükseltilmez (Xcode 26.2).
 - Peer aralıkları yalnızca test edilen sürümleri kapsar (RN ≥0.83, Reanimated ≥4.2, Worklets ≥0.7, Skia ≥2.4).
 - Her component ikon (`icon`/`children`), font (`textStyle` ya da Skia `font`/`fontSource`/`fontFamily`), renk ve zamanlamayı prop olarak alır.
@@ -65,8 +65,8 @@ Kök `src/index.ts` theme ve text'i export eder; Skia isteyen hiçbir şey köke
 ## Durum
 
 - GitHub: `git@github.com:AhmeetKaar/nami-motion.git`, branch `main`. `gh` kurulu değil. `nami-motion-web` ve `nami-motion-ios` da GitHub'da (push kullanıcı izniyle).
-- npm: `craft-stuff` henüz yayımlanmadı (ilk sürüm changeset `rename-craft-stuff.md` ile 0.10.0); yayından sonra `react-native-ai-animations` "Renamed to craft-stuff" mesajıyla deprecate edilir. `react-native-ai-animations` son sürümü 0.9.2. `react-native-ai-animations@0.8.0` 2026-10-18'de yayımlandı (tag `v0.8.0` → `e2399d4`); `nami-motion`'ın tüm sürümleri "Renamed to react-native-ai-animations" mesajıyla deprecate edildi (son sürüm 0.7.0). Her web onay bağlantısı yalnızca kendi çalışan `npm` sürecine geçerlidir; süreç kapanınca onay işe yaramaz. `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
-- Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
+- npm: `react-native-ai-animations` `latest` 0.9.1. Repodaki 0.9.2 (tag `v0.9.2`, peer aralıkları üst sınırlı) yayımlanmadı; kullanıcı 2026-10-29'da site ve uygulamanın 0.9.1'de kalmasını istedi. `craft-stuff` npm'de yok. `react-native-ai-animations@0.8.0` 2026-10-18'de yayımlandı (tag `v0.8.0` → `e2399d4`); `nami-motion`'ın tüm sürümleri "Renamed to react-native-ai-animations" mesajıyla deprecate edildi (son sürüm 0.7.0). Her web onay bağlantısı yalnızca kendi çalışan `npm` sürecine geçerlidir; süreç kapanınca onay işe yaramaz. `nami-motion@0.6.0` 2026-10-18'de yayımlandı (tag `v0.6.0` → `d54268f`): EffortBar yalnızca bar (başlık ve açıklama uygulamada), MediaGenerating gri zeminsiz, QuestionCard boşlukları eşit ve sheet kendi yüksekliğinde. 0.5.0 tag `v0.5.0` → `10ff360`. Web yayını: `npm login --auth-type=web`, ardından TTY'de (terminal sekmesi) `npm publish --auth-type=web --provenance=false`; arka plan kabuğunda 2FA web onayı çalışmaz (EOTP), onay linkleri birkaç dakikada düşer.
+- Kayıtlar: `nami-motion-ios/maestro/record-showcase.sh` → `~/development/react-native-ai-animations/nami-motion-videos/raw`; web `public/videos` + `public/posters`, paket `media/`.
 
 ## Sıradaki işler
 
